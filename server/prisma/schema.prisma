@@ -1,0 +1,713 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USERS & ROLES
+// ============================================================
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  firstName    String    @map("first_name")
+  lastName     String    @map("last_name")
+  phone        String?
+  avatarUrl    String?   @map("avatar_url")
+  status       String    @default("active") // active, suspended, archived
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  // Notifications
+  emailNotificationsEnabled Boolean @default(true) @map("email_notifications_enabled")
+  notificationPreferences   Json?   @map("notification_preferences")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Auth
+  userRoles     UserRole[]
+  parentOf      ParentStudent[] @relation("ParentRelation")
+  childOf       ParentStudent[] @relation("StudentRelation")
+  refreshTokens RefreshToken[]
+
+  // Messaging
+  channelMembers  ChannelMember[]
+  sentMessages    Message[]       @relation("SentMessages")
+  createdChannels Channel[]       @relation("ChannelCreator")
+  auditActions    AuditLog[]      @relation("AuditActor")
+  mutedByMe       ChannelMute[]   @relation("Muter") // Channels where I muted others
+  mutedInChannels ChannelMute[]   @relation("MutedUser") // Channels where I'm muted
+  reportsMade     ChannelReport[] @relation("ReportReporter") // Reports made by user
+  reportsAssigned ChannelReport[] @relation("ReportAssignee") // Reports assigned to admin
+
+  // Reactions and reads
+  reactions        Reaction[]
+  messageReads     MessageRead[]
+  typingIndicators TypingIndicator[]
+  editHistory      EditHistory[]
+
+  // Mentions
+  mentions Mention[]
+
+  // Courses
+  teachingClasses  Class[]           @relation("ClassTeacher")
+  classAssignments ClassTeacher[] // Many-to-many class assignments
+  enrollments      ClassEnrollment[]
+
+  // Grading
+  createdAssignments Assignment[] @relation("AssignmentCreator")
+  submissions        Submission[]
+  studentGrades      Grade[]      @relation("StudentGrades")
+  gradedByMe         Grade[]      @relation("GradedBy")
+
+  // Attendance
+  attendanceRecords AttendanceRecord[] @relation("StudentAttendance")
+  markedAttendance  AttendanceRecord[] @relation("MarkedBy")
+
+  // Files
+  uploadedFiles   File[]
+  filePermissions FilePermission[]
+
+  @@index([email])
+  @@index([status])
+  @@index([deletedAt])
+  @@index([emailNotificationsEnabled])
+  @@map("users")
+}
+
+model Role {
+  id   String @id @default(uuid())
+  name String @unique // admin, teacher, parent, student
+
+  userRoles       UserRole[]
+  filePermissions FilePermission[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  userId String @map("user_id")
+  roleId String @map("role_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model ParentStudent {
+  parentId  String @map("parent_id")
+  studentId String @map("student_id")
+
+  parent  User @relation("ParentRelation", fields: [parentId], references: [id], onDelete: Cascade)
+  student User @relation("StudentRelation", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, studentId])
+  @@index([studentId])
+  @@map("parent_students")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ============================================================
+// MESSAGING
+// ============================================================
+
+model Channel {
+  id          String  @id @default(uuid())
+  type        String // podcast, classroom, direct_message, teacher_parent, teacher_student, admin_broadcast, group
+  name        String?
+  description String?
+  classId     String? @map("class_id")
+  isArchived  Boolean @default(false) @map("is_archived")
+  createdBy   String? @map("created_by")
+
+  // Approval workflow for non-admin created channels
+  approvalStatus  String    @default("approved") @map("approval_status") // pending, approved, rejected
+  requestedBy     String?   @map("requested_by") // User who requested the channel (if not admin)
+  approvedBy      String?   @map("approved_by") // Admin who approved
+  approvedAt      DateTime? @map("approved_at")
+  rejectionReason String?   @map("rejection_reason")
+
+  // For classroom channels - max students
+  maxMembers Int? @map("max_members")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  creator          User?             @relation("ChannelCreator", fields: [createdBy], references: [id])
+  members          ChannelMember[]
+  messages         Message[]
+  mutes            ChannelMute[] // Track who is muted and by whom
+  reports          ChannelReport[] // Reports made against this channel
+  typingIndicators TypingIndicator[]
+
+  @@index([type])
+  @@index([classId])
+  @@index([isArchived])
+  @@index([approvalStatus])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("channels")
+}
+
+model ChannelMember {
+  channelId  String    @map("channel_id")
+  userId     String    @map("user_id")
+  role       String    @default("member") // owner, moderator, member, student
+  isMuted    Boolean   @default(false) @map("is_muted")
+  isBanned   Boolean   @default(false) @map("is_banned")
+  joinedAt   DateTime  @default(now()) @map("joined_at")
+  lastReadAt DateTime? @map("last_read_at") // Track last time user read messages in this channel
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+  @@index([userId])
+  @@index([lastReadAt])
+  @@map("channel_members")
+}
+
+// Track mutes with expiration and muter information
+model ChannelMute {
+  id        String    @id @default(uuid())
+  channelId String    @map("channel_id")
+  userId    String    @map("user_id") // Who is muted
+  mutedBy   String    @map("muted_by") // Who muted them
+  mutedAt   DateTime  @default(now()) @map("muted_at")
+  expiresAt DateTime? @map("expires_at") // Optional expiration
+  reason    String?
+  isActive  Boolean   @default(true) @map("is_active")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation("MutedUser", fields: [userId], references: [id], onDelete: Cascade)
+  muter   User    @relation("Muter", fields: [mutedBy], references: [id], onDelete: Cascade)
+
+  @@index([channelId])
+  @@index([userId])
+  @@index([isActive])
+  @@map("channel_mutes")
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  channelId   String    @map("channel_id")
+  senderId    String    @map("sender_id")
+  content     String // Text content (can be empty if only attachments)
+  contentType String    @default("text") @map("content_type") // text, image, file, voice, mixed
+  replyTo     String?   @map("reply_to")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  deletedAt   DateTime? @map("deleted_at") // Soft delete timestamp
+  deletedBy   String?   @map("deleted_by") // User who soft deleted
+  editedAt    DateTime? @map("edited_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Full-text search
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
+  channel     Channel             @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender      User                @relation("SentMessages", fields: [senderId], references: [id])
+  parent      Message?            @relation("MessageReplies", fields: [replyTo], references: [id])
+  replies     Message[]           @relation("MessageReplies")
+  attachments MessageAttachment[]
+  reactions   Reaction[]
+  reads       MessageRead[]
+  editHistory EditHistory[]
+  mentions    Mention[]
+
+  @@index([channelId, createdAt(sort: Desc)])
+  @@index([senderId])
+  @@index([isDeleted])
+  @@index([channelId, isDeleted, createdAt(sort: Desc)])
+  @@index([contentType])
+  @@index([createdAt])
+  @@index([searchVector])
+  @@map("messages")
+}
+
+// Message attachments (files, images, voice messages)
+model MessageAttachment {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  fileName  String   @map("file_name")
+  fileType  String   @map("file_type") // image/jpeg, audio/ogg, application/pdf, etc.
+  fileSize  Int      @map("file_size") // bytes
+  filePath  String   @map("file_path") // Storage path
+  url       String? // Public URL if applicable
+  duration  Int? // For voice messages (seconds)
+  width     Int? // For images
+  height    Int? // For images
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([fileType])
+  @@map("message_attachments")
+}
+
+// ============================================================
+// CHANNEL REPORTS
+// ============================================================
+
+model ChannelReport {
+  id         String    @id @default(uuid())
+  channelId  String    @map("channel_id")
+  reportedBy String    @map("reported_by")
+  reason     String // Reason for reporting
+  status     String    @default("pending") // pending, investigating, resolved, dismissed
+  assignedTo String?   @map("assigned_to") // Admin assigned to investigate
+  resolution String? // Resolution notes
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  resolvedAt DateTime? @map("resolved_at")
+
+  channel  Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  reporter User    @relation("ReportReporter", fields: [reportedBy], references: [id])
+  assignee User?   @relation("ReportAssignee", fields: [assignedTo], references: [id])
+
+  @@index([channelId])
+  @@index([reportedBy])
+  @@index([status])
+  @@index([assignedTo])
+  @@map("channel_reports")
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String // send, edit, delete, mute, ban, unmute, unban, archive, grade, enroll, ...
+  messageId String?  @map("message_id")
+  channelId String?  @map("channel_id")
+  actorId   String   @map("actor_id")
+  targetId  String?  @map("target_id")
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  actor User @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([channelId, createdAt(sort: Desc)])
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_log")
+}
+
+// ============================================================
+// COURSES & CLASSES
+// ============================================================
+
+model Course {
+  id          String  @id @default(uuid())
+  code        String  @unique // e.g., "MATH101"
+  name        String // e.g., "Algebra I"
+  description String?
+  credits     Int     @default(1)
+  department  String? // e.g., "Mathematics"
+  isActive    Boolean @default(true) @map("is_active")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  classes Class[]
+
+  @@index([code])
+  @@index([department])
+  @@index([deletedAt])
+  @@map("courses")
+}
+
+model Class {
+  id          String  @id @default(uuid())
+  courseId    String  @map("course_id")
+  teacherId   String? @map("teacher_id")
+  term        String // e.g., "Fall 2026"
+  section     String? // e.g., "A", "B"
+  room        String?
+  maxStudents Int?    @map("max_students")
+  isActive    Boolean @default(true) @map("is_active")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  course      Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher     User?               @relation("ClassTeacher", fields: [teacherId], references: [id])
+  teachers    ClassTeacher[] // Many-to-many relationship
+  enrollments ClassEnrollment[]
+  schedules   Schedule[]
+  assignments Assignment[]
+  attendance  AttendanceSession[]
+
+  @@index([courseId])
+  @@index([teacherId])
+  @@index([term])
+  @@index([deletedAt])
+  @@map("classes")
+}
+
+// Join table for many-to-many teacher-class relationship
+model ClassTeacher {
+  id         String   @id @default(uuid())
+  classId    String   @map("class_id")
+  teacherId  String   @map("teacher_id")
+  isPrimary  Boolean  @default(false) @map("is_primary")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+  assignedBy String?  @map("assigned_by")
+
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher User  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, teacherId])
+  @@index([teacherId])
+  @@index([classId])
+  @@map("class_teachers")
+}
+
+model ClassEnrollment {
+  id         String   @id @default(uuid())
+  classId    String   @map("class_id")
+  studentId  String   @map("student_id")
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+  status     String   @default("active") // active, dropped, completed
+
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@index([studentId])
+  @@index([status])
+  @@map("class_enrollments")
+}
+
+model Schedule {
+  id        String @id @default(uuid())
+  classId   String @map("class_id")
+  dayOfWeek Int    @map("day_of_week") // 0=Sun, 1=Mon ... 6=Sat
+  startTime String @map("start_time") // "09:00"
+  endTime   String @map("end_time") // "10:30"
+
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@index([classId])
+  @@map("schedules")
+}
+
+// ============================================================
+// GRADING
+// ============================================================
+
+model Assignment {
+  id          String   @id @default(uuid())
+  classId     String   @map("class_id")
+  title       String
+  description String?
+  dueDate     DateTime @map("due_date")
+  maxPoints   Int      @default(100) @map("max_points")
+  type        String   @default("homework") // homework, quiz, exam, project
+  createdById String   @map("created_by_id")
+  isPublished Boolean  @default(true) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdBy   User         @relation("AssignmentCreator", fields: [createdById], references: [id])
+  submissions Submission[]
+  grades      Grade[]
+
+  @@index([classId])
+  @@index([dueDate])
+  @@map("assignments")
+}
+
+model Submission {
+  id           String   @id @default(uuid())
+  assignmentId String   @map("assignment_id")
+  studentId    String   @map("student_id")
+  content      String? // Text submission or notes
+  fileIds      String[] @map("file_ids") // Array of File IDs
+  isLate       Boolean  @default(false) @map("is_late")
+  submittedAt  DateTime @default(now()) @map("submitted_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  grade      Grade?
+
+  @@unique([assignmentId, studentId])
+  @@index([studentId])
+  @@map("submissions")
+}
+
+model Grade {
+  id           String   @id @default(uuid())
+  assignmentId String   @map("assignment_id")
+  studentId    String   @map("student_id")
+  submissionId String?  @unique @map("submission_id")
+  score        Float
+  maxScore     Float    @map("max_score")
+  letterGrade  String?  @map("letter_grade") // A, B, C, D, F
+  feedback     String?
+  gradedById   String   @map("graded_by_id")
+  gradedAt     DateTime @default(now()) @map("graded_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  assignment Assignment  @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User        @relation("StudentGrades", fields: [studentId], references: [id], onDelete: Cascade)
+  submission Submission? @relation(fields: [submissionId], references: [id])
+  gradedBy   User        @relation("GradedBy", fields: [gradedById], references: [id])
+
+  @@unique([assignmentId, studentId])
+  @@index([studentId])
+  @@map("grades")
+}
+
+// ============================================================
+// ATTENDANCE
+// ============================================================
+
+model AttendanceSession {
+  id          String   @id @default(uuid())
+  classId     String   @map("class_id")
+  date        DateTime @db.Date
+  notes       String?
+  period      Int      @default(1) // 1=Morning, 2=Mid, 3=Afternoon
+  createdById String   @map("created_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  class   Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
+  records AttendanceRecord[]
+
+  @@unique([classId, date, period])
+  @@index([classId])
+  @@index([date])
+  @@map("attendance_sessions")
+}
+
+model AttendanceRecord {
+  id         String   @id @default(uuid())
+  sessionId  String   @map("session_id")
+  studentId  String   @map("student_id")
+  status     String // present, absent, late, excused
+  notes      String?
+  markedAt   DateTime @default(now()) @map("marked_at")
+  markedById String   @map("marked_by_id")
+
+  session  AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student  User              @relation("StudentAttendance", fields: [studentId], references: [id], onDelete: Cascade)
+  markedBy User              @relation("MarkedBy", fields: [markedById], references: [id])
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+  @@index([status])
+  @@map("attendance_records")
+}
+
+// ============================================================
+// FILE MANAGEMENT
+// ============================================================
+
+model File {
+  id           String    @id @default(uuid())
+  filename     String
+  originalName String    @map("original_name")
+  mimeType     String    @map("mime_type")
+  size         Int // bytes
+  path         String // storage path
+  category     String // assignment_submission, course_material, shared_document
+  uploaderId   String    @map("uploader_id")
+  relatedId    String?   @map("related_id") // assignment ID, class ID, etc.
+  relatedType  String?   @map("related_type") // assignment, class, channel
+  isDeleted    Boolean   @default(false) @map("is_deleted")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  uploader    User             @relation(fields: [uploaderId], references: [id])
+  permissions FilePermission[]
+
+  @@index([uploaderId])
+  @@index([category])
+  @@index([relatedId])
+  @@index([isDeleted])
+  @@index([createdAt])
+  @@map("files")
+}
+
+model FilePermission {
+  id        String  @id @default(uuid())
+  fileId    String  @map("file_id")
+  userId    String? @map("user_id")
+  roleId    String? @map("role_id")
+  canView   Boolean @default(true) @map("can_view")
+  canEdit   Boolean @default(false) @map("can_edit")
+  canDelete Boolean @default(false) @map("can_delete")
+
+  file File  @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role? @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([userId])
+  @@map("file_permissions")
+}
+
+// ============================================================
+// REACTIONS
+// ============================================================
+
+model Reaction {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  reaction  String // emoji or reaction code
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, reaction])
+  @@index([messageId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("reactions")
+}
+
+// ============================================================
+// MESSAGE READS (Read Receipts)
+// ============================================================
+
+model MessageRead {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  readAt    DateTime @default(now()) @map("read_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@index([readAt])
+  @@map("message_reads")
+}
+
+// ============================================================
+// TYPING INDICATORS
+// ============================================================
+
+model TypingIndicator {
+  id        String   @id @default(uuid())
+  channelId String   @map("channel_id")
+  userId    String   @map("user_id")
+  startedAt DateTime @default(now()) @map("started_at")
+  expiresAt DateTime @map("expires_at")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+  @@index([channelId])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("typing_indicators")
+}
+
+// ============================================================
+// EMAIL QUEUE
+// ============================================================
+
+model EmailQueue {
+  id        String    @id @default(uuid())
+  toEmail   String    @map("to_email")
+  subject   String
+  body      String
+  status    String    @default("pending") // pending, processing, sent, failed
+  attempts  Int       @default(0)
+  sentAt    DateTime? @map("sent_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([attempts])
+  @@index([toEmail])
+  @@map("email_queue")
+}
+
+// ============================================================
+// EDIT HISTORY
+// ============================================================
+
+model EditHistory {
+  id              String   @id @default(uuid())
+  messageId       String   @map("message_id")
+  previousContent String   @map("previous_content")
+  editedBy        String   @map("edited_by")
+  editedAt        DateTime @default(now()) @map("edited_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  editor  User    @relation(fields: [editedBy], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([editedBy])
+  @@index([editedAt])
+  @@map("edit_history")
+}
+
+// ============================================================
+// MENTIONS
+// ============================================================
+
+model Mention {
+  id              String    @id @default(uuid())
+  messageId       String    @map("message_id")
+  mentionedUserId String    @map("mentioned_user_id")
+  mentionText     String?   @map("mention_text") // The raw @mention text
+  isRead          Boolean   @default(false) @map("is_read")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  readAt          DateTime? @map("read_at")
+
+  message       Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  mentionedUser User    @relation(fields: [mentionedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, mentionedUserId]) // Prevent duplicate mentions
+  @@index([messageId])
+  @@index([mentionedUserId])
+  @@index([isRead])
+  @@index([mentionedUserId, isRead])
+  @@index([createdAt])
+  @@map("mentions")
+}

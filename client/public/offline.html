@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#E3F2FD">
+  <title>Offline - School Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary-color: #1976d2;
+      --primary-light: #E3F2FD;
+      --primary-dark: #1565c0;
+      --surface-color: #ffffff;
+      --background-color: #f5f5f5;
+      --text-primary: #1a1a1a;
+      --text-secondary: #666666;
+      --border-color: #e0e0e0;
+      --error-color: #d32f2f;
+      --success-color: #388e3c;
+      --warning-color: #f57c00;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --surface-color: #1e1e1e;
+        --background-color: #121212;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --border-color: #333333;
+      }
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.6;
+    }
+    
+    .offline-container {
+      background: var(--surface-color);
+      border-radius: 24px;
+      padding: 48px 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .offline-icon {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 32px;
+      position: relative;
+    }
+    
+    .offline-icon .material-icons-round {
+      font-size: 64px;
+      color: var(--primary-color);
+    }
+    
+    .offline-icon::after {
+      content: '';
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: var(--warning-color);
+      border-radius: 50%;
+      bottom: 0;
+      right: 0;
+      border: 4px solid var(--surface-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .offline-icon::before {
+      content: '!';
+      position: absolute;
+      bottom: 2px;
+      right: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      z-index: 1;
+    }
+    
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    .status-card {
+      background: var(--background-color);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .status-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    .status-item:first-child {
+      padding-top: 0;
+    }
+    
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .status-icon.available {
+      background: rgba(56, 142, 60, 0.1);
+      color: var(--success-color);
+    }
+    
+    .status-icon.unavailable {
+      background: rgba(211, 47, 47, 0.1);
+      color: var(--error-color);
+    }
+    
+    .status-icon.pending {
+      background: rgba(245, 124, 0, 0.1);
+      color: var(--warning-color);
+    }
+    
+    .status-content {
+      flex: 1;
+    }
+    
+    .status-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    
+    .status-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      text-decoration: none;
+      width: 100%;
+    }
+    
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn .material-icons-round {
+      font-size: 20px;
+    }
+    
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .cached-content {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .cached-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .cached-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .cached-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--background-color);
+      border-radius: 10px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .cached-link:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+    
+    .cached-link .material-icons-round {
+      color: var(--primary-color);
+      font-size: 20px;
+    }
+    
+    .info-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(25, 118, 210, 0.05);
+      border-radius: 10px;
+      border-left: 3px solid var(--primary-color);
+    }
+    
+    /* Dark mode adjustments */
+    @media (prefers-color-scheme: dark) {
+      .offline-icon {
+        background: linear-gradient(135deg, rgba(25, 118, 210, 0.2) 0%, var(--surface-color) 100%);
+      }
+      
+      .offline-icon::after {
+        border-color: var(--surface-color);
+      }
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+      
+      .offline-container {
+        padding: 32px 24px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .offline-icon {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .offline-icon .material-icons-round {
+        font-size: 48px;
+      }
+    }
+    
+    /* Safe area for notched devices */
+    @supports (padding-top: env(safe-area-inset-top)) {
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: max(24px, env(safe-area-inset-left));
+        padding-right: max(24px, env(safe-area-inset-right));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">
+      <span class="material-icons-round">wifi_off</span>
+    </div>
+    
+    <h1>You're Offline</h1>
+    <p class="subtitle">Don't worry! You can still access previously loaded content.</p>
+    
+    <div class="status-card">
+      <div class="status-item">
+        <div class="status-icon unavailable">
+          <span class="material-icons-round">cloud_off</span>
+        </div>
+        <div class="status-content">
+          <div class="status-title">No Internet Connection</div>
+          <div class="status-desc">Check your Wi-Fi or mobile data</div>
+        </div>
+      </div>
+      
+      <div class="status-item">
+        <div class="status-icon available">
+          <span class="material-icons-round">storage</span>
+        </div>
+        <div class="status-content">
+          <div class="status-title">Cached Data Available</div>
+          <div class="status-desc">Previously viewed content is accessible</div>
+        </div>
+      </div>
+      
+      <div class="status-item">
+        <div class="status-icon pending">
+          <span class="material-icons-round">schedule</span>
+        </div>
+        <div class="status-content">
+          <div class="status-title">Messages Queued</div>
+          <div class="status-desc">Will be sent when connection restored</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button class="btn btn-primary" id="retryBtn" onclick="retryConnection()">
+        <span class="material-icons-round">refresh</span>
+        <span>Try Again</span>
+      </button>
+      
+      <a href="/" class="btn btn-secondary">
+        <span class="material-icons-round">home</span>
+        <span>Go to Home</span>
+      </a>
+    </div>
+    
+    <div class="cached-content">
+      <div class="cached-title">Available Offline</div>
+      <div class="cached-links">
+        <a href="/messaging" class="cached-link">
+          <span class="material-icons-round">chat</span>
+          <span>Messages</span>
+        </a>
+        <a href="/courses" class="cached-link">
+          <span class="material-icons-round">school</span>
+          <span>Courses</span>
+        </a>
+        <a href="/assignments" class="cached-link">
+          <span class="material-icons-round">assignment</span>
+          <span>Assignments</span>
+        </a>
+      </div>
+    </div>
+    
+    <p class="info-text">
+      <strong>Tip:</strong> While offline, you can still read messages, view courses, 
+      and browse previously loaded assignments. New messages you compose will be 
+      sent automatically when your connection is restored.
+    </p>
+  </div>
+  
+  <script>
+    // Check connection status periodically
+    function checkConnection() {
+      if (navigator.onLine) {
+        window.location.reload();
+      }
+    }
+    
+    // Retry connection
+    function retryConnection() {
+      const btn = document.getElementById('retryBtn');
+      const originalContent = btn.innerHTML;
+      
+      // Show loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span><span>Checking...</span>';
+      
+      // Try to fetch a small resource
+      fetch('/manifest.json', { method: 'HEAD', cache: 'no-store' })
+        .then(() => {
+          window.location.reload();
+        })
+        .catch(() => {
+          // Still offline
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+          }, 1000);
+        });
+    }
+    
+    // Listen for online event
+    window.addEventListener('online', () => {
+      console.log('[Offline Page] Connection restored');
+      window.location.reload();
+    });
+    
+    // Listen for offline event
+    window.addEventListener('offline', () => {
+      console.log('[Offline Page] Connection lost');
+    });
+    
+    // Check periodically
+    setInterval(checkConnection, 5000);
+    
+    // Sync with service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        // Request background sync when back online
+        if ('sync' in registration) {
+          registration.sync.register('sync-messages').catch(console.error);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 50
+      name: "Ramp up"
+    - duration: 300
+      arrivalRate: 50
+      name: "Sustained load"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  plugins:
+    expect: {}
+
+scenarios:
+  - name: "Health Check"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+
+  - name: "Login Flow"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "admin@school.com"
+            password: "Password123!"
+          expect:
+            - statusCode: 200
+          capture:
+            - json: "$.accessToken"
+              as: "token"
+      - get:
+          url: "/api/auth/profile"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Get Channels"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "teacher1@school.com"
+            password: "Password123!"
+          capture:
+            - json: "$.accessToken"
+              as: "token"
+      - get:
+          url: "/api/channels"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Get Courses"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/courses"
+          expect:
+            - statusCode: 200
