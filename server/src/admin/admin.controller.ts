@@ -27,6 +27,7 @@ import {
     TimeRange,
 } from './dto/admin.dto';
 import { InviteUserDto, BulkInviteUserDto } from './dto/invite-user.dto';
+import { CreateUserDto, LinkParentDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Admin Dashboard')
@@ -98,6 +99,18 @@ export class AdminController {
     @ApiOperation({ summary: 'Invite a new user' })
     async inviteUser(@Body() dto: InviteUserDto, @Request() req) {
         return this.adminService.inviteUser(dto, req.user.sub);
+    }
+
+    @Post('users/create')
+    @ApiOperation({ summary: 'Manually create a new user (Admin function)' })
+    async createUser(@Body() dto: CreateUserDto, @Request() req) {
+        return this.adminService.createUser(dto, req.user.sub);
+    }
+
+    @Post('users/link-parent')
+    @ApiOperation({ summary: 'Link a parent to a student' })
+    async linkParent(@Body() dto: LinkParentDto, @Request() req) {
+        return this.adminService.linkParentToChild(dto, req.user.sub);
     }
 
     @Post('users/bulk-invite')

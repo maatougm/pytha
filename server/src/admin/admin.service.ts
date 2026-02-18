@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { sanitizeUsers } from '../common/utils/user-sanitizer';
@@ -26,8 +26,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ModerateContentDto } from './dto/moderate-content.dto';
 import { SystemSettingsDto } from './dto/system-settings.dto';
 import { InviteUserDto, BulkInviteUserDto } from './dto/invite-user.dto';
+import { CreateUserDto, LinkParentDto, UserRole } from './dto/create-user.dto';
 import { User, Course, Class } from '@prisma/client';
 import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 
 // Using SystemMetrics from admin.dto.ts which has nested structure
 // This interface matches the expected frontend format
@@ -101,6 +103,92 @@ export class AdminService {
     constructor(private prisma: PrismaService) { }
 
     // ─── USER MANAGEMENT ────────────────────────────────────────────────
+
+    async createUser(dto: CreateUserDto, actorId: string): Promise<User> {
+        const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+        if (existing) throw new ConflictException('Email already registered');
+
+        // Verify role exists
+        const role = await this.prisma.role.findUnique({ where: { name: dto.role } });
+        if (!role) throw new BadRequestException(`Role ${dto.role} does not exist`);
+
+        // Generate or hash password
+        const password = dto.password || crypto.randomBytes(8).toString('hex');
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        const user = await this.prisma.user.create({
+            data: {
+                email: dto.email,
+                firstName: dto.firstName,
+                lastName: dto.lastName,
+                passwordHash,
+                status: UserStatus.ACTIVE, // Created by admin, so active by default
+                userRoles: {
+                    create: { roleId: role.id },
+                },
+            },
+        });
+
+        await this.prisma.auditLog.create({
+            data: {
+                actorId,
+                action: 'user_create_manual',
+                targetId: user.id,
+                metadata: { role: dto.role, email: dto.email } as any,
+            },
+        });
+
+        return user;
+    }
+
+    async linkParentToChild(dto: LinkParentDto, actorId: string) {
+        const parent = await this.prisma.user.findUnique({
+            where: { id: dto.parentId },
+            include: { userRoles: { include: { role: true } } },
+        });
+        const student = await this.prisma.user.findUnique({
+            where: { id: dto.studentId },
+            include: { userRoles: { include: { role: true } } },
+        });
+
+        if (!parent || !student) throw new NotFoundException('Parent or Student not found');
+
+        const isParent = parent.userRoles.some(r => r.role.name === 'parent');
+        const isStudent = student.userRoles.some(r => r.role.name === 'student');
+
+        if (!isParent) throw new BadRequestException('Selected parent user does not have Parent role');
+        if (!isStudent) throw new BadRequestException('Selected student user does not have Student role');
+
+        // Check if link already exists
+        const existing = await this.prisma.parentStudent.findUnique({
+            where: {
+                parentId_studentId: {
+                    parentId: dto.parentId,
+                    studentId: dto.studentId,
+                },
+            },
+        });
+
+        if (existing) throw new ConflictException('Link already exists');
+
+        await this.prisma.parentStudent.create({
+            data: {
+                parentId: dto.parentId,
+                studentId: dto.studentId,
+            },
+        });
+
+        await this.prisma.auditLog.create({
+            data: {
+                actorId,
+                action: 'parent_student_link',
+                targetId: dto.studentId,
+                metadata: { parentId: dto.parentId } as any,
+            },
+        });
+
+        return { success: true };
+    }
 
     async getUsers(params: { search?: string; role?: string; status?: string; page?: number; limit?: number }) {
         const result = await this.getAllUsers({
