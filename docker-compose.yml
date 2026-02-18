@@ -60,16 +60,17 @@ services:
       redis:
         condition: service_healthy
 
-  # Flutter Web (serves pre-built files)
+  # Flutter Web (Production Build)
   flutter_web:
-    image: nginx:alpine
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile.web
+      args:
+        API_BASE_URL: ${API_BASE_URL:-http://localhost:3000}
     container_name: sms_flutter_web
     restart: unless-stopped
     ports:
       - "8085:80"
-    volumes:
-      - ./mobile/build/web:/usr/share/nginx/html:ro
-      - ./mobile/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - server
 

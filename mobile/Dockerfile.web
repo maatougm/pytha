@@ -19,11 +19,14 @@ COPY . .
 # This avoids network download issues
 COPY flutter_web_sdk/ /usr/local/flutter/bin/cache/flutter_web_sdk/ 2>/dev/null || true
 
+# Accept API_BASE_URL build argument
+ARG API_BASE_URL=http://localhost:3000
+
 # Build for web - skip download if SDK exists
 RUN if [ -d "/usr/local/flutter/bin/cache/flutter_web_sdk" ]; then \
-      echo "Using cached Flutter Web SDK"; \
-    fi && \
-    flutter build web --release
+  echo "Using cached Flutter Web SDK"; \
+  fi && \
+  flutter build web --release --dart-define=API_BASE_URL=$API_BASE_URL
 
 # Stage 2: Serve with nginx
 FROM nginx:alpine
