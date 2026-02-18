@@ -10,6 +10,42 @@ A full-stack web application for educational institutions featuring real-time me
 
 ![School Hub Preview](docs/preview.png)
 
+## 🚀 Quick Start (Local Development)
+
+> ⚠️ **LOCAL USE ONLY - NOT FOR PRODUCTION**
+
+### One-Command Startup
+
+**Windows:**
+```powershell
+start-local.bat
+```
+
+**Linux/Mac:**
+```bash
+./start-local.sh
+```
+
+This will:
+1. Start Docker containers (PostgreSQL, Redis, Backend)
+2. Run database migrations
+3. Build Flutter web app (if Flutter is installed)
+
+Then open:
+- Web App: http://localhost:8085
+- API: http://localhost:3000
+- API Docs: http://localhost:3000/api/docs
+
+**Demo Login (after seeding):**
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@school.com | Password123! |
+| Teacher | teacher1@school.com | Password123! |
+| Parent | parent1@school.com | Password123! |
+| Student | student1@school.com | Password123! |
+
+---
+
 ## ✨ Features
 
 ### 🔐 Authentication & Security
@@ -179,34 +215,35 @@ Visit `http://localhost:5173` and log in with:
 - **Student**: `student1@school.com` / `Password123!`
 - **Parent**: `parent1@school.com` / `Password123!`
 
-## 🐳 Docker Production Deployment
+## ⚠️ IMPORTANT: Local Development Only
 
-### Build & Run
+> **This setup is for LOCAL TESTING and DEVELOPMENT only.**
+> 
+> The `start-local` scripts and `docker-compose.yml` are NOT suitable for production use.
+> They lack proper security hardening, SSL certificates, and production optimizations.
+> 
+> For production deployment, additional configuration is required (reverse proxy, SSL, secrets management, etc.)
 
-```bash
-# Build production images
-docker-compose -f docker-compose.prod.yml build
+---
 
-# Start production stack
-docker-compose -f docker-compose.prod.yml up -d
+## 📁 Project Structure
+
 ```
-
-### Environment Variables
-
-**Server (.env)**
-```env
-NODE_ENV=production
-PORT=3000
-DATABASE_URL=postgresql://sms_user:sms_password_2026@postgres:5432/school_messaging
-REDIS_URL=redis://redis:6379
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
-```
-
-**Client (.env)**
-```env
-VITE_API_URL=https://api.yourdomain.com/api
-VITE_WS_URL=wss://api.yourdomain.com
+school-hub/
+├── mobile/                 # Flutter Frontend (Web + Mobile)
+│   ├── lib/                # Dart source code
+│   ├── build/web/          # Compiled web app
+│   └── web/                # Web-specific files
+│
+├── server/                 # NestJS Backend
+│   ├── src/                # Source code
+│   ├── prisma/             # Database schema
+│   └── Dockerfile
+│
+├── docker-compose.yml      # Local development compose
+├── start-local.bat         # Windows startup script
+├── start-local.sh          # Linux/Mac startup script
+└── .env                    # Environment variables
 ```
 
 ## 📁 Project Structure
@@ -291,11 +328,11 @@ Key entities:
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Vue 3** - Progressive JavaScript framework
-- **Vite** - Build tool
-- **Pinia** - State management
-- **Vue Router** - Client-side routing
-- **Vue I18n** - Internationalization
+- **Flutter** - Cross-platform UI framework
+- **Dart** - Programming language
+- **Riverpod** - State management
+- **Go Router** - Navigation
+- **Dio** - HTTP client
 - **Socket.io Client** - WebSocket client
 
 ### Backend
@@ -417,5 +454,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ for education**
-#   p y t h a  
+#   p y t h a 
+ 
  
