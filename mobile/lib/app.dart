@@ -23,6 +23,8 @@ import '../screens/admin/system_settings_screen.dart';
 import '../screens/admin/admin_classes_screen.dart';
 import '../screens/admin/class_composition_screen.dart';
 import '../screens/admin/teacher_allocation_screen.dart';
+import '../screens/admin/admin_user_creation_screen.dart';
+import '../screens/admin/admin_parent_link_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -89,6 +91,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/admin/users',
             builder: (_, __) => const UserManagementScreen(),
+            routes: [
+              GoRoute(
+                path: 'create',
+                builder: (_, __) => const AdminUserCreationScreen(),
+              ),
+              GoRoute(
+                path: 'link-parent',
+                builder: (_, __) => const AdminParentLinkScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: '/admin/moderation',

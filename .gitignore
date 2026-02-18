@@ -1,43 +1,17 @@
-# =============================================================================
-# School Hub - Git Ignore File
-# =============================================================================
-
-# =============================================================================
-# Environment & Secrets (NEVER commit these!)
-# =============================================================================
-.env
-.env.local
-.env.*.local
-.env.production
-!.env.example
-!.env.production.example
-secrets/
-*.pem
-*.key
-*.crt
-*.p12
-*.pfx
-
-# =============================================================================
 # Dependencies
-# =============================================================================
 node_modules/
 **/node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
 
-# =============================================================================
-# Build Outputs
-# =============================================================================
+# Environment files (NEVER commit these)
+.env
+.env.local
+.env.production
+
+# Build outputs
 dist/
 build/
 **/dist/
 **/build/
-*.tsbuildinfo
 
 # Flutter
 mobile/build/
@@ -46,91 +20,22 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/.packages
 mobile/pubspec.lock
-mobile/ios/Flutter/.last_build_id
-mobile/android/.gradle/
-mobile/android/app/debug/
-mobile/android/app/profile/
-mobile/android/app/release/
 
-# =============================================================================
-# IDE & Editor Files
-# =============================================================================
+# IDE files
 .idea/
 .vscode/
 *.swp
-*.swo
 *~
 .DS_Store
-*.sublime-project
-*.sublime-workspace
-.project
-.classpath
-.settings/
 
-# =============================================================================
-# Logs & Databases
-# =============================================================================
+# Logs
 *.log
 logs/
-*.sqlite
-*.sqlite3
-*.mdb
-*.ldb
 
-# =============================================================================
-# Uploads & Generated Files
-# =============================================================================
+# Uploads
 uploads/
 **/uploads/*
 !uploads/.gitkeep
-files/
-**/files/*
-!files/.gitkeep
-temp/
-tmp/
-*.tmp
 
-# =============================================================================
-# Docker
-# =============================================================================
-.dockerignore
-docker-compose.override.yml
-
-# =============================================================================
-# Testing & Coverage
-# =============================================================================
-coverage/
-.nyc_output/
-*.lcov
-
-# =============================================================================
-# OS Generated
-# =============================================================================
+# OS files
 Thumbs.db
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Desktop.ini
-
-# =============================================================================
-# Backup Files
-# =============================================================================
-*.bak
-*.backup
-*.old
-*.orig
-
-# =============================================================================
-# Misc
-# =============================================================================
-.cache/
-.parcel-cache/
-.next/
-.nuxt/
-.vuepress/dist
-.serverless/
-.fusebox/
-.dynamodb/

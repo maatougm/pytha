@@ -47,8 +47,13 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
         title: const Text('User Management'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.link),
+            tooltip: 'Link Parent to Student',
+            onPressed: () => context.push('/admin/users/link-parent'),
+          ),
+          IconButton(
             icon: const Icon(Icons.person_add_outlined),
-            onPressed: () => _showCreateUserDialog(context),
+            onPressed: () => context.push('/admin/users/create').then((_) => ref.refresh(adminUsersProvider(_params))),
           ),
         ],
       ),
