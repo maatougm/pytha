@@ -15,6 +15,12 @@ module.exports = {
     },
     setupFilesAfterEnv: ['<rootDir>/../test/setup.ts'],
     transformIgnorePatterns: [
+        // Transform ES modules in these packages
         'node_modules/(?!(uuid|@nestjs|class-validator|class-transformer)/)',
     ],
+    // Mock modules that cause issues in tests
+    moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/$1',
+        'jsdom': '<rootDir>/../test/__mocks__/jsdom.mock.ts',
+    },
 };

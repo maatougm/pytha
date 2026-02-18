@@ -1,3 +1,7 @@
+// Set environment variables BEFORE imports
+process.env.JWT_SECRET = 'test-jwt-secret-minimum-32-characters-long-12345';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-32-characters-long-67890';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -42,6 +46,12 @@ describe('AuthService', () => {
             delete: jest.fn(),
             deleteMany: jest.fn(),
         },
+        $transaction: jest.fn((callback) => {
+            if (typeof callback === 'function') {
+                return callback(mockPrisma);
+            }
+            return Promise.all(callback);
+        }),
     };
 
     const mockJwtService = {
@@ -51,7 +61,8 @@ describe('AuthService', () => {
     const mockConfigService = {
         get: jest.fn((key: string) => {
             const config = {
-                JWT_SECRET: 'test-secret',
+                JWT_SECRET: 'test-jwt-secret-minimum-32-characters-long-12345',
+                JWT_REFRESH_SECRET: 'test-refresh-secret-32-characters-long-67890',
                 JWT_EXPIRATION: '15m',
                 JWT_REFRESH_EXPIRATION: '7d',
                 REDIS_URL: 'redis://localhost:6379',

@@ -60,7 +60,7 @@ describe('MessagingController', () => {
             const result = await controller.createChannel(dto, mockRequest);
 
             expect(result).toEqual(expected);
-            expect(service.createChannel).toHaveBeenCalledWith(dto, 'user-1');
+            expect(service.createChannel).toHaveBeenCalledWith(dto, 'user-1', ['student']);
         });
     });
 

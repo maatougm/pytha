@@ -1,20 +1,20 @@
 // Jest setup file
 
-// Set test environment variables
-process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-for-testing-only';
+// Set test environment variables - MUST be 32+ characters
+process.env.JWT_SECRET = 'test-jwt-secret-minimum-32-characters-long-12345';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-32-characters-long-67890';
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5433/test_db';
 process.env.NODE_ENV = 'test';
+process.env.REDIS_URL = 'redis://localhost:6379';
 
-// Mock console methods during tests to reduce noise
-global.console = {
-    ...console,
-    log: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-};
+// Mock Redis client for health checks
+jest.mock('redis', () => ({
+    createClient: jest.fn().mockReturnValue({
+        connect: jest.fn().mockResolvedValue(undefined),
+        ping: jest.fn().mockResolvedValue('PONG'),
+        isReady: true,
+    }),
+}));
 
 // Global test timeout
 jest.setTimeout(10000);
