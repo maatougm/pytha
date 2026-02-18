@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_endpoints.dart';
@@ -24,7 +25,7 @@ class AdminClassesScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {},
+            onPressed: () => context.push('/admin/classes/create').then((_) => ref.refresh(adminClassesProvider)),
           ),
         ],
       ),
