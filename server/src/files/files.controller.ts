@@ -370,27 +370,27 @@ export class FilesController {
         @Query('width') width?: string,
         @Query('height') height?: string,
     ) {
+        // CRIT-003 fix: check permissions FIRST before any file operations
+        // This prevents probing file existence / mime type without authorization
         const file = await this.filesService.findById(id);
 
-        // Check if preview is available for this file type
-        if (!isPreviewableImage(file.mimeType)) {
-            return res.status(400).json({
-                message: 'Preview not available for this file type',
-                supportedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'],
-            });
-        }
+        const isOwner = file.uploaderId === req.user.sub;
+        const isAdmin = req.user.roles?.includes('admin');
 
-        // Check permissions
-        const hasAccess =
-            file.uploaderId === req.user.sub ||
-            req.user.roles?.includes('admin');
-
-        if (!hasAccess) {
+        if (!isOwner && !isAdmin) {
             const permissions = await this.filesService.getPermissions(id);
             const userPermission = permissions.find(p => p.userId === req.user.sub && p.canView);
             if (!userPermission) {
                 return res.status(403).json({ message: 'You do not have permission to view this file' });
             }
+        }
+
+        // Only after auth passes, check if preview is available for this file type
+        if (!isPreviewableImage(file.mimeType)) {
+            return res.status(400).json({
+                message: 'Preview not available for this file type',
+                supportedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'],
+            });
         }
 
         // Generate preview on-demand

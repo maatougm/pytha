@@ -18,6 +18,8 @@ export enum AuditActions {
     USER_REACTIVATE = 'user_reactivate',
     COURSE_ACTIVATE = 'course_activate',
     COURSE_DEACTIVATE = 'course_deactivate',
+    REPORT_UPDATE = 'report_update',
+    PROMOTE_STUDENTS = 'promote_students',
 }
 
 interface AuditLogData {

@@ -1,6 +1,34 @@
 version: "3.8"
 
 services:
+  # Flutter Web Frontend
+  flutter_web:
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile.web
+    container_name: sms_flutter_web
+    restart: unless-stopped
+    ports:
+      - "8085:80"
+    environment:
+      - API_BASE_URL=http://localhost:3000
+    depends_on:
+      - server
+
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - flutter_web
+      - server
+
   postgres:
     image: postgres:16-alpine
     container_name: sms_postgres
@@ -24,6 +52,25 @@ services:
       - "log_connections=on"
       - "-c"
       - "log_disconnections=on"
+      - "-c"
+      - "max_connections=200"
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: sms_pgbouncer
+    restart: unless-stopped
+    ports:
+      - "6432:6432"
+    environment:
+      - DB_USER=sms_user
+      - DB_PASSWORD=sms_password_2026
+      - DB_HOST=postgres
+      - DB_NAME=school_messaging
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=1000
+      - DEFAULT_POOL_SIZE=20
+    depends_on:
+      - postgres
 
   redis:
     image: redis:7-alpine
@@ -62,17 +109,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-
-  client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: sms_client
-    restart: unless-stopped
-    ports:
-      - "8085:80"
-    depends_on:
-      - server
 
 volumes:
   pgdata:

@@ -142,11 +142,15 @@ export class AuthService {
             throw new UnauthorizedException('Account has been deleted');
         }
 
-        // Delete old token (single use)
-        await this.prisma.refreshToken.delete({ where: { id: stored.id } });
-
         const roles = stored.user.userRoles.map((ur) => ur.role.name);
-        const tokens = await this.generateTokens(stored.user.id, stored.user.email, roles);
+
+        // HIGH-002 fix: use a transaction so the old token is only deleted
+        // after the new one is successfully created. Prevents logout on failure.
+        const tokens = await this.prisma.$transaction(async (tx) => {
+            const newTokens = await this.generateTokens(stored.user.id, stored.user.email, roles);
+            await tx.refreshToken.delete({ where: { id: stored.id } });
+            return newTokens;
+        });
 
         this.logger.log(`Token refreshed for user: ${stored.user.email}`);
 
@@ -202,8 +206,11 @@ export class AuthService {
         const expiresIn = this.configService.get<string>('JWT_EXPIRATION', '15m');
         const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRATION', '7d');
 
-        if (!secret) {
-            throw new UnauthorizedException('JWT_SECRET not configured');
+        // HIGH-001 fix: enforce minimum secret strength (32 chars) to prevent weak secrets
+        if (!secret || secret.length < 32) {
+            throw new UnauthorizedException(
+                'JWT_SECRET must be configured and at least 32 characters long',
+            );
         }
 
         const accessToken = this.jwtService.sign(payload, {

@@ -3,6 +3,7 @@ import {
     Get,
     Post,
     Put,
+    Patch,
     Delete,
     Body,
     Param,
@@ -220,5 +221,71 @@ export class AdminController {
     @ApiOperation({ summary: 'Get all classes with their assigned teachers' })
     async getClassesWithTeachers() {
         return this.adminService.getClassesWithTeachers();
+    }
+
+    // ─── CLASS COMPOSITION ──────────────────────────────────────────
+
+    @Get('classes/composition')
+    @ApiOperation({ summary: 'Get class composition with enrolled students' })
+    async getClassComposition() {
+        return this.adminService.getClassComposition();
+    }
+
+    @Get('students/unassigned')
+    @ApiOperation({ summary: 'Get students not enrolled in any class' })
+    async getUnassignedStudents() {
+        return this.adminService.getUnassignedStudents();
+    }
+
+    @Post('classes/:classId/enroll')
+    @ApiOperation({ summary: 'Enroll a student in a class' })
+    async enrollStudent(
+        @Param('classId') classId: string,
+        @Body() body: { studentId: string },
+    ) {
+        return this.adminService.enrollStudent(classId, body.studentId);
+    }
+
+    @Delete('classes/:classId/unenroll/:studentId')
+    @ApiOperation({ summary: 'Remove a student from a class' })
+    async unenrollStudent(
+        @Param('classId') classId: string,
+        @Param('studentId') studentId: string,
+    ) {
+        return this.adminService.unenrollStudent(classId, studentId);
+    }
+
+    // ─── ACADEMIC YEAR ──────────────────────────────────────────────
+
+    @Get('academic-years')
+    @ApiOperation({ summary: 'Get all academic years' })
+    async getAcademicYears() {
+        return this.adminService.getAcademicYears();
+    }
+
+    @Post('academic-years')
+    @ApiOperation({ summary: 'Create a new academic year' })
+    async createAcademicYear(@Body() body: { name: string; startDate: string; endDate: string }) {
+        return this.adminService.createAcademicYear(body);
+    }
+
+    @Patch('academic-years/:id/set-current')
+    @ApiOperation({ summary: 'Set an academic year as current' })
+    async setCurrentAcademicYear(@Param('id') id: string) {
+        return this.adminService.setCurrentAcademicYear(id);
+    }
+
+    // ─── GRADE PROMOTION ────────────────────────────────────────────
+
+    @Get('promotion/preview')
+    @ApiOperation({ summary: 'Preview grade promotion results' })
+    async getPromotionPreview() {
+        return this.adminService.getPromotionPreview();
+    }
+
+    @Post('promotion/execute')
+    @ApiOperation({ summary: 'Execute grade promotion for all students' })
+    async promoteAllStudents(@Request() req) {
+        return this.adminService.promoteAllStudents(req.user.sub);
     }
 }

@@ -19,6 +19,7 @@ model User {
   lastName     String    @map("last_name")
   phone        String?
   avatarUrl    String?   @map("avatar_url")
+  gradeLevel   String?   @map("grade_level") // Grade 1-12 for students
   status       String    @default("active") // active, suspended, archived
   lastLoginAt  DateTime? @map("last_login_at")
 
@@ -710,4 +711,21 @@ model Mention {
   @@index([mentionedUserId, isRead])
   @@index([createdAt])
   @@map("mentions")
+}
+
+// ============================================================
+// ACADEMIC YEAR
+// ============================================================
+
+model AcademicYear {
+  id        String   @id @default(uuid())
+  name      String   // "2025-2026"
+  startDate DateTime @map("start_date") @db.Date
+  endDate   DateTime @map("end_date") @db.Date
+  isCurrent Boolean  @default(false) @map("is_current")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isCurrent])
+  @@map("academic_years")
 }

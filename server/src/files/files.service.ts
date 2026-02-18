@@ -76,7 +76,7 @@ export class FilesService {
         this.uploadsDir = path.resolve(process.cwd(), 'uploads');
         this.thumbnailsDir = path.join(this.uploadsDir, 'thumbnails');
         this.previewsDir = path.join(this.uploadsDir, 'previews');
-        
+
         // Ensure directories exist
         this.ensureDirectories();
     }
@@ -100,19 +100,19 @@ export class FilesService {
         const now = Date.now();
         const windowStart = now - 60000; // 1 minute window
         const key = `upload:${userId}`;
-        
+
         const record = this.uploadRateStore.get(key);
-        
+
         if (!record || record.resetTime < now) {
             // New window
             this.uploadRateStore.set(key, { count: 1, resetTime: now + 60000 });
             return { allowed: true, remaining: UPLOAD_RATE_LIMIT - 1, resetTime: now + 60000 };
         }
-        
+
         if (record.count >= UPLOAD_RATE_LIMIT) {
             return { allowed: false, remaining: 0, resetTime: record.resetTime };
         }
-        
+
         record.count++;
         return { allowed: true, remaining: UPLOAD_RATE_LIMIT - record.count, resetTime: record.resetTime };
     }
@@ -123,14 +123,14 @@ export class FilesService {
     getRateLimitStatus(userId: string): { remaining: number; resetTime: number } {
         const key = `upload:${userId}`;
         const record = this.uploadRateStore.get(key);
-        
+
         if (!record) {
             return { remaining: UPLOAD_RATE_LIMIT, resetTime: Date.now() + 60000 };
         }
-        
-        return { 
-            remaining: Math.max(0, UPLOAD_RATE_LIMIT - record.count), 
-            resetTime: record.resetTime 
+
+        return {
+            remaining: Math.max(0, UPLOAD_RATE_LIMIT - record.count),
+            resetTime: record.resetTime
         };
     }
 
@@ -140,15 +140,15 @@ export class FilesService {
      * Scan file for viruses using ClamAV
      * Returns scan result with status and any findings
      */
-    async scanFile(filePath: string): Promise<{ 
-        clean: boolean; 
+    async scanFile(filePath: string): Promise<{
+        clean: boolean;
         status: 'clean' | 'infected' | 'error' | 'skipped';
         message?: string;
         threats?: string[];
     }> {
         // Check if ClamAV is available
         const isClamAvAvailable = await this.isClamAvAvailable();
-        
+
         if (!isClamAvAvailable) {
             this.logger.warn('ClamAV not available, skipping virus scan');
             return { clean: true, status: 'skipped', message: 'Virus scanning not available' };
@@ -156,17 +156,17 @@ export class FilesService {
 
         return new Promise((resolve) => {
             const timeout = setTimeout(() => {
-                resolve({ 
-                    clean: false, 
-                    status: 'error', 
-                    message: 'Virus scan timeout' 
+                resolve({
+                    clean: false,
+                    status: 'error',
+                    message: 'Virus scan timeout'
                 });
             }, VIRUS_SCAN_TIMEOUT);
 
             try {
                 // Try clamdscan first (daemon mode - faster), fallback to clamscan
                 const scanner = spawn('clamdscan', ['--fdpass', '--no-summary', filePath]);
-                
+
                 let stdout = '';
                 let stderr = '';
 
@@ -180,25 +180,25 @@ export class FilesService {
 
                 scanner.on('close', (code) => {
                     clearTimeout(timeout);
-                    
+
                     if (code === 0) {
                         // Clean
                         resolve({ clean: true, status: 'clean' });
                     } else if (code === 1) {
                         // Infected
                         const threats = this.parseThreats(stdout);
-                        resolve({ 
-                            clean: false, 
-                            status: 'infected', 
+                        resolve({
+                            clean: false,
+                            status: 'infected',
                             message: 'File contains malware',
-                            threats 
+                            threats
                         });
                     } else {
                         // Error
-                        resolve({ 
-                            clean: false, 
-                            status: 'error', 
-                            message: stderr || 'Scan failed' 
+                        resolve({
+                            clean: false,
+                            status: 'error',
+                            message: stderr || 'Scan failed'
                         });
                     }
                 });
@@ -210,10 +210,10 @@ export class FilesService {
                 });
             } catch (error) {
                 clearTimeout(timeout);
-                resolve({ 
-                    clean: false, 
-                    status: 'error', 
-                    message: error.message 
+                resolve({
+                    clean: false,
+                    status: 'error',
+                    message: error.message
                 });
             }
         });
@@ -230,16 +230,16 @@ export class FilesService {
     }> {
         return new Promise((resolve) => {
             const timeout = setTimeout(() => {
-                resolve({ 
-                    clean: false, 
-                    status: 'error', 
-                    message: 'Virus scan timeout' 
+                resolve({
+                    clean: false,
+                    status: 'error',
+                    message: 'Virus scan timeout'
                 });
             }, VIRUS_SCAN_TIMEOUT);
 
             try {
                 const scanner = spawn('clamscan', ['--no-summary', filePath]);
-                
+
                 let stdout = '';
                 let stderr = '';
 
@@ -253,40 +253,40 @@ export class FilesService {
 
                 scanner.on('close', (code) => {
                     clearTimeout(timeout);
-                    
+
                     if (code === 0) {
                         resolve({ clean: true, status: 'clean' });
                     } else if (code === 1) {
                         const threats = this.parseThreats(stdout);
-                        resolve({ 
-                            clean: false, 
-                            status: 'infected', 
+                        resolve({
+                            clean: false,
+                            status: 'infected',
                             message: 'File contains malware',
-                            threats 
+                            threats
                         });
                     } else {
-                        resolve({ 
-                            clean: false, 
-                            status: 'error', 
-                            message: stderr || 'Scan failed' 
+                        resolve({
+                            clean: false,
+                            status: 'error',
+                            message: stderr || 'Scan failed'
                         });
                     }
                 });
 
                 scanner.on('error', () => {
                     clearTimeout(timeout);
-                    resolve({ 
-                        clean: true, 
-                        status: 'skipped', 
-                        message: 'Virus scanner not available' 
+                    resolve({
+                        clean: true,
+                        status: 'skipped',
+                        message: 'Virus scanner not available'
                     });
                 });
             } catch (error) {
                 clearTimeout(timeout);
-                resolve({ 
-                    clean: true, 
-                    status: 'skipped', 
-                    message: 'Virus scanner not available' 
+                resolve({
+                    clean: true,
+                    status: 'skipped',
+                    message: 'Virus scanner not available'
                 });
             }
         });
@@ -309,7 +309,7 @@ export class FilesService {
     private parseThreats(output: string): string[] {
         const threats: string[] = [];
         const lines = output.split('\n');
-        
+
         for (const line of lines) {
             if (line.includes('FOUND')) {
                 const match = line.match(/: ([^:]+) FOUND/);
@@ -318,7 +318,7 @@ export class FilesService {
                 }
             }
         }
-        
+
         return threats;
     }
 
@@ -329,7 +329,7 @@ export class FilesService {
      * Uses ImageMagick if available, otherwise returns null
      */
     async generateThumbnail(
-        filePath: string, 
+        filePath: string,
         mimeType: string,
         width: number = THUMBNAIL_WIDTH,
         height: number = THUMBNAIL_HEIGHT,
@@ -433,9 +433,9 @@ export class FilesService {
 
         // Calculate used storage
         const userFiles = await this.prisma.file.findMany({
-            where: { 
-                uploaderId: userId, 
-                isDeleted: false 
+            where: {
+                uploaderId: userId,
+                isDeleted: false
             },
             select: { size: true },
         });
@@ -459,13 +459,13 @@ export class FilesService {
         message?: string;
     }> {
         const quota = await this.getUserQuota(userId, userRoles);
-        
+
         if (fileSize > quota.availableStorage) {
             return {
                 allowed: false,
                 quota,
                 message: `Insufficient storage. Available: ${formatFileSize(quota.availableStorage)}, ` +
-                        `Required: ${formatFileSize(fileSize)}`,
+                    `Required: ${formatFileSize(fileSize)}`,
             };
         }
 
@@ -518,12 +518,12 @@ export class FilesService {
 
         // Virus scan (unless skipped by admin)
         let virusScanStatus: 'pending' | 'clean' | 'infected' | 'error' | 'skipped' = 'pending';
-        
+
         if (!metadata.skipVirusScan || !userRoles.includes('admin')) {
             if (requiresVirusScan(file.mimetype)) {
                 const scanResult = await this.scanFile(file.path);
                 virusScanStatus = scanResult.status;
-                
+
                 if (scanResult.status === 'infected') {
                     await this.cleanupTempFile(file.path);
                     this.logger.warn(`Malware detected in upload by ${uploaderId}: ${scanResult.threats?.join(', ')}`);
@@ -531,7 +531,7 @@ export class FilesService {
                         `File rejected: ${scanResult.message}. Threats: ${scanResult.threats?.join(', ')}`
                     );
                 }
-                
+
                 if (scanResult.status === 'error' || scanResult.status === 'skipped') {
                     warnings.push(`Virus scan: ${scanResult.message}`);
                 }
@@ -546,7 +546,16 @@ export class FilesService {
         // Generate secure filename
         const ext = extname(file.originalname).toLowerCase();
         const secureFilename = `${uuidv4()}${ext}`;
-        const category = metadata.category || FileUploadCategory.GENERAL;
+        const rawCategory = metadata.category || FileUploadCategory.GENERAL;
+
+        // HIGH-006 fix: validate category against the enum allowlist even if DTO validation
+        // was bypassed (e.g. direct service call). Prevents path traversal via category.
+        const allowedCategories = Object.values(FileUploadCategory) as string[];
+        if (!allowedCategories.includes(rawCategory)) {
+            throw new BadRequestException(`Invalid file category: ${rawCategory}`);
+        }
+        const category = rawCategory as FileUploadCategory;
+
         const categoryDir = path.join(this.uploadsDir, category);
         const finalPath = path.join(categoryDir, secureFilename);
         const relativePath = path.join('uploads', category, secureFilename);
@@ -563,7 +572,7 @@ export class FilesService {
             // Generate thumbnail for images if requested
             if (metadata.generateThumbnail !== false && isPreviewableImage(file.mimetype)) {
                 thumbnailPath = await this.generateThumbnail(
-                    finalPath, 
+                    finalPath,
                     file.mimetype,
                     metadata.thumbnailWidth,
                     metadata.thumbnailHeight,
@@ -655,7 +664,7 @@ export class FilesService {
         return new Promise((resolve, reject) => {
             const hash = crypto.createHash('sha256');
             const stream = createReadStream(filePath);
-            
+
             stream.on('data', (data) => hash.update(data));
             stream.on('end', () => resolve(hash.digest('hex')));
             stream.on('error', reject);
@@ -760,9 +769,9 @@ export class FilesService {
             file.uploaderId === userId ||
             userRoles.includes('admin') ||
             (await this.prisma.filePermission.findFirst({
-                where: { 
-                    fileId: id, 
-                    userId, 
+                where: {
+                    fileId: id,
+                    userId,
                     canView: true,
                 },
             }));
@@ -807,7 +816,7 @@ export class FilesService {
 
         // Get thumbnail path from metadata
         const thumbnailPath = await this.getThumbnailMetadata(id);
-        
+
         if (!thumbnailPath) {
             throw new NotFoundException('Thumbnail not available for this file');
         }
@@ -879,7 +888,7 @@ export class FilesService {
         // Soft delete
         await this.prisma.file.update({
             where: { id },
-            data: { 
+            data: {
                 isDeleted: true,
                 deletedAt: new Date(),
             },
@@ -1073,12 +1082,12 @@ export class FilesService {
         });
 
         if (!file) {
-            return { 
-                valid: false, 
-                fileExists: false, 
-                hashValid: false, 
-                sizeValid: false, 
-                issues: ['File record not found'] 
+            return {
+                valid: false,
+                fileExists: false,
+                hashValid: false,
+                sizeValid: false,
+                issues: ['File record not found']
             };
         }
 

@@ -1,6 +1,6 @@
 # School Hub - School Messaging System (SMS)
 
-A full-stack web application for educational institutions featuring real-time messaging, course management, assignments, attendance tracking, and file sharing with role-based access control.
+A full-stack school management platform featuring real-time messaging, course management, assignments, attendance tracking, and file sharing with role-based access control.
 
 ## Project Overview
 
@@ -16,7 +16,7 @@ School Hub is a **School Management System** designed to facilitate communicatio
 - **Role-Based Access**: Four user roles (admin, teacher, parent, student) with different permissions
 - **Admin Dashboard**: Real-time analytics, user management, audit logs, system health monitoring, and content moderation
 - **Audit Logging**: Track important actions for compliance and moderation
-- **Internationalization**: Multi-language support (English, French, Arabic) with RTL layout for Arabic
+- **Mobile App**: Flutter-based cross-platform mobile application
 
 ## Technology Stack
 
@@ -36,19 +36,21 @@ School Hub is a **School Management System** designed to facilitate communicatio
 | **Helmet** | 8.1.x | Security headers |
 | **Swagger** | 7.4.x | API documentation |
 | **Jest** | 29.5.x | Testing framework |
+| **Winston** | 3.19.x | Logging |
+| **DOMPurify** | 3.3.x | XSS protection |
 
-### Frontend (client/)
+### Mobile App (mobile/)
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| **Vue 3** | 3.5.x | Progressive JavaScript framework (Composition API) |
-| **Vite** | 5.4.x | Next-generation frontend build tool |
-| **Pinia** | 2.2.x | State management for Vue |
-| **Vue Router** | 4.4.x | Client-side routing |
-| **Axios** | 1.7.x | HTTP client for API communication |
-| **Socket.IO Client** | 4.7.x | Real-time WebSocket client |
-| **Vue I18n** | 9.14.x | Internationalization support |
-| **Chart.js** | 4.5.x | Data visualization |
+| **Flutter** | 3.x+ | Cross-platform mobile framework |
+| **Dart** | 3.x+ | Programming language |
+| **Dio** | 5.7.x | HTTP client for API communication |
+| **Socket.IO Client** | 2.0.x | Real-time WebSocket client |
+| **Riverpod** | 2.6.x | State management |
+| **Go Router** | 14.6.x | Navigation |
+| **Hive** | 1.1.x | Local storage |
+| **flutter_secure_storage** | 9.2.x | Secure key storage |
 
 ### Infrastructure
 
@@ -64,67 +66,43 @@ School Hub is a **School Management System** designed to facilitate communicatio
 ```
 minivirson/
 ├── .env                      # Shared environment configuration
+├── .env.example              # Environment template
 ├── .github/
 │   └── workflows/
 │       └── ci.yml           # CI/CD pipeline configuration
 ├── docker-compose.yml        # Development infrastructure (PostgreSQL + Redis)
 ├── docker-compose.prod.yml   # Full production stack
+├── docker-compose.loadbalanced.yml # Load-balanced multi-instance setup
 ├── README.md                # Human-readable documentation
 ├── SCALING.md               # Scalability and performance guide
 ├── AGENTS.md                # This file - AI agent documentation
-├── client/                  # Frontend application
-│   ├── Dockerfile           # Multi-stage production build
-│   ├── nginx.conf           # Nginx configuration for production
-│   ├── package.json         # Frontend dependencies
-│   ├── vite.config.js       # Vite build configuration
-│   ├── index.html           # HTML entry point
-│   └── src/
-│       ├── main.js          # Application entry point
-│       ├── App.vue          # Root component
-│       ├── assets/          # Static assets (styles.css)
-│       ├── components/      # Reusable Vue components
-│       │   ├── MainLayout.vue
-│       │   ├── SubmissionGradeModal.vue
-│       │   ├── ToastContainer.vue
-│       │   └── admin/       # Admin-specific components
-│       ├── composables/     # Vue composables
-│       │   ├── useSocket.js # WebSocket management
-│       │   └── useToast.js  # Toast notifications
-│       ├── i18n/            # Internationalization
-│       │   ├── index.js     # i18n configuration
-│       │   └── locales/     # Translation files
-│       │       ├── en.json
-│       │       ├── fr.json
-│       │       └── ar.json
-│       ├── router/          # Vue Router configuration
-│       │   └── index.js
-│       ├── services/        # API service modules
-│       │   ├── api.js       # Axios configuration with interceptors
-│       │   ├── assignments.js
-│       │   ├── attendance.js
-│       │   ├── courses.js
-│       │   ├── files.js
-│       │   └── messaging.js
-│       ├── stores/          # Pinia state stores
-│       │   ├── auth.js      # Authentication state
-│       │   ├── admin.js     # Admin dashboard state
-│       │   └── messaging.js # Messaging state
-│       ├── styles/          # Global styles
-│       │   └── design-system.css
-│       ├── utils/           # Utility functions
-│       │   └── debounce.js
-│       └── views/           # Page-level Vue components
-│           ├── LoginView.vue
-│           ├── RegisterView.vue
-│           ├── HomeView.vue
-│           ├── MessagingView.vue
-│           ├── CoursesView.vue
-│           ├── AssignmentsView.vue
-│           ├── AttendanceView.vue
-│           ├── FilesView.vue
-│           ├── AdminView.vue
-│           ├── AdminDashboardView.vue
-│           └── UserManagementView.vue
+├── mobile/                  # Flutter mobile application
+│   ├── pubspec.yaml         # Flutter dependencies
+│   ├── lib/
+│   │   ├── main.dart        # Application entry point
+│   │   ├── app.dart         # Root application widget
+│   │   ├── core/            # Core utilities
+│   │   │   ├── api/         # API client (dio)
+│   │   │   ├── socket/      # WebSocket management
+│   │   │   └── theme/       # App theming
+│   │   ├── models/          # Data models (user, course, file, etc.)
+│   │   ├── providers/       # Riverpod state providers
+│   │   ├── repositories/    # Data access layer
+│   │   └── screens/         # UI screens
+│   │       ├── admin/       # Admin dashboard screens
+│   │       ├── assignments/ # Assignment screens
+│   │       ├── attendance/  # Attendance screens
+│   │       ├── auth/        # Login/register screens
+│   │       ├── courses/     # Course screens
+│   │       ├── files/       # File management screens
+│   │       ├── grades/      # Grade viewing screens
+│   │       ├── home/        # Home dashboard
+│   │       ├── messaging/   # Chat/messaging screens
+│   │       └── profile/     # User profile screens
+│   └── assets/              # Images and icons
+├── scripts/                 # Utility scripts
+│   ├── migrate-mdb-to-prisma.js  # Legacy database migration
+│   └── requirements.txt     # Python dependencies for scripts
 └── server/                  # Backend application
     ├── Dockerfile           # Multi-stage production build
     ├── package.json         # Backend dependencies
@@ -171,9 +149,7 @@ minivirson/
         │   ├── messaging.gateway.ts
         │   ├── messaging.module.ts
         │   ├── messaging.service.ts
-        │   ├── messaging-enhanced.service.ts
-        │   ├── channel-management.controller.ts
-        │   ├── channel-management.service.ts
+        │   ├── typing.service.ts
         │   └── dto/
         ├── admin/           # Admin dashboard module
         │   ├── admin.controller.ts
@@ -181,6 +157,10 @@ minivirson/
         │   ├── admin.module.ts
         │   ├── admin.service.ts
         │   └── dto/
+        ├── analytics/       # Analytics module
+        │   ├── analytics.controller.ts
+        │   ├── analytics.module.ts
+        │   └── analytics.service.ts
         ├── moderation/      # Audit logging and moderation
         │   ├── moderation.controller.ts
         │   ├── moderation.module.ts
@@ -207,16 +187,31 @@ minivirson/
         │   └── dto/files.dto.ts
         ├── health/          # Health checks
         │   ├── health.controller.ts
-        │   ├── health.controller.spec.ts
         │   ├── health.module.ts
         │   └── health.interface.ts
+        ├── notifications/   # Email notifications
+        │   ├── notifications.module.ts
+        │   ├── notifications.service.ts
+        │   ├── notifications.controller.ts
+        │   ├── email.processor.ts
+        │   ├── queue.service.ts
+        │   └── dto/notifications.dto.ts
+        ├── mentions/        # User mentions in messages
+        │   ├── mentions.module.ts
+        │   ├── mentions.service.ts
+        │   └── mentions.controller.ts
+        ├── redis/           # Redis client module
+        │   ├── redis.module.ts
+        │   └── redis.service.ts
         └── common/          # Shared utilities
-            ├── guards/ws-rate-limit.guard.ts
-            ├── interceptors/logging.interceptor.ts
-            └── utils/
-                ├── audit-helper.ts
-                ├── user-sanitizer.ts
-                └── user-sanitizer.spec.ts
+            ├── decorators/  # Custom decorators
+            ├── guards/      # WebSocket rate limit guards
+            ├── interceptors/# Logging interceptors
+            ├── logger/      # Winston configuration
+            ├── pipes/       # Sanitization pipes
+            ├── redis/       # Redis utilities
+            ├── soft-delete/ # Soft delete functionality
+            └── utils/       # Helper utilities
 ```
 
 ## Module Architecture
@@ -229,25 +224,20 @@ Each module follows NestJS conventions with controllers, services, and DTOs:
 |--------|---------|-----------|
 | **AuthModule** | JWT-based authentication with access/refresh tokens | `auth.service.ts`, `jwt.strategy.ts`, `roles.guard.ts` |
 | **UsersModule** | User CRUD and profile management | `users.controller.ts`, `users.service.ts` |
-| **MessagingModule** | Real-time messaging via Socket.IO gateway + REST API | `messaging.gateway.ts`, `messaging.service.ts` |
+| **MessagingModule** | Real-time messaging via Socket.IO gateway + REST API | `messaging.gateway.ts`, `messaging.service.ts`, `typing.service.ts` |
 | **AdminModule** | Admin dashboard, user management, system stats | `admin.controller.ts`, `admin.gateway.ts` |
+| **AnalyticsModule** | System analytics and reporting | `analytics.service.ts` |
 | **CoursesModule** | Course catalog, classes, enrollments, schedules | `courses.controller.ts`, `courses.service.ts` |
 | **GradingModule** | Assignments, submissions, and gradebook | `grading.controller.ts`, `grading.service.ts` |
 | **AttendanceModule** | Attendance sessions and records | `attendance.controller.ts`, `attendance.service.ts` |
 | **FilesModule** | File uploads with permission-based access | `files.controller.ts`, `files.service.ts` |
 | **ModerationModule** | Audit logging for compliance | `moderation.controller.ts`, `moderation.service.ts` |
-| **SoftDeleteModule** | Soft delete functionality with cleanup jobs | `soft-delete.service.ts`, `soft-delete.controller.ts` |
+| **NotificationsModule** | Email notifications and queue | `notifications.service.ts`, `email.processor.ts` |
+| **MentionsModule** | User mentions in messages | `mentions.service.ts` |
+| **SoftDeleteModule** | Soft delete functionality with cleanup jobs | `soft-delete.service.ts` |
 | **HealthModule** | System health checks | `health.controller.ts` |
 | **PrismaModule** | Database connection | `prisma.service.ts` |
-
-### Frontend Structure
-
-- **Views**: Page components (Login, Register, Messaging, Courses, Assignments, Attendance, Files, Admin)
-- **Components**: Reusable UI components (MainLayout, SubmissionGradeModal, ToastContainer, Admin components)
-- **Stores**: Pinia stores using Composition API style (auth.js, admin.js, messaging.js)
-- **Services**: API client configuration with interceptors (api.js)
-- **Composables**: Shared logic (useSocket.js for WebSocket management, useToast.js)
-- **i18n**: Multi-language support with lazy-loaded locale files
+| **RedisModule** | Redis client management | `redis.service.ts` |
 
 ## Environment Configuration
 
@@ -272,16 +262,19 @@ JWT_REFRESH_EXPIRATION="7d"
 PORT=3000
 NODE_ENV=development
 
-# Client
-VITE_API_URL=http://localhost:3000
-VITE_WS_URL=http://localhost:3000
+# CORS
+ALLOWED_ORIGINS="http://localhost:5173,http://localhost:4173"
+CLIENT_URL=http://localhost:5173
 ```
 
 ### Server `.env` (Extended)
 
 ```env
-# CORS Origins (comma-separated)
-ALLOWED_ORIGINS="http://localhost:5173,http://localhost:4173"
+# Email (for notifications)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=60000
@@ -295,14 +288,6 @@ UPLOAD_DEST=./uploads
 ADMIN_WS_NAMESPACE=/admin
 ```
 
-### Client `.env`
-
-```env
-VITE_API_URL=http://localhost:3000
-VITE_WS_URL=http://localhost:3000
-# VITE_SENTRY_DSN=  # Optional: Sentry DSN for error tracking
-```
-
 ## Build and Development Commands
 
 ### Prerequisites
@@ -310,6 +295,7 @@ VITE_WS_URL=http://localhost:3000
 - Node.js 20+ (see `engines` in `package.json`)
 - npm 8+
 - Docker & Docker Compose
+- Flutter SDK 3.x+ (for mobile)
 
 ### Infrastructure Setup
 
@@ -351,18 +337,28 @@ npm run test:e2e           # Run end-to-end tests
 npm run lint               # Run ESLint with auto-fix
 ```
 
-### Frontend (client/)
+### Mobile App (mobile/)
 
 ```bash
 # Install dependencies
-npm install
+flutter pub get
 
 # Development
-npm run dev                # Start Vite dev server (port 5173)
+flutter run                # Run on connected device/emulator
+flutter run --debug        # Debug mode
+flutter run --profile      # Profile mode
 
-# Production
-npm run build              # Build for production to dist/
-npm run preview            # Preview production build locally (port 4173)
+# Build
+flutter build apk          # Build Android APK
+flutter build appbundle    # Build Android App Bundle
+flutter build ios          # Build iOS (macOS only)
+
+# Testing
+flutter test               # Run unit tests
+flutter test --coverage    # Run tests with coverage
+
+# Code generation
+flutter pub run build_runner build    # Generate code (freezed, json_serializable)
 ```
 
 ### Full Development Startup
@@ -381,10 +377,10 @@ npm run prisma:seed
 # 3. Start backend (in server/ directory)
 npm run dev
 
-# 4. Start frontend (in client/ directory, new terminal)
-cd ../client
-npm install
-npm run dev
+# 4. Start mobile app (in mobile/ directory, new terminal)
+cd ../mobile
+flutter pub get
+flutter run
 ```
 
 ### Production Deployment
@@ -396,10 +392,9 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 Production stack includes:
-- PostgreSQL (port 5434 internally)
-- Redis (port 6379 internally)
+- PostgreSQL (internal network only)
+- Redis (internal network only)
 - NestJS API server (port 3000)
-- Nginx frontend (port 8085)
 
 ## Testing Strategy
 
@@ -466,27 +461,27 @@ export class AuthController {
 }
 ```
 
-### Frontend (Vue 3/JavaScript)
+### Mobile (Dart/Flutter)
 
-- **Component Files**: PascalCase (e.g., `LoginView.vue`, `MainLayout.vue`)
-- **Composables**: camelCase with `use` prefix (e.g., `useSocket.js`, `useToast.js`)
-- **Stores**: camelCase (e.g., `auth.js`, `messaging.js`)
-- **API**: Use Composition API with `<script setup>` syntax
-- **State**: Pinia stores use Composition API style (`defineStore` with function)
-- **API Calls**: Abstracted in `services/` directory
-- **Notifications**: Global toast via `provide/inject` pattern
+- **Class Names**: PascalCase (e.g., `AuthProvider`, `MessagingScreen`)
+- **Variables/Functions**: camelCase (e.g., `fetchUserById`, `isAuthenticated`)
+- **File Names**: snake_case (e.g., `auth_provider.dart`, `messaging_screen.dart`)
+- **Constants**: camelCase with `k` prefix for constants (e.g., `kBaseUrl`)
+- **State Management**: Riverpod with StateNotifier/AsyncNotifier
+- **API Calls**: Abstracted in `repositories/` directory
+- **Models**: Freezed for immutable data classes
 
 Example:
-```vue
-<script setup>
-import { ref, computed } from 'vue'
-import { useAuthStore } from '../stores/auth'
-
-const auth = useAuthStore()
-const email = ref('')
-
-const isValid = computed(() => email.value.includes('@'))
-</script>
+```dart
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  @override
+  AuthState build() => const AuthState.loading();
+  
+  Future<void> login(String email, String password) async {
+    // Implementation
+  }
+}
 ```
 
 ## Database Schema
@@ -504,24 +499,33 @@ The Prisma schema defines these main entities:
 - `Channel`: Message channels (podcast, classroom, direct_message, teacher_parent, teacher_student, admin_broadcast, group)
 - `ChannelMember`: Channel membership with roles (owner, moderator, member, student)
 - `ChannelMute`: Track who is muted and by whom with expiration
+- `ChannelReport`: Channel moderation reports
 - `Message`: Chat messages with reply support
 - `MessageAttachment`: File attachments for messages
+- `MessageRead`: Read receipts
+- `Reaction`: Message reactions
+- `TypingIndicator`: Real-time typing indicators
+- `EditHistory`: Message edit history
+- `Mention`: User mentions in messages
 - `AuditLog`: Action audit trail
 
 ### Academic
+- `AcademicYear`: School year management
 - `Course`: Course catalog entries with departments
 - `Class`: Scheduled course instances with teachers
+- `ClassTeacher`: Many-to-many teacher-class assignments
 - `ClassEnrollment`: Student enrollments with status
 - `Schedule`: Class meeting times (dayOfWeek, startTime, endTime)
 - `Assignment`: Coursework assignments with due dates
 - `Submission`: Student assignment submissions with file IDs
 - `Grade`: Graded scores, feedback, and letter grades
-- `AttendanceSession`: Daily attendance records
+- `AttendanceSession`: Daily attendance records with period
 - `AttendanceRecord`: Individual student attendance status
 
-### Files
+### Files & Notifications
 - `File`: Uploaded file metadata with soft delete
 - `FilePermission`: Role/user-based file access control
+- `EmailQueue`: Pending email notifications
 
 ### Soft Delete
 All major entities support soft delete functionality:
@@ -543,13 +547,6 @@ All major entities support soft delete functionality:
 - All queries filter out soft-deleted items by default
 - Audit logs for all soft delete/restore operations
 
-**API Endpoints:**
-- `DELETE /admin/soft-delete/:type/:id` - Soft delete item
-- `POST /admin/restore/:type/:id` - Restore soft-deleted item
-- `DELETE /admin/permanent-delete/:type/:id` - Permanent delete (after grace period)
-- `GET /admin/deleted-items` - List soft-deleted items
-- `POST /admin/cleanup-deleted-items` - Trigger manual cleanup
-
 ## Security Considerations
 
 ### Authentication & Authorization
@@ -568,6 +565,7 @@ All major entities support soft delete functionality:
 - **Validation**: Global `ValidationPipe` with whitelist enabled
 - **Helmet**: Security headers (CSP, HSTS, etc.)
 - **Compression**: Response compression enabled
+- **Input Sanitization**: DOMPurify for XSS protection via `SanitizePipe`
 
 ### Data Security
 - **SQL Injection**: Prisma ORM provides parameterized queries
@@ -607,6 +605,48 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
    - Depends on test and e2e-test
    - Only on main branch
 
+## Scalability & Performance
+
+### Current Capabilities
+| Component | Capacity |
+|-----------|----------|
+| HTTP API | 100 req/min per IP |
+| WebSocket Connections | ~500/server |
+| File Uploads | ~50/min |
+| Admin Analytics | 1M+ records |
+
+### Scalability Features
+- **Redis Adapter**: WebSocket horizontal scaling across multiple instances
+- **Database Indexes**: Optimized compound indexes for common queries
+- **Streaming Uploads**: Files written directly to disk, not buffered in memory
+- **Raw SQL Analytics**: PostgreSQL native date grouping for large datasets
+- **Pagination**: All list endpoints with configurable limits (default 20, max 200)
+
+### Scaling Architecture
+```
+                    ┌─────────────┐
+                    │ Load Balancer│
+                    │  (Nginx/ALB) │
+                    └──────┬──────┘
+           ┌───────────────┼───────────────┐
+           │               │               │
+    ┌──────▼─────┐  ┌──────▼─────┐  ┌──────▼─────┐
+    │  Server 1  │  │  Server 2  │  │  Server 3  │
+    │  (Node.js) │  │  (Node.js) │  │  (Node.js) │
+    └──────┬─────┘  └──────┬─────┘  └──────┬─────┘
+           │               │               │
+           └───────────────┼───────────────┘
+                    ┌──────┴──────┐
+                    │    Redis    │
+                    │ (Pub/Sub)   │
+                    └──────┬──────┘
+                    ┌──────┴──────┐
+                    │  PostgreSQL │
+                    └─────────────┘
+```
+
+See `SCALING.md` for detailed scaling instructions.
+
 ## Testing Credentials
 
 After seeding the database, use these demo accounts:
@@ -632,16 +672,23 @@ After seeding the database, use these demo accounts:
 - `message:send` - Send a message to a channel
 - `message:edit` - Edit an existing message
 - `message:delete` - Delete a message
+- `message:read` - Mark message as read
+- `message:read_bulk` - Mark multiple messages as read
 - `typing:start` - Start typing indicator
 - `typing:stop` - Stop typing indicator
+- `typing:get` - Get currently typing users
 - `channel:join` - Join a channel room
+- `reaction:add` - Add reaction to message
+- `reaction:remove` - Remove reaction from message
 
 ### Server → Client
 - `message:new` - New message received
-- `message:edited` - Message was edited
+- `message:updated` - Message was edited
 - `message:deleted` - Message was deleted
-- `typing:indicator` - User is typing
-- `typing:stop` - User stopped typing
+- `message:read_receipt` - Read receipt notification
+- `message:reaction_added` - Reaction added
+- `message:reaction_removed` - Reaction removed
+- `typing:update` - Typing indicator update
 - `user:online` - User came online
 - `user:offline` - User went offline
 
@@ -674,20 +721,12 @@ After seeding the database, use these demo accounts:
    @Roles('admin', 'teacher')
    ```
 
-### Adding a New Page
+### Adding a Mobile Screen
 
-1. Create Vue component in `client/src/views/`
-2. Add route in `client/src/router/index.js`:
-   ```javascript
-   {
-       path: '/new-page',
-       name: 'NewPage',
-       component: () => import('../views/NewPageView.vue'),
-       meta: { requiresAuth: true, role: 'admin' }
-   }
-   ```
-3. Add navigation link in `MainLayout.vue` if needed
-4. Implement API calls in the appropriate store or component
+1. Create screen widget in `mobile/lib/screens/`
+2. Add route in `mobile/lib/core/router/app_router.dart`
+3. Add provider if state management needed in `mobile/lib/providers/`
+4. Implement API calls in the appropriate repository
 
 ### Database Changes
 
@@ -702,10 +741,8 @@ After seeding the database, use these demo accounts:
 ### Port Conflicts
 Ensure these ports are available:
 - 3000 (backend API)
-- 5173 (frontend dev server)
 - 5433 (PostgreSQL - mapped from 5432)
 - 6379 (Redis)
-- 8085 (production frontend)
 
 ### Database Connection Errors
 - Verify Docker containers: `docker-compose ps`
@@ -722,6 +759,15 @@ Regenerate client:
 ```bash
 cd server
 npm run prisma:generate
+```
+
+### Flutter Build Issues
+Clean and rebuild:
+```bash
+cd mobile
+flutter clean
+flutter pub get
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 ### Reset Everything

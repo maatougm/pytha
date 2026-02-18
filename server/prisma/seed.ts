@@ -57,11 +57,12 @@ async function main() {
         { email: 'parent3@school.com', firstName: 'Robert', lastName: 'Davis', role: 'parent' },
 
         // Students
-        { email: 'student1@school.com', firstName: 'Alex', lastName: 'Williams', role: 'student' },
-        { email: 'student2@school.com', firstName: 'Maya', lastName: 'Brown', role: 'student' },
-        { email: 'student3@school.com', firstName: 'Liam', lastName: 'Davis', role: 'student' },
-        { email: 'student4@school.com', firstName: 'Sophia', lastName: 'Miller', role: 'student' },
-        { email: 'student5@school.com', firstName: 'Ethan', lastName: 'Wilson', role: 'student' },
+        // Students - REMOVED for test
+        // { email: 'student1@school.com', firstName: 'Alex', lastName: 'Williams', role: 'student' },
+        // { email: 'student2@school.com', firstName: 'Maya', lastName: 'Brown', role: 'student' },
+        // { email: 'student3@school.com', firstName: 'Liam', lastName: 'Davis', role: 'student' },
+        // { email: 'student4@school.com', firstName: 'Sophia', lastName: 'Miller', role: 'student' },
+        // { email: 'student5@school.com', firstName: 'Ethan', lastName: 'Wilson', role: 'student' },
     ];
 
     const userRecords: Record<string, any> = {};
@@ -83,11 +84,12 @@ async function main() {
     console.log('  ✅ Users created');
 
     // ─── Parent-Student Links ────────────────────────────────
-    const parentLinks = [
-        { parent: 'parent1@school.com', student: 'student1@school.com' },
-        { parent: 'parent2@school.com', student: 'student2@school.com' },
-        { parent: 'parent3@school.com', student: 'student3@school.com' },
-    ];
+    const parentLinks: any[] = [];
+    // const parentLinks = [
+    //     { parent: 'parent1@school.com', student: 'student1@school.com' },
+    //     { parent: 'parent2@school.com', student: 'student2@school.com' },
+    //     { parent: 'parent3@school.com', student: 'student3@school.com' },
+    // ];
 
     for (const link of parentLinks) {
         await prisma.parentStudent.upsert({
@@ -163,10 +165,10 @@ async function main() {
             members: {
                 create: [
                     { userId: userRecords['teacher1@school.com'].id, role: 'owner' },
-                    { userId: userRecords['student1@school.com'].id, role: 'member' },
-                    { userId: userRecords['student2@school.com'].id, role: 'member' },
-                    { userId: userRecords['student3@school.com'].id, role: 'member' },
-                    { userId: userRecords['student4@school.com'].id, role: 'member' },
+                    // { userId: userRecords['student1@school.com'].id, role: 'member' },
+                    // { userId: userRecords['student2@school.com'].id, role: 'member' },
+                    // { userId: userRecords['student3@school.com'].id, role: 'member' },
+                    // { userId: userRecords['student4@school.com'].id, role: 'member' },
                 ],
             },
         },
@@ -201,11 +203,10 @@ async function main() {
         { channelId: parentTeacherChannel.id, senderId: userRecords['teacher2@school.com'].id, content: 'They should be ready by next Monday.', createdAt: daysAgo(2) },
 
         // Math Class Channel
-        { channelId: mathClassChannel.id, senderId: userRecords['teacher1@school.com'].id, content: 'Don\'t forget: Chapter 1 homework is due tomorrow!', createdAt: hoursAgo(20) },
-        { channelId: mathClassChannel.id, senderId: userRecords['student1@school.com'].id, content: 'Will we be covering quadratic equations next week?', createdAt: hoursAgo(15) },
+        // { channelId: mathClassChannel.id, senderId: userRecords['student1@school.com'].id, content: 'Will we be covering quadratic equations next week?', createdAt: hoursAgo(15) },
         { channelId: mathClassChannel.id, senderId: userRecords['teacher1@school.com'].id, content: 'Yes, starting Monday. Make sure to review the prep material.', createdAt: hoursAgo(14) },
-        { channelId: mathClassChannel.id, senderId: userRecords['student2@school.com'].id, content: 'Thanks for the reminder!', createdAt: hoursAgo(10) },
-        { channelId: mathClassChannel.id, senderId: userRecords['student3@school.com'].id, content: 'I have a question about problem #5...', createdAt: hoursAgo(2) },
+        // { channelId: mathClassChannel.id, senderId: userRecords['student2@school.com'].id, content: 'Thanks for the reminder!', createdAt: hoursAgo(10) },
+        // { channelId: mathClassChannel.id, senderId: userRecords['student3@school.com'].id, content: 'I have a question about problem #5...', createdAt: hoursAgo(2) },
     ];
 
     for (const msg of messages) {
@@ -293,16 +294,11 @@ async function main() {
     console.log('  ✅ Schedules created');
 
     // ─── Enrollments ─────────────────────────────────────────
-    const enrollments = [
-        { classKey: 'MATH101-A', studentEmails: ['student1@school.com', 'student2@school.com', 'student3@school.com', 'student4@school.com'] },
-        { classKey: 'MATH101-B', studentEmails: ['student5@school.com'] },
-        { classKey: 'ENG101-A', studentEmails: ['student1@school.com', 'student2@school.com', 'student3@school.com'] },
-        { classKey: 'ENG101-B', studentEmails: ['student4@school.com', 'student5@school.com'] },
-        { classKey: 'SCI101-A', studentEmails: ['student2@school.com', 'student3@school.com', 'student4@school.com'] },
-        { classKey: 'MATH201-A', studentEmails: ['student1@school.com', 'student5@school.com'] },
-        { classKey: 'PHY101-A', studentEmails: ['student1@school.com', 'student3@school.com'] },
-        { classKey: 'CHE101-A', studentEmails: ['student2@school.com', 'student4@school.com', 'student5@school.com'] },
-    ];
+    const enrollments: any[] = [];
+    // const enrollments = [
+    //     { classKey: 'MATH101-A', studentEmails: ['student1@school.com', 'student2@school.com', 'student3@school.com', 'student4@school.com'] },
+    //     ...
+    // ];
 
     for (const e of enrollments) {
         for (const email of e.studentEmails) {
@@ -363,121 +359,14 @@ async function main() {
 
     // ─── Submissions & Grades ────────────────────────────────
     // Week 1 Practice - all submitted and graded
+    /*
+    // Week 1 Practice - all submitted and graded
     const week1Assignment = assignmentRecords['MATH101-A:Week 1 Practice'];
     for (const email of ['student1@school.com', 'student2@school.com', 'student3@school.com', 'student4@school.com']) {
-        const sub = await prisma.submission.create({
-            data: {
-                assignmentId: week1Assignment.id,
-                studentId: userRecords[email].id,
-                content: 'Completed all practice problems.',
-                isLate: false,
-            },
-        });
-        const scores: Record<string, number> = {
-            'student1@school.com': 18,
-            'student2@school.com': 20,
-            'student3@school.com': 17,
-            'student4@school.com': 19,
-        };
-        await prisma.grade.create({
-            data: {
-                assignmentId: week1Assignment.id,
-                studentId: userRecords[email].id,
-                submissionId: sub.id,
-                score: scores[email],
-                maxScore: 20,
-                letterGrade: scores[email] >= 18 ? 'A' : scores[email] >= 16 ? 'B' : 'C',
-                feedback: scores[email] >= 19 ? 'Excellent work!' : 'Good job, review minor errors.',
-                gradedById: userRecords['teacher1@school.com'].id,
-            },
-        });
+        // ...
     }
-
-    // Quiz 1 - all submitted and graded
-    const quiz1Assignment = assignmentRecords['MATH101-A:Quiz 1'];
-    for (const email of ['student1@school.com', 'student2@school.com', 'student3@school.com', 'student4@school.com']) {
-        const sub = await prisma.submission.create({
-            data: {
-                assignmentId: quiz1Assignment.id,
-                studentId: userRecords[email].id,
-                content: 'Quiz completed.',
-                isLate: false,
-            },
-        });
-        const scores: Record<string, number> = {
-            'student1@school.com': 45,
-            'student2@school.com': 48,
-            'student3@school.com': 42,
-            'student4@school.com': 50,
-        };
-        await prisma.grade.create({
-            data: {
-                assignmentId: quiz1Assignment.id,
-                studentId: userRecords[email].id,
-                submissionId: sub.id,
-                score: scores[email],
-                maxScore: 50,
-                letterGrade: scores[email] >= 45 ? 'A' : scores[email] >= 40 ? 'B' : 'C',
-                feedback: scores[email] >= 48 ? 'Outstanding!' : 'Good understanding of material.',
-                gradedById: userRecords['teacher1@school.com'].id,
-            },
-        });
-    }
-
-    // Practice Problems Set 1 - mix of submissions
-    const practiceAssignment = assignmentRecords['MATH101-A:Practice Problems Set 1'];
-    // Student 1 - submitted on time, graded
-    const sub1 = await prisma.submission.create({
-        data: {
-            assignmentId: practiceAssignment.id,
-            studentId: userRecords['student1@school.com'].id,
-            content: 'Completed all practice problems.',
-            isLate: false,
-        },
-    });
-    await prisma.grade.create({
-        data: {
-            assignmentId: practiceAssignment.id,
-            studentId: userRecords['student1@school.com'].id,
-            submissionId: sub1.id,
-            score: 28,
-            maxScore: 30,
-            letterGrade: 'A',
-            feedback: 'Excellent work! Minor error on problem 8.',
-            gradedById: userRecords['teacher1@school.com'].id,
-        },
-    });
-    // Student 2 - submitted late, graded
-    const sub2 = await prisma.submission.create({
-        data: {
-            assignmentId: practiceAssignment.id,
-            studentId: userRecords['student2@school.com'].id,
-            content: 'Done with problems.',
-            isLate: true,
-        },
-    });
-    await prisma.grade.create({
-        data: {
-            assignmentId: practiceAssignment.id,
-            studentId: userRecords['student2@school.com'].id,
-            submissionId: sub2.id,
-            score: 22,
-            maxScore: 30,
-            letterGrade: 'B-',
-            feedback: 'Good effort, but late submission. Review problems 5 and 12.',
-            gradedById: userRecords['teacher1@school.com'].id,
-        },
-    });
-    // Student 3 - submitted, not graded yet
-    await prisma.submission.create({
-        data: {
-            assignmentId: practiceAssignment.id,
-            studentId: userRecords['student3@school.com'].id,
-            content: 'Completed.',
-            isLate: false,
-        },
-    });
-    // Student 4 - not submitted (overdue)
+    // ... other assignments
+    */
     console.log('  ✅ Submissions & Grades created');
 
     // ─── Files ───────────────────────────────────────────────
@@ -529,7 +418,8 @@ async function main() {
 
         const dateKey = date.toISOString().split('T')[0];
         const statuses = patterns[dateKey] || ['present', 'present', 'present', 'present'];
-        const studentEmails = ['student1@school.com', 'student2@school.com', 'student3@school.com', 'student4@school.com'];
+        const studentEmails: string[] = [];
+        // const studentEmails = ['student1@school.com', 'student2@school.com', 'student3@school.com', 'student4@school.com'];
 
         for (let i = 0; i < studentEmails.length; i++) {
             await prisma.attendanceRecord.create({
@@ -583,12 +473,12 @@ async function main() {
     console.log('   parent1@school.com (David Williams)');
     console.log('   parent2@school.com (Emily Brown)');
     console.log('   parent3@school.com (Robert Davis)');
-    console.log('\n🎓 Students:');
-    console.log('   student1@school.com (Alex Williams)');
-    console.log('   student2@school.com (Maya Brown)');
-    console.log('   student3@school.com (Liam Davis)');
-    console.log('   student4@school.com (Sophia Miller)');
-    console.log('   student5@school.com (Ethan Wilson)');
+    // console.log('\n🎓 Students:');
+    // console.log('   student1@school.com (Alex Williams)');
+    // console.log('   student2@school.com (Maya Brown)');
+    // console.log('   student3@school.com (Liam Davis)');
+    // console.log('   student4@school.com (Sophia Miller)');
+    // console.log('   student5@school.com (Ethan Wilson)');
     console.log('\n═══════════════════════════════════════════════════════════');
     console.log('📊 DATA SUMMARY');
     console.log('═══════════════════════════════════════════════════════════');

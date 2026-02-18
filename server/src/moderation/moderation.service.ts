@@ -202,4 +202,78 @@ export class ModerationService {
             },
         });
     }
+
+    // ─── CHANNEL REPORTS ────────────────────────────────────────────
+
+    async getReports(params: { status?: string; page?: number; limit?: number }) {
+        const { status, page = 1, limit = 50 } = params;
+        const skip = (page - 1) * limit;
+        const where = status ? { status } : {};
+
+        const [reports, total] = await Promise.all([
+            this.prisma.channelReport.findMany({
+                where,
+                include: {
+                    reporter: {
+                        select: { id: true, firstName: true, lastName: true, email: true, avatarUrl: true },
+                    },
+                    channel: {
+                        select: { id: true, name: true, type: true },
+                    },
+                    assignee: {
+                        select: { id: true, firstName: true, lastName: true },
+                    },
+                },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+            }),
+            this.prisma.channelReport.count({ where }),
+        ]);
+
+        return { reports, total };
+    }
+
+    async getReportStats() {
+        const [pending, investigating, resolved, dismissed] = await Promise.all([
+            this.prisma.channelReport.count({ where: { status: 'pending' } }),
+            this.prisma.channelReport.count({ where: { status: 'investigating' } }),
+            this.prisma.channelReport.count({ where: { status: 'resolved' } }),
+            this.prisma.channelReport.count({ where: { status: 'dismissed' } }),
+        ]);
+        return { pending, investigating, resolved, dismissed, total: pending + investigating + resolved + dismissed };
+    }
+
+    async updateReportStatus(reportId: string, data: { status: string; resolution?: string }, actorId: string) {
+        const report = await this.prisma.channelReport.findUnique({ where: { id: reportId } });
+        if (!report) throw new NotFoundException('Report not found');
+
+        const updateData: any = {
+            status: data.status,
+            assignedTo: actorId,
+        };
+        if (data.resolution) updateData.resolution = data.resolution;
+        if (data.status === 'resolved' || data.status === 'dismissed') {
+            updateData.resolvedAt = new Date();
+        }
+
+        const updated = await this.prisma.channelReport.update({
+            where: { id: reportId },
+            data: updateData,
+            include: {
+                reporter: { select: { id: true, firstName: true, lastName: true, email: true } },
+                channel: { select: { id: true, name: true, type: true } },
+            },
+        });
+
+        await createAuditLog(this.prisma, {
+            action: AuditActions.REPORT_UPDATE,
+            actorId,
+            targetId: reportId,
+            metadata: { status: data.status, resolution: data.resolution },
+        });
+
+        this.logger.log(`Report ${reportId} updated to ${data.status} by ${actorId}`);
+        return updated;
+    }
 }

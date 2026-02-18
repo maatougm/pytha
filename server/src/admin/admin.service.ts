@@ -98,7 +98,7 @@ export class AdminService {
     private metricsCache: { data: SystemMetrics; timestamp: number } | null = null;
     private readonly CACHE_TTL = 60000; // 1 minute
 
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) { }
 
     // ─── USER MANAGEMENT ────────────────────────────────────────────────
 
@@ -154,10 +154,12 @@ export class AdminService {
         }
 
         if (search) {
+            // HIGH-005 fix: escape PostgreSQL LIKE wildcards to prevent performance attacks
+            const sanitizedSearch = search.replace(/[%_\\]/g, '\\$&');
             where.OR = [
-                { email: { contains: search, mode: 'insensitive' } },
-                { firstName: { contains: search, mode: 'insensitive' } },
-                { lastName: { contains: search, mode: 'insensitive' } },
+                { email: { contains: sanitizedSearch, mode: 'insensitive' } },
+                { firstName: { contains: sanitizedSearch, mode: 'insensitive' } },
+                { lastName: { contains: sanitizedSearch, mode: 'insensitive' } },
             ];
         }
 
@@ -188,7 +190,7 @@ export class AdminService {
                     },
                     _count: {
                         select: {
-                                uploadedFiles: true,
+                            uploadedFiles: true,
                             sentMessages: true,
                         },
                     },
@@ -353,7 +355,7 @@ export class AdminService {
             if (!user.deletedAt) {
                 throw new BadRequestException('User must be soft deleted first before permanent deletion');
             }
-            
+
             await this.prisma.$transaction([
                 this.prisma.auditLog.create({
                     data: {
@@ -376,7 +378,7 @@ export class AdminService {
                         metadata: { deletedUserEmail: user.email, softDelete: true } as any,
                     },
                 }),
-                this.prisma.user.update({ 
+                this.prisma.user.update({
                     where: { id: userId },
                     data: {
                         deletedAt: new Date(),
@@ -505,23 +507,23 @@ export class AdminService {
         startDate: Date,
         endDate: Date,
     ): Promise<number[]> {
-        const tableMap = { message: 'messages', user: 'users', file: 'files' };
+        // Hardcoded allowlist — never interpolate user input here
+        const tableMap = { message: 'messages', user: 'users', file: 'files' } as const;
         const table = tableMap[model];
-        const dateField = model === 'user' ? 'created_at' : 'created_at';
+        const dateField = 'created_at'; // same for all models; kept explicit for clarity
 
-        // Use raw SQL for efficient date grouping at database level
-        const results = await this.prisma.$queryRawUnsafe<
+        // CRIT-001 fix: use Prisma.sql tagged template instead of $queryRawUnsafe.
+        // Prisma.raw() is safe here because table/dateField come from a hardcoded allowlist.
+        const results = await this.prisma.$queryRaw<
             Array<{ date: string; count: bigint }>
         >(
-            `
-            SELECT DATE(${dateField}) as date, COUNT(*) as count
-            FROM ${table}
-            WHERE ${dateField} >= $1 AND ${dateField} <= $2
-            GROUP BY DATE(${dateField})
+            Prisma.sql`
+            SELECT DATE(${Prisma.raw(dateField)}) as date, COUNT(*) as count
+            FROM ${Prisma.raw(table)}
+            WHERE ${Prisma.raw(dateField)} >= ${startDate} AND ${Prisma.raw(dateField)} <= ${endDate}
+            GROUP BY DATE(${Prisma.raw(dateField)})
             ORDER BY date
             `,
-            startDate,
-            endDate,
         );
 
         // Build a map of date -> count
@@ -614,14 +616,24 @@ export class AdminService {
 
     async bulkAction(dto: any, actorId: string): Promise<{ success: number; failed: number }> {
         const { action, targetType, targetIds, reason } = dto;
-        
+
+        // CRIT-002 fix: validate targetIds array — must be non-empty, max 100, all valid UUIDs
         if (!Array.isArray(targetIds) || targetIds.length === 0) {
             throw new BadRequestException('No targets specified');
         }
-        
+        if (targetIds.length > 100) {
+            throw new BadRequestException('Bulk action limited to 100 targets per request');
+        }
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        for (const id of targetIds) {
+            if (typeof id !== 'string' || !uuidRegex.test(id)) {
+                throw new BadRequestException(`Invalid ID format: ${id}`);
+            }
+        }
+
         let success = 0;
         let failed = 0;
-        
+
         // Process each target
         for (const targetId of targetIds) {
             try {
@@ -645,7 +657,7 @@ export class AdminService {
                 failed++;
             }
         }
-        
+
         this.logger.log(`Bulk action completed by ${actorId}: ${success} succeeded, ${failed} failed`);
         return { success, failed };
     }
@@ -674,7 +686,7 @@ export class AdminService {
     private async handleBulkMessageAction(action: string, messageId: string, actorId: string) {
         const message = await this.prisma.message.findUnique({ where: { id: messageId } });
         if (!message) throw new NotFoundException('Message not found');
-        
+
         switch (action) {
             case 'delete':
                 await this.prisma.message.update({
@@ -706,21 +718,21 @@ export class AdminService {
             // Get all attendance records from the last 30 days
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            
+
             const [totalRecords, presentRecords] = await Promise.all([
                 this.prisma.attendanceRecord.count({
                     where: { markedAt: { gte: thirtyDaysAgo } },
                 }),
                 this.prisma.attendanceRecord.count({
-                    where: { 
+                    where: {
                         markedAt: { gte: thirtyDaysAgo },
                         status: 'present',
                     },
                 }),
             ]);
-            
+
             if (totalRecords === 0) return 100; // Default if no data
-            
+
             // Calculate percentage
             return Math.round((presentRecords / totalRecords) * 100);
         } catch (error) {
@@ -1005,7 +1017,7 @@ export class AdminService {
         const existingUser = await this.prisma.user.findUnique({
             where: { email: dto.email.toLowerCase() },
         });
-        
+
         if (existingUser) {
             throw new BadRequestException('User with this email already exists');
         }
@@ -1018,7 +1030,7 @@ export class AdminService {
         const role = await this.prisma.role.findUnique({
             where: { name: dto.role },
         });
-        
+
         if (!role) {
             throw new BadRequestException(`Role '${dto.role}' not found`);
         }
@@ -1083,8 +1095,8 @@ export class AdminService {
                 actorId: actorId,
                 action: AuditAction.USER_APPROVE,
                 targetId: user.id,
-                metadata: { 
-                    invitedBy: actorId, 
+                metadata: {
+                    invitedBy: actorId,
                     role: dto.role,
                     tempPassword: tempPassword // In production, send this via email instead
                 } as any,
@@ -1092,7 +1104,7 @@ export class AdminService {
         });
 
         this.logger.log(`User invited by ${actorId}: ${dto.email} (${dto.role})`);
-        
+
         // Return user with the temporary password (in production, send via email)
         return { ...user, tempPassword } as any;
     }
@@ -1127,9 +1139,9 @@ export class AdminService {
 
         await this.prisma.user.update({
             where: { id: userId },
-            data: { 
+            data: {
                 passwordHash: hashedPassword,
-                updatedAt: new Date() 
+                updatedAt: new Date()
             },
         });
 
@@ -1319,5 +1331,242 @@ export class AdminService {
                 ...t.teacher,
             })),
         }));
+    }
+
+    // ─── CLASS COMPOSITION ──────────────────────────────────────────
+
+    async getClassComposition() {
+        const classes = await this.prisma.class.findMany({
+            where: { isActive: true },
+            include: {
+                course: { select: { id: true, name: true, code: true } },
+                teacher: { select: { id: true, firstName: true, lastName: true } },
+                enrollments: {
+                    where: { status: 'active' },
+                    include: {
+                        student: {
+                            select: {
+                                id: true,
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                avatarUrl: true,
+                                gradeLevel: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: [{ term: 'desc' }, { course: { name: 'asc' } }],
+        });
+
+        return classes.map(c => ({
+            id: c.id,
+            name: c.course.name,
+            code: c.course.code,
+            section: c.section,
+            term: c.term,
+            teacher: c.teacher ? `${c.teacher.firstName} ${c.teacher.lastName}` : null,
+            maxStudents: c.maxStudents,
+            students: c.enrollments.map(e => ({
+                id: e.student.id,
+                firstName: e.student.firstName,
+                lastName: e.student.lastName,
+                email: e.student.email,
+                avatarUrl: e.student.avatarUrl,
+                gradeLevel: e.student.gradeLevel,
+                enrollmentId: e.id,
+            })),
+        }));
+    }
+
+    async getUnassignedStudents(term?: string) {
+        // Get all student user IDs
+        const studentRole = await this.prisma.role.findUnique({ where: { name: 'student' } });
+        if (!studentRole) return [];
+
+        const students = await this.prisma.user.findMany({
+            where: {
+                status: 'active',
+                deletedAt: null,
+                userRoles: { some: { roleId: studentRole.id } },
+                // Not enrolled in any active class
+                enrollments: {
+                    none: { status: 'active' },
+                },
+            },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                avatarUrl: true,
+                gradeLevel: true,
+            },
+            orderBy: [{ gradeLevel: 'asc' }, { lastName: 'asc' }],
+        });
+
+        return students;
+    }
+
+    async enrollStudent(classId: string, studentId: string) {
+        // Check if already enrolled
+        const existing = await this.prisma.classEnrollment.findUnique({
+            where: { classId_studentId: { classId, studentId } },
+        });
+        if (existing) {
+            if (existing.status === 'active') {
+                throw new BadRequestException('Student is already enrolled in this class');
+            }
+            // Re-activate if dropped
+            return this.prisma.classEnrollment.update({
+                where: { id: existing.id },
+                data: { status: 'active' },
+            });
+        }
+
+        return this.prisma.classEnrollment.create({
+            data: { classId, studentId, status: 'active' },
+        });
+    }
+
+    async unenrollStudent(classId: string, studentId: string) {
+        const enrollment = await this.prisma.classEnrollment.findUnique({
+            where: { classId_studentId: { classId, studentId } },
+        });
+        if (!enrollment) throw new NotFoundException('Enrollment not found');
+
+        return this.prisma.classEnrollment.update({
+            where: { id: enrollment.id },
+            data: { status: 'dropped' },
+        });
+    }
+
+    // ─── ACADEMIC YEAR ──────────────────────────────────────────────
+
+    async getAcademicYears() {
+        return this.prisma.academicYear.findMany({
+            orderBy: { startDate: 'desc' },
+        });
+    }
+
+    async createAcademicYear(data: { name: string; startDate: string; endDate: string }) {
+        return this.prisma.academicYear.create({
+            data: {
+                name: data.name,
+                startDate: new Date(data.startDate),
+                endDate: new Date(data.endDate),
+                isCurrent: false,
+            },
+        });
+    }
+
+    async setCurrentAcademicYear(yearId: string) {
+        // Unset all current
+        await this.prisma.academicYear.updateMany({
+            where: { isCurrent: true },
+            data: { isCurrent: false },
+        });
+        // Set the new one
+        return this.prisma.academicYear.update({
+            where: { id: yearId },
+            data: { isCurrent: true },
+        });
+    }
+
+    // ─── GRADE PROMOTION ────────────────────────────────────────────
+
+    async getPromotionPreview() {
+        const studentRole = await this.prisma.role.findUnique({ where: { name: 'student' } });
+        if (!studentRole) return { grades: [], total: 0 };
+
+        const students = await this.prisma.user.findMany({
+            where: {
+                status: 'active',
+                deletedAt: null,
+                userRoles: { some: { roleId: studentRole.id } },
+            },
+            select: { id: true, gradeLevel: true, firstName: true, lastName: true },
+        });
+
+        // Group by grade level
+        const gradeMap: Record<string, number> = {};
+        let noGrade = 0;
+        for (const s of students) {
+            if (!s.gradeLevel) {
+                noGrade++;
+                continue;
+            }
+            gradeMap[s.gradeLevel] = (gradeMap[s.gradeLevel] || 0) + 1;
+        }
+
+        const grades = Object.entries(gradeMap)
+            .map(([grade, count]) => {
+                const num = parseInt(grade.replace(/\D/g, ''), 10);
+                const nextGrade = num >= 12 ? 'Graduated' : `Grade ${num + 1}`;
+                return { currentGrade: grade, nextGrade, count, willGraduate: num >= 12 };
+            })
+            .sort((a, b) => {
+                const aNum = parseInt(a.currentGrade.replace(/\D/g, ''), 10) || 0;
+                const bNum = parseInt(b.currentGrade.replace(/\D/g, ''), 10) || 0;
+                return aNum - bNum;
+            });
+
+        return { grades, noGrade, total: students.length };
+    }
+
+    async promoteAllStudents(actorId: string) {
+        const studentRole = await this.prisma.role.findUnique({ where: { name: 'student' } });
+        if (!studentRole) throw new NotFoundException('Student role not found');
+
+        const students = await this.prisma.user.findMany({
+            where: {
+                status: 'active',
+                deletedAt: null,
+                userRoles: { some: { roleId: studentRole.id } },
+                gradeLevel: { not: null },
+            },
+            select: { id: true, gradeLevel: true },
+        });
+
+        let promoted = 0;
+        let graduated = 0;
+
+        for (const s of students) {
+            const num = parseInt(s.gradeLevel!.replace(/\D/g, ''), 10);
+            if (isNaN(num)) continue;
+
+            if (num >= 12) {
+                await this.prisma.user.update({
+                    where: { id: s.id },
+                    data: { gradeLevel: 'Graduated', status: 'archived' },
+                });
+                graduated++;
+            } else {
+                await this.prisma.user.update({
+                    where: { id: s.id },
+                    data: { gradeLevel: `Grade ${num + 1}` },
+                });
+                promoted++;
+            }
+        }
+
+        // Archive all current enrollments
+        await this.prisma.classEnrollment.updateMany({
+            where: { status: 'active' },
+            data: { status: 'completed' },
+        });
+
+        // Audit log
+        await this.prisma.auditLog.create({
+            data: {
+                actorId,
+                action: 'promote_students',
+                metadata: { promoted, graduated, total: students.length } as any,
+            },
+        });
+
+        this.logger.log(`Grade promotion by ${actorId}: ${promoted} promoted, ${graduated} graduated`);
+        return { promoted, graduated, total: students.length };
     }
 }

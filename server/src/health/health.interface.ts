@@ -10,6 +10,7 @@ export interface HealthCheckResponse {
     timestamp: string;
     uptime: number;
     version: string;
+    instance?: string;
     checks: {
         database?: HealthCheck;
         memory?: HealthCheck;

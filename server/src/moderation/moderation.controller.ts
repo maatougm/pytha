@@ -3,6 +3,8 @@ import {
     Patch,
     Delete,
     Get,
+    Post,
+    Body,
     Param,
     Query,
     UseGuards,
@@ -22,6 +24,38 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class ModerationController {
     constructor(private moderationService: ModerationService) { }
 
+    // ─── CHANNEL REPORTS ─────────────────────────────────────────
+    @Get('reports')
+    @ApiOperation({ summary: 'Get channel reports' })
+    async getReports(
+        @Query('status') status?: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+    ) {
+        return this.moderationService.getReports({
+            status,
+            page: page ? parseInt(page, 10) : 1,
+            limit: limit ? parseInt(limit, 10) : 50,
+        });
+    }
+
+    @Get('reports/stats')
+    @ApiOperation({ summary: 'Get report statistics' })
+    async getReportStats() {
+        return this.moderationService.getReportStats();
+    }
+
+    @Patch('reports/:id')
+    @ApiOperation({ summary: 'Update report status' })
+    async updateReportStatus(
+        @Param('id') reportId: string,
+        @Body() body: { status: string; resolution?: string },
+        @Request() req,
+    ) {
+        return this.moderationService.updateReportStatus(reportId, body, req.user.sub);
+    }
+
+    // ─── EXISTING MODERATION ─────────────────────────────────────
     @Patch('channels/:channelId/mute/:userId')
     async muteUser(
         @Param('channelId') channelId: string,

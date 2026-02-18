@@ -1,0 +1,62 @@
+# =============================================================================
+# Git Attributes - Line Endings & File Handling
+# =============================================================================
+
+# Auto detect text files and handle line endings
+* text=auto
+
+# Force batch scripts to use CRLF (Windows)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Force shell scripts to use LF (Unix)
+*.sh text eol=lf
+
+# Source code
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.vue text eol=lf
+
+# Dart/Flutter
+*.dart text eol=lf
+*.yaml text eol=lf
+
+# Docker
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+docker-compose*.yml text eol=lf
+.dockerignore text eol=lf
+
+# Treat binary files as binary (no line ending conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.pyc binary
+*.pdf binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
