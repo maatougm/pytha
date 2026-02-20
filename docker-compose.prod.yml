@@ -208,12 +208,11 @@ services:
       DOMAIN_NAME: ${DOMAIN_NAME}
       API_BASE_URL: ${API_BASE_URL}
     volumes:
-      # SSL certificates - mount your certs here
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      # SSL certificates - mount the Host's live Let's Encrypt certificates directly
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       # Logs
       - ./logs/nginx:/var/log/nginx
-      # Certbot for Let's Encrypt (optional)
-      - ./certbot/data:/etc/letsencrypt:ro
+      # Certbot Webroot
       - ./certbot/www:/var/www/certbot:ro
     depends_on:
       - server
