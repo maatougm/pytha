@@ -174,15 +174,10 @@ services:
   # provided API_BASE_URL build argument. No local build required.
   # ===========================================================================
   flutter_web:
-    build:
-      context: ./mobile
-      dockerfile: Dockerfile.web
-      args:
-        # Pass the API URL at BUILD time - this is baked into the Flutter app
-        API_BASE_URL: ${API_BASE_URL}
-        # Also pass WebSocket URL if different (defaults to API_BASE_URL)
-        WS_BASE_URL: ${WS_BASE_URL:-${API_BASE_URL}}
+    image: nginx:alpine
     container_name: sms_flutter_web_prod
+    volumes:
+      - ./mobile/build/web:/usr/share/nginx/html:ro
     restart: always
     expose:
       - "80"
@@ -222,7 +217,6 @@ services:
       - ./certbot/www:/var/www/certbot:ro
     depends_on:
       - server
-      - flutter_web
     networks:
       - frontend
       - backend
