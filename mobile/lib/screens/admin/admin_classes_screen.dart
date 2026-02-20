@@ -5,7 +5,9 @@ import '../../core/api/api_client.dart';
 import '../../core/api/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 
-final adminClassesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminClassesProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final api = ref.read(apiClientProvider);
   final response = await api.get(ApiEndpoints.adminClasses);
   final list = response.data as List<dynamic>;
@@ -25,7 +27,9 @@ class AdminClassesScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => context.push('/admin/classes/create').then((_) => ref.refresh(adminClassesProvider)),
+            onPressed: () => context
+                .push('/admin/classes/create')
+                .then((_) => ref.refresh(adminClassesProvider)),
           ),
         ],
       ),
@@ -40,7 +44,10 @@ class AdminClassesScreen extends ConsumerWidget {
         data: (classes) {
           if (classes.isEmpty) {
             return const Center(
-              child: Text('No classes', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                'No classes',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             );
           }
           return RefreshIndicator(
@@ -60,11 +67,14 @@ class AdminClassesScreen extends ConsumerWidget {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: AppColors.teacherColor.withOpacity(0.1),
+                        color: AppColors.teacherColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Center(
-                        child: Icon(Icons.class_outlined, color: AppColors.teacherColor),
+                        child: Icon(
+                          Icons.class_outlined,
+                          color: AppColors.teacherColor,
+                        ),
                       ),
                     ),
                     title: Text(
@@ -82,7 +92,9 @@ class AdminClassesScreen extends ConsumerWidget {
                           Text(
                             '${c['teacher']['firstName']} ${c['teacher']['lastName']}',
                             style: const TextStyle(
-                                fontSize: 11, color: AppColors.textMuted),
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                            ),
                           ),
                       ],
                     ),
@@ -92,12 +104,16 @@ class AdminClassesScreen extends ConsumerWidget {
                         Text(
                           '$studentCount',
                           style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w800),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         Text(
                           'of $maxStudents',
                           style: const TextStyle(
-                              fontSize: 10, color: AppColors.textMuted),
+                            fontSize: 10,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ],
                     ),

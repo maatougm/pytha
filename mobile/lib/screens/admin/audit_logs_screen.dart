@@ -4,7 +4,8 @@ import '../../core/api/api_client.dart';
 import '../../core/api/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 
-final auditLogsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final auditLogsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final api = ref.read(apiClientProvider);
   final response = await api.get(ApiEndpoints.adminAuditLogs);
   final list = response.data as List<dynamic>;
@@ -34,7 +35,8 @@ class AuditLogsScreen extends ConsumerWidget {
         data: (logs) {
           if (logs.isEmpty) {
             return const Center(
-              child: Text('No audit logs', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('No audit logs',
+                  style: TextStyle(color: AppColors.textSecondary)),
             );
           }
           return ListView.builder(
@@ -62,13 +64,19 @@ class _AuditLogRow extends StatelessWidget {
 
     Color actionColor;
     IconData actionIcon;
-    if (action.contains('delete') || action.contains('ban') || action.contains('suspend')) {
+    if (action.contains('delete') ||
+        action.contains('ban') ||
+        action.contains('suspend')) {
       actionColor = AppColors.danger;
       actionIcon = Icons.remove_circle_outline;
-    } else if (action.contains('create') || action.contains('add') || action.contains('promote')) {
+    } else if (action.contains('create') ||
+        action.contains('add') ||
+        action.contains('promote')) {
       actionColor = AppColors.success;
       actionIcon = Icons.add_circle_outline;
-    } else if (action.contains('update') || action.contains('edit') || action.contains('assign')) {
+    } else if (action.contains('update') ||
+        action.contains('edit') ||
+        action.contains('assign')) {
       actionColor = AppColors.warning;
       actionIcon = Icons.edit_outlined;
     } else {
@@ -82,7 +90,7 @@ class _AuditLogRow extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: actionColor.withOpacity(0.1),
+            color: actionColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(actionIcon, color: actionColor, size: 18),
@@ -97,12 +105,14 @@ class _AuditLogRow extends StatelessWidget {
             if (actor != null)
               Text(
                 'by ${actor['firstName']} ${actor['lastName']}',
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                style: const TextStyle(
+                    fontSize: 11, color: AppColors.textSecondary),
               ),
             if (createdAt != null)
               Text(
                 _formatDateTime(createdAt),
-                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                style:
+                    const TextStyle(fontSize: 11, color: AppColors.textMuted),
               ),
           ],
         ),
@@ -119,8 +129,20 @@ class _AuditLogRow extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year} '
         '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
@@ -134,30 +156,33 @@ class _AuditLogRow extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Audit Log Details', style: Theme.of(context).textTheme.titleLarge),
+            Text('Audit Log Details',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             ...log.entries.where((e) => e.key != 'actor').map(
-              (e) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 100,
-                      child: Text(e.key,
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12)),
+                  (e) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Text(e.key,
+                              style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12)),
+                        ),
+                        Expanded(
+                          child: Text(
+                            '${e.value}',
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      child: Text(
-                        '${e.value}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
           ],
         ),
       ),

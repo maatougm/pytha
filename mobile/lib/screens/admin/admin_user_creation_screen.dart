@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api/api_client.dart';
-import '../../core/api/api_endpoints.dart';
+// Unused import removed
 import '../../core/theme/app_colors.dart';
 
 class AdminUserCreationScreen extends ConsumerStatefulWidget {
   const AdminUserCreationScreen({super.key});
 
   @override
-  ConsumerState<AdminUserCreationScreen> createState() => _AdminUserCreationScreenState();
+  ConsumerState<AdminUserCreationScreen> createState() =>
+      _AdminUserCreationScreenState();
 }
 
-class _AdminUserCreationScreenState extends ConsumerState<AdminUserCreationScreen> {
+class _AdminUserCreationScreenState
+    extends ConsumerState<AdminUserCreationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameCtrl = TextEditingController();
   final _lastNameCtrl = TextEditingController();
@@ -47,14 +49,18 @@ class _AdminUserCreationScreenState extends ConsumerState<AdminUserCreationScree
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User created successfully'), backgroundColor: AppColors.success),
+          const SnackBar(
+              content: Text('User created successfully'),
+              backgroundColor: AppColors.success),
         );
         context.pop(true); // Return result to refresh list
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create user: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed to create user: $e'),
+              backgroundColor: AppColors.danger),
         );
       }
     } finally {
@@ -78,7 +84,9 @@ class _AdminUserCreationScreenState extends ConsumerState<AdminUserCreationScree
                   Expanded(
                     child: TextFormField(
                       controller: _firstNameCtrl,
-                      decoration: const InputDecoration(labelText: 'First Name', prefixIcon: Icon(Icons.person_outline)),
+                      decoration: const InputDecoration(
+                          labelText: 'First Name',
+                          prefixIcon: Icon(Icons.person_outline)),
                       validator: (v) => v?.isEmpty == true ? 'Required' : null,
                     ),
                   ),
@@ -95,14 +103,17 @@ class _AdminUserCreationScreenState extends ConsumerState<AdminUserCreationScree
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailCtrl,
-                decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+                decoration: const InputDecoration(
+                    labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) => v?.contains('@') == false ? 'Invalid email' : null,
+                validator: (v) =>
+                    v?.contains('@') == false ? 'Invalid email' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _role,
-                decoration: const InputDecoration(labelText: 'Role', prefixIcon: Icon(Icons.badge_outlined)),
+                initialValue: _role,
+                decoration: const InputDecoration(
+                    labelText: 'Role', prefixIcon: Icon(Icons.badge_outlined)),
                 items: const [
                   DropdownMenuItem(value: 'student', child: Text('Student')),
                   DropdownMenuItem(value: 'teacher', child: Text('Teacher')),
@@ -115,10 +126,9 @@ class _AdminUserCreationScreenState extends ConsumerState<AdminUserCreationScree
               TextFormField(
                 controller: _passwordCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Password (Optional)', 
-                  helperText: 'Leave blank to auto-generate',
-                  prefixIcon: Icon(Icons.lock_outline)
-                ),
+                    labelText: 'Password (Optional)',
+                    helperText: 'Leave blank to auto-generate',
+                    prefixIcon: Icon(Icons.lock_outline)),
                 obscureText: true,
               ),
               const SizedBox(height: 32),
@@ -129,9 +139,13 @@ class _AdminUserCreationScreenState extends ConsumerState<AdminUserCreationScree
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                 ),
-                child: _isLoading 
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
-                  : const Text('Create User'),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Text('Create User'),
               ),
             ],
           ),

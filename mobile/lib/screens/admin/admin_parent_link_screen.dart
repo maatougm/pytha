@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api/api_client.dart';
-import '../../core/api/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user.dart';
 
@@ -11,7 +10,8 @@ class AdminParentLinkScreen extends ConsumerStatefulWidget {
   const AdminParentLinkScreen({super.key});
 
   @override
-  ConsumerState<AdminParentLinkScreen> createState() => _AdminParentLinkScreenState();
+  ConsumerState<AdminParentLinkScreen> createState() =>
+      _AdminParentLinkScreenState();
 }
 
 class _AdminParentLinkScreenState extends ConsumerState<AdminParentLinkScreen> {
@@ -21,7 +21,8 @@ class _AdminParentLinkScreenState extends ConsumerState<AdminParentLinkScreen> {
 
   Future<List<AppUser>> _searchUsers(String role, String query) async {
     final api = ref.read(apiClientProvider);
-    final res = await api.get('/admin/users', params: {'role': role, 'search': query});
+    final res =
+        await api.get('/admin/users', params: {'role': role, 'search': query});
     final list = res.data['users'] as List<dynamic>;
     return list.map((u) => AppUser.fromJson(u)).toList();
   }
@@ -45,14 +46,18 @@ class _AdminParentLinkScreenState extends ConsumerState<AdminParentLinkScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Linked successfully'), backgroundColor: AppColors.success),
+          const SnackBar(
+              content: Text('Linked successfully'),
+              backgroundColor: AppColors.success),
         );
         context.pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to link: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed to link: $e'),
+              backgroundColor: AppColors.danger),
         );
       }
     } finally {
@@ -69,16 +74,20 @@ class _AdminParentLinkScreenState extends ConsumerState<AdminParentLinkScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Select Parent', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Select Parent',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             DropdownSearch<AppUser>(
               popupProps: const PopupProps.menu(
                 showSearchBox: true,
-                searchFieldProps: TextFieldProps(decoration: InputDecoration(hintText: 'Search parent name...')),
+                searchFieldProps: TextFieldProps(
+                    decoration:
+                        InputDecoration(hintText: 'Search parent name...')),
               ),
               asyncItems: (String filter) => _searchUsers('parent', filter),
               itemAsString: (AppUser u) => '${u.fullName} (${u.email})',
-              onChanged: (AppUser? data) => setState(() => _selectedParentId = data?.id),
+              onChanged: (AppUser? data) =>
+                  setState(() => _selectedParentId = data?.id),
               dropdownDecoratorProps: const DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
                   labelText: "Parent",
@@ -88,16 +97,20 @@ class _AdminParentLinkScreenState extends ConsumerState<AdminParentLinkScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text('Select Student', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Select Student',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             DropdownSearch<AppUser>(
               popupProps: const PopupProps.menu(
                 showSearchBox: true,
-                searchFieldProps: TextFieldProps(decoration: InputDecoration(hintText: 'Search student name...')),
+                searchFieldProps: TextFieldProps(
+                    decoration:
+                        InputDecoration(hintText: 'Search student name...')),
               ),
               asyncItems: (String filter) => _searchUsers('student', filter),
               itemAsString: (AppUser u) => '${u.fullName} (${u.email})',
-              onChanged: (AppUser? data) => setState(() => _selectedStudentId = data?.id),
+              onChanged: (AppUser? data) =>
+                  setState(() => _selectedStudentId = data?.id),
               dropdownDecoratorProps: const DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
                   labelText: "Student",
@@ -114,9 +127,13 @@ class _AdminParentLinkScreenState extends ConsumerState<AdminParentLinkScreen> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
-              child: _isLoading 
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
-                : const Text('Link Parent & Student'),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : const Text('Link Parent & Student'),
             ),
           ],
         ),

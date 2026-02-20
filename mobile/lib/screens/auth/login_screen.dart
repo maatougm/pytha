@@ -30,11 +30,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _performLogin(String email, String password) async {
-    final success = await ref.read(authProvider.notifier).login(email, password);
+    final success =
+        await ref.read(authProvider.notifier).login(email, password);
     if (!success && mounted) {
       final error = ref.read(authProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error ?? 'Login failed'), backgroundColor: AppColors.danger),
+        SnackBar(
+            content: Text(error ?? 'Login failed'),
+            backgroundColor: AppColors.danger),
       );
     }
   }
@@ -72,7 +75,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(Icons.school_rounded, color: Colors.white, size: 40),
+                    child: const Icon(Icons.school_rounded,
+                        color: Colors.white, size: 40),
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -100,8 +104,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             prefixIcon: Icon(Icons.email_outlined),
                           ),
                           validator: (v) {
-                            if (v == null || v.isEmpty) return 'Email is required';
-                            if (!v.contains('@')) return 'Enter a valid email';
+                            if (v == null || v.isEmpty) {
+                              return 'Email is required';
+                            }
+                            if (!v.contains('@')) {
+                              return 'Enter a valid email';
+                            }
                             return null;
                           },
                         ),
@@ -118,13 +126,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               icon: Icon(_obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined),
-                              onPressed: () =>
-                                  setState(() => _obscurePassword = !_obscurePassword),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
                             ),
                           ),
                           validator: (v) {
-                            if (v == null || v.isEmpty) return 'Password is required';
-                            if (v.length < 6) return 'Password must be at least 6 characters';
+                            if (v == null || v.isEmpty) {
+                              return 'Password is required';
+                            }
+                            if (v.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
                             return null;
                           },
                         ),
@@ -161,11 +173,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.flash_on, color: AppColors.primary, size: 20),
+                            Icon(Icons.flash_on,
+                                color: AppColors.primary, size: 20),
                             const SizedBox(width: 8),
                             Text(
                               'Quick Demo Login',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
@@ -174,9 +190,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'Tap any role to login instantly (Password: Password123!)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey.shade600,
+                                  ),
                         ),
                         const SizedBox(height: 12),
                         Wrap(
@@ -184,7 +201,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           runSpacing: 8,
                           children: _demoAccounts.map((account) {
                             final color = Color(
-                              int.parse(account['color']!.substring(1), radix: 16) + 0xFF000000,
+                              int.parse(account['color']!.substring(1),
+                                      radix: 16) +
+                                  0xFF000000,
                             );
                             return ActionChip(
                               avatar: CircleAvatar(
@@ -200,8 +219,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ),
                               label: Text(account['role']!),
-                              backgroundColor: color.withOpacity(0.1),
-                              side: BorderSide(color: color.withOpacity(0.3)),
+                              backgroundColor: color.withValues(alpha: 0.1),
+                              side: BorderSide(
+                                  color: color.withValues(alpha: 0.3)),
                               onPressed: isLoading
                                   ? null
                                   : () => _performLogin(

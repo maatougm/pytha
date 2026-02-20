@@ -4,7 +4,8 @@ import '../../core/api/api_client.dart';
 import '../../core/api/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 
-final adminCoursesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+final adminCoursesProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final api = ref.read(apiClientProvider);
   final response = await api.get(ApiEndpoints.courses);
   final list = response.data['data'] as List<dynamic>;
@@ -32,7 +33,7 @@ class AdminCourseManagementScreen extends ConsumerWidget {
             return const Center(child: Text('No subjects found'));
           }
           return RefreshIndicator(
-            onRefresh: () async => ref.refresh(adminCoursesProvider),
+            onRefresh: () async => ref.invalidate(adminCoursesProvider),
             child: ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: courses.length,
@@ -42,13 +43,17 @@ class AdminCourseManagementScreen extends ConsumerWidget {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: AppColors.primaryLight.withOpacity(0.2),
+                      backgroundColor:
+                          AppColors.primaryLight.withValues(alpha: 0.2),
                       child: Text(
                         (c['code'] as String).substring(0, 2),
-                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
-                    title: Text('${c['code']} - ${c['name']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text('${c['code']} - ${c['name']}',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(c['department'] ?? 'No Department'),
                     trailing: const Icon(Icons.chevron_right),
                   ),
@@ -66,7 +71,7 @@ class AdminCourseManagementScreen extends ConsumerWidget {
       context: context,
       builder: (_) => const _CreateCourseDialog(),
     ).then((val) {
-      if (val == true) ref.refresh(adminCoursesProvider);
+      if (val == true) ref.invalidate(adminCoursesProvider);
     });
   }
 }
@@ -74,7 +79,8 @@ class AdminCourseManagementScreen extends ConsumerWidget {
 class _CreateCourseDialog extends ConsumerStatefulWidget {
   const _CreateCourseDialog();
   @override
-  ConsumerState<_CreateCourseDialog> createState() => _CreateCourseDialogState();
+  ConsumerState<_CreateCourseDialog> createState() =>
+      _CreateCourseDialogState();
 }
 
 class _CreateCourseDialogState extends ConsumerState<_CreateCourseDialog> {
@@ -112,13 +118,16 @@ class _CreateCourseDialogState extends ConsumerState<_CreateCourseDialog> {
       if (mounted) {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Subject created'), backgroundColor: AppColors.success),
+          const SnackBar(
+              content: Text('Subject created'),
+              backgroundColor: AppColors.success),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
         );
       }
     } finally {
@@ -138,12 +147,14 @@ class _CreateCourseDialogState extends ConsumerState<_CreateCourseDialog> {
             children: [
               TextFormField(
                 controller: _codeCtrl,
-                decoration: const InputDecoration(labelText: 'Code (e.g. MATH101)'),
+                decoration:
+                    const InputDecoration(labelText: 'Code (e.g. MATH101)'),
                 validator: (v) => v?.isEmpty == true ? 'Required' : null,
               ),
               TextFormField(
                 controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Name (e.g. Algebra I)'),
+                decoration:
+                    const InputDecoration(labelText: 'Name (e.g. Algebra I)'),
                 validator: (v) => v?.isEmpty == true ? 'Required' : null,
               ),
               Row(
@@ -151,7 +162,8 @@ class _CreateCourseDialogState extends ConsumerState<_CreateCourseDialog> {
                   Expanded(
                     child: TextFormField(
                       controller: _deptCtrl,
-                      decoration: const InputDecoration(labelText: 'Department'),
+                      decoration:
+                          const InputDecoration(labelText: 'Department'),
                       validator: (v) => v?.isEmpty == true ? 'Required' : null,
                     ),
                   ),
@@ -175,8 +187,12 @@ class _CreateCourseDialogState extends ConsumerState<_CreateCourseDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-        ElevatedButton(onPressed: _isLoading ? null : _submit, child: const Text('Create')),
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel')),
+        ElevatedButton(
+            onPressed: _isLoading ? null : _submit,
+            child: const Text('Create')),
       ],
     );
   }

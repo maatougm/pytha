@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user.dart';
 
-final adminUsersProvider = FutureProvider.family<Map<String, dynamic>, Map<String, String>>(
-    (ref, params) async {
+final adminUsersProvider =
+    FutureProvider.family<Map<String, dynamic>, Map<String, String>>(
+        (ref, params) async {
   final api = ref.read(apiClientProvider);
   final response = await api.get(ApiEndpoints.adminUsers, params: params);
   return response.data as Map<String, dynamic>;
@@ -16,7 +18,8 @@ class UserManagementScreen extends ConsumerStatefulWidget {
   const UserManagementScreen({super.key});
 
   @override
-  ConsumerState<UserManagementScreen> createState() => _UserManagementScreenState();
+  ConsumerState<UserManagementScreen> createState() =>
+      _UserManagementScreenState();
 }
 
 class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
@@ -38,6 +41,57 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
     super.dispose();
   }
 
+  Future<void> _suspendUser(AppUser user) async {
+    final api = ref.read(apiClientProvider);
+    try {
+      await api.patch(
+        ApiEndpoints.adminUserById(user.id),
+        data: {'status': user.status == 'suspended' ? 'active' : 'suspended'},
+      );
+      ref.invalidate(adminUsersProvider(_params));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteUser(AppUser user) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete User'),
+        content: Text('Delete ${user.fullName}? This cannot be undone.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child:
+                const Text('Delete', style: TextStyle(color: AppColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    final api = ref.read(apiClientProvider);
+    try {
+      await api.delete(ApiEndpoints.adminUserById(user.id));
+      ref.invalidate(adminUsersProvider(_params));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(adminUsersProvider(_params));
@@ -53,7 +107,9 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.person_add_outlined),
-            onPressed: () => context.push('/admin/users/create').then((_) => ref.refresh(adminUsersProvider(_params))),
+            onPressed: () => context
+                .push('/admin/users/create')
+                .then((_) => ref.refresh(adminUsersProvider(_params))),
           ),
         ],
       ),
@@ -120,19 +176,23 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
 
                 if (users.isEmpty) {
                   return const Center(
-                    child: Text('No users found', style: TextStyle(color: AppColors.textSecondary)),
+                    child: Text('No users found',
+                        style: TextStyle(color: AppColors.textSecondary)),
                   );
                 }
 
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('$total users found',
-                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                              style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12)),
                         ],
                       ),
                     ),
@@ -155,51 +215,42 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
       ),
     );
   }
+}
 
-  Future<void> _suspendUser(AppUser user) async {
-    final api = ref.read(apiClientProvider);
-    try {
-      await api.patch(
-        ApiEndpoints.adminUserById(user.id),
-        data: {'status': user.status == 'suspended' ? 'active' : 'suspended'},
-      );
-      ref.refresh(adminUsersProvider(_params));
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
-        );
-      }
-    }
-  }
+class _UserRow extends StatelessWidget {
+  final AppUser user;
+  final VoidCallback onSuspend;
+  final VoidCallback onDelete;
 
-  Future<void> _deleteUser(AppUser user) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Delete User'),
-        content: Text('Delete ${user.fullName}? This cannot be undone.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: AppColors.danger)),
+  const _UserRow({
+    required this.user,
+    required this.onSuspend,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: AppColors.primary,
+        child: Text(user.fullName[0].toUpperCase()),
+      ),
+      title: Text(user.fullName),
+      subtitle: Text(user.email),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon:
+                Icon(user.status == 'suspended' ? Icons.restore : Icons.block),
+            onPressed: onSuspend,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: AppColors.danger),
+            onPressed: onDelete,
           ),
         ],
       ),
     );
-    if (confirm != true) return;
-    final api = ref.read(apiClientProvider);
-    try {
-      await api.delete(ApiEndpoints.adminUserById(user.id));
-      ref.refresh(adminUsersProvider(_params));
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
-        );
-      }
-    }
   }
-
 }

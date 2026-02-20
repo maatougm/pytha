@@ -1,9 +1,17 @@
 #!/bin/bash
 # =============================================================================
-# School Hub - PRODUCTION Deployment Script
+# School Hub - PRODUCTION Deployment Script (Fixed)
 # =============================================================================
-# Usage: ./deploy-production.sh [domain] [email]
-# Example: ./deploy-production.sh school.example.com admin@example.com
+# Usage: ./scripts/deploy-production.sh [domain] [email]
+# 
+# This script handles the COMPLETE production deployment including:
+# - Environment validation
+# - SSL certificate setup (Let's Encrypt)
+# - Docker-based Flutter Web build (no local Flutter needed!)
+# - Database migrations
+# - Health checks
+#
+# Example: ./scripts/deploy-production.sh school.example.com admin@example.com
 # =============================================================================
 
 set -e
@@ -19,9 +27,40 @@ NC='\033[0m'
 DOMAIN=${1:-}
 EMAIL=${2:-}
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+cd "$PROJECT_DIR"
+
+# =============================================================================
+# Help
+# =============================================================================
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    echo "School Hub - Production Deployment"
+    echo ""
+    echo "Usage:"
+    echo "  $0 <domain> <email>     Deploy with Let's Encrypt SSL"
+    echo "  $0 --existing-ssl       Deploy using existing certificates in nginx/ssl/"
+    echo "  $0 --help               Show this help"
+    echo ""
+    echo "Prerequisites:"
+    echo "  1. Domain DNS pointed to this server"
+    echo "  2. .env file configured (copy from .env.production)"
+    echo "  3. Docker and Docker Compose installed"
+    echo ""
+    echo "Examples:"
+    echo "  $0 school.example.com admin@example.com"
+    echo "  $0 --existing-ssl"
+    exit 0
+fi
+
+# =============================================================================
 # Validation
-if [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; then
+# =============================================================================
+if [ "$1" != "--existing-ssl" ] && { [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; }; then
     echo -e "${RED}Usage: $0 <domain> <email>${NC}"
+    echo "       $0 --existing-ssl"
+    echo ""
     echo "Example: $0 school.example.com admin@example.com"
     exit 1
 fi
@@ -30,59 +69,59 @@ echo "========================================"
 echo "  School Hub - PRODUCTION Deployment"
 echo "========================================"
 echo ""
-echo "Domain: $DOMAIN"
-echo "Email: $EMAIL"
+
+if [ "$1" == "--existing-ssl" ]; then
+    USE_EXISTING_SSL=1
+    echo "Mode: Using existing SSL certificates"
+else
+    echo "Domain: $DOMAIN"
+    echo "Email: $EMAIL"
+fi
+
+if [ -f ".env" ]; then
+    echo "Environment: .env"
+else
+    echo -e "${RED}ERROR: .env file not found!${NC}"
+    echo "Copy .env.production to .env and configure it:"
+    echo "  cp .env.production .env"
+    echo "  nano .env"
+    exit 1
+fi
+
 echo ""
 
 # =============================================================================
 # 1. Pre-flight Checks
 # =============================================================================
-echo -e "${BLUE}[1/8]${NC} Running pre-flight checks..."
+echo -e "${BLUE}[1/7]${NC} Running pre-flight checks..."
 
 # Check if running as root
 if [ "$EUID" -eq 0 ]; then
-    echo -e "${RED}ERROR: Do not run as root${NC}"
+    echo -e "${RED}ERROR: Do not run as root for security reasons${NC}"
     exit 1
 fi
 
-# Check Docker
-if ! command -v docker &> /dev/null; then
-    echo -e "${RED}ERROR: Docker not installed${NC}"
-    exit 1
-fi
-
-# Check Docker Compose
-if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}ERROR: Docker Compose not installed${NC}"
-    exit 1
-fi
-
-# Check if .env.production exists
-if [ ! -f ".env.production" ]; then
-    echo -e "${RED}ERROR: .env.production not found${NC}"
-    echo "Copy .env.production.example to .env.production and fill in values"
-    exit 1
-fi
-
-# Source production environment
-set -a
-source .env.production
-set +a
-
-# Validate required variables
-if [ -z "$JWT_SECRET" ] || [ ${#JWT_SECRET} -lt 32 ]; then
-    echo -e "${RED}ERROR: JWT_SECRET must be at least 32 characters${NC}"
-    exit 1
-fi
-
-if [ -z "$DB_PASSWORD" ]; then
-    echo -e "${RED}ERROR: DB_PASSWORD not set${NC}"
-    exit 1
-fi
-
-if [ -z "$REDIS_PASSWORD" ]; then
-    echo -e "${RED}ERROR: REDIS_PASSWORD not set${NC}"
-    exit 1
+# Run validation script
+if [ -f "$SCRIPT_DIR/validate-env.sh" ]; then
+    if ! "$SCRIPT_DIR/validate-env.sh"; then
+        echo ""
+        echo -e "${RED}ERROR: Environment validation failed${NC}"
+        echo "Fix the issues above or run with --force (not recommended)"
+        exit 1
+    fi
+else
+    echo -e "${YELLOW}⚠ validate-env.sh not found, skipping detailed validation${NC}"
+    
+    # Basic checks
+    if ! command -v docker &> /dev/null; then
+        echo -e "${RED}ERROR: Docker not installed${NC}"
+        exit 1
+    fi
+    
+    if ! docker compose version &> /dev/null && ! docker-compose version &> /dev/null; then
+        echo -e "${RED}ERROR: Docker Compose not installed${NC}"
+        exit 1
+    fi
 fi
 
 echo -e "${GREEN}✓${NC} Pre-flight checks passed"
@@ -90,195 +129,176 @@ echo -e "${GREEN}✓${NC} Pre-flight checks passed"
 # =============================================================================
 # 2. Create Required Directories
 # =============================================================================
-echo -e "${BLUE}[2/8]${NC} Creating directories..."
+echo -e "${BLUE}[2/7]${NC} Creating directories..."
 
 mkdir -p nginx/ssl
 mkdir -p logs/nginx
+mkdir -p logs/server
 mkdir -p backups
 mkdir -p uploads
+mkdir -p certbot/www
+mkdir -p certbot/data
 mkdir -p monitoring/grafana/dashboards
 mkdir -p monitoring/grafana/datasources
 
 echo -e "${GREEN}✓${NC} Directories created"
 
 # =============================================================================
-# 3. SSL Certificate Setup (Let's Encrypt)
+# 3. SSL Certificate Setup
 # =============================================================================
-echo -e "${BLUE}[3/8]${NC} Setting up SSL certificates..."
+echo -e "${BLUE}[3/7]${NC} Setting up SSL certificates..."
 
-if [ ! -f "nginx/ssl/fullchain.pem" ]; then
-    echo "SSL certificates not found. Setting up Let's Encrypt..."
-    
-    # Install certbot if not present
-    if ! command -v certbot &> /dev/null; then
-        echo "Installing certbot..."
-        sudo apt-get update
-        sudo apt-get install -y certbot
-    fi
-    
-    # Create temporary nginx config for certbot
-    mkdir -p var/www/certbot
-    
-    # Get certificate
-    sudo certbot certonly --standalone \
-        --preferred-challenges http \
-        --agree-tos \
-        --non-interactive \
-        --email "$EMAIL" \
-        -d "$DOMAIN" \
-        -d "www.$DOMAIN" || true
-    
-    # Copy certificates
-    if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
-        sudo cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" nginx/ssl/
-        sudo cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" nginx/ssl/
-        sudo cp "/etc/letsencrypt/live/$DOMAIN/chain.pem" nginx/ssl/
-        sudo chown -R $USER:$USER nginx/ssl/
-        echo -e "${GREEN}✓${NC} SSL certificates installed"
-    else
-        echo -e "${YELLOW}⚠${NC} SSL certificate generation failed. Using self-signed..."
-        
-        # Generate self-signed certificate temporarily
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-            -keyout nginx/ssl/privkey.pem \
-            -out nginx/ssl/fullchain.pem \
-            -subj "/CN=$DOMAIN"
-        cp nginx/ssl/fullchain.pem nginx/ssl/chain.pem
-    fi
-else
+if [ -f "nginx/ssl/fullchain.pem" ] && [ -f "nginx/ssl/privkey.pem" ]; then
     echo -e "${GREEN}✓${NC} SSL certificates already exist"
-fi
-
-# =============================================================================
-# 4. Build Flutter Web
-# =============================================================================
-echo -e "${BLUE}[4/8]${NC} Building Flutter web app..."
-
-cd mobile
-
-# Check if Flutter is installed
-if ! command -v flutter &> /dev/null; then
-    echo -e "${YELLOW}⚠${NC} Flutter not found. Please install Flutter first."
+    
+    # Verify they're valid
+    if openssl x509 -in nginx/ssl/fullchain.pem -noout 2>/dev/null; then
+        EXPIRY=$(openssl x509 -in nginx/ssl/fullchain.pem -noout -enddate | cut -d= -f2)
+        echo "  Certificate expiry: $EXPIRY"
+    else
+        echo -e "${YELLOW}⚠${NC} Existing certificate appears invalid"
+    fi
+elif [ -z "$USE_EXISTING_SSL" ]; then
+    # Use the setup-ssl.sh script for Let's Encrypt
+    "$SCRIPT_DIR/setup-ssl.sh" "$DOMAIN" "$EMAIL"
+else
+    echo -e "${RED}ERROR: SSL certificates not found in nginx/ssl/${NC}"
+    echo "Please place your certificates:"
+    echo "  - nginx/ssl/fullchain.pem"
+    echo "  - nginx/ssl/privkey.pem"
     exit 1
 fi
 
-# Get dependencies
-flutter pub get
+# =============================================================================
+# 4. Build & Deploy with Docker
+# =============================================================================
+echo -e "${BLUE}[4/7]${NC} Building and deploying Docker containers..."
 
-# Build for production
-flutter build web --release
+# Set domain for docker-compose if provided
+if [ -n "$DOMAIN" ]; then
+    export DOMAIN_NAME=$DOMAIN
+fi
 
-cd ..
+# Source environment
+set -a
+source .env
+set +a
 
-echo -e "${GREEN}✓${NC} Flutter build completed"
+# Determine docker compose command
+if docker compose version &> /dev/null; then
+    COMPOSE_CMD="docker compose"
+else
+    COMPOSE_CMD="docker-compose"
+fi
+
+# Stop existing containers gracefully
+echo "  Stopping existing containers..."
+$COMPOSE_CMD -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
+
+# Build and start services
+echo "  Building images (this may take several minutes)..."
+$COMPOSE_CMD -f docker-compose.prod.yml build --no-cache
+
+echo "  Starting services..."
+$COMPOSE_CMD -f docker-compose.prod.yml up -d
+
+echo -e "${GREEN}✓${NC} Containers started"
 
 # =============================================================================
-# 5. Database Migrations
+# 5. Wait for Database & Run Migrations
 # =============================================================================
-echo -e "${BLUE}[5/8]${NC} Running database migrations..."
+echo -e "${BLUE}[5/7]${NC} Running database migrations..."
 
-cd server
+echo "  Waiting for database to be ready..."
+MAX_RETRIES=30
+RETRY=0
 
-# Install dependencies
-npm ci
+while [ $RETRY -lt $MAX_RETRIES ]; do
+    if $COMPOSE_CMD -f docker-compose.prod.yml exec -T postgres pg_isready -U "$DB_USER" > /dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} Database is ready"
+        break
+    fi
+    echo -n "."
+    sleep 2
+    ((RETRY++))
+done
 
-# Generate Prisma client
-npx prisma generate
-
-# Build the server
-npm run build
-
-cd ..
-
-echo -e "${GREEN}✓${NC} Server build completed"
-
-# =============================================================================
-# 6. Deploy with Docker
-# =============================================================================
-echo -e "${BLUE}[6/8]${NC} Deploying with Docker Compose..."
-
-# Export environment for docker-compose
-export DOMAIN_NAME=$DOMAIN
-
-# Pull latest images
-docker-compose -f docker-compose.prod.yml pull
-
-# Build images
-docker-compose -f docker-compose.prod.yml build
-
-# Start services
-docker-compose -f docker-compose.prod.yml up -d
-
-# Wait for database to be ready
-echo "Waiting for database..."
-sleep 15
+if [ $RETRY -eq $MAX_RETRIES ]; then
+    echo -e "${RED}ERROR: Database failed to start${NC}"
+    $COMPOSE_CMD -f docker-compose.prod.yml logs postgres
+    exit 1
+fi
 
 # Run migrations
-docker-compose -f docker-compose.prod.yml exec -T server npx prisma migrate deploy
-
-echo -e "${GREEN}✓${NC} Deployment completed"
+echo "  Running Prisma migrations..."
+if $COMPOSE_CMD -f docker-compose.prod.yml exec -T server npx prisma migrate deploy; then
+    echo -e "${GREEN}✓${NC} Migrations completed"
+else
+    echo -e "${YELLOW}⚠${NC} Migration warning (may be already applied)"
+fi
 
 # =============================================================================
-# 7. Post-deployment Verification
+# 6. Health Checks
 # =============================================================================
-echo -e "${BLUE}[7/8]${NC} Verifying deployment..."
+echo -e "${BLUE}[6/7]${NC} Running health checks..."
 
-# Wait for services
-sleep 10
+sleep 5
 
-# Check if containers are running
-RUNNING=$(docker-compose -f docker-compose.prod.yml ps -q | wc -l)
-if [ "$RUNNING" -lt 3 ]; then
-    echo -e "${RED}ERROR: Some containers failed to start${NC}"
-    docker-compose -f docker-compose.prod.yml logs
+# Check all services are running
+RUNNING=$($COMPOSE_CMD -f docker-compose.prod.yml ps --filter "status=running" --format "{{.Name}}" | wc -l)
+if [ "$RUNNING" -lt 4 ]; then
+    echo -e "${RED}ERROR: Some containers failed to start (only $RUNNING running)${NC}"
+    $COMPOSE_CMD -f docker-compose.prod.yml ps
+    echo ""
+    echo "Logs:"
+    $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=50
     exit 1
 fi
 
-# Test health endpoint
-if curl -sf "https://$DOMAIN/api/health" > /dev/null; then
-    echo -e "${GREEN}✓${NC} API is healthy"
+# Check health status
+ATTEMPTS=0
+HEALTHY=0
+
+while [ $ATTEMPTS -lt 10 ]; do
+    if $COMPOSE_CMD -f docker-compose.prod.yml ps | grep -q "healthy"; then
+        HEALTHY=1
+        break
+    fi
+    echo "  Waiting for health checks... ($(($ATTEMPTS + 1))/10)"
+    sleep 3
+    ((ATTEMPTS++))
+done
+
+if [ $HEALTHY -eq 1 ]; then
+    echo -e "${GREEN}✓${NC} All services are healthy"
 else
-    echo -e "${YELLOW}⚠${NC} API health check failed (may still be starting)"
+    echo -e "${YELLOW}⚠${NC} Health checks pending, but services are running"
 fi
 
-# Test web app
-if curl -sf "https://$DOMAIN" > /dev/null; then
-    echo -e "${GREEN}✓${NC} Web app is accessible"
-else
-    echo -e "${YELLOW}⚠${NC} Web app check failed"
+# Test endpoints if domain is available
+if [ -n "$DOMAIN_NAME" ] || [ -n "$DOMAIN" ]; then
+    TEST_DOMAIN="${DOMAIN:-$DOMAIN_NAME}"
+    
+    echo "  Testing https://$TEST_DOMAIN/api/health..."
+    if curl -sfk "https://$TEST_DOMAIN/api/health" > /dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} API endpoint is accessible"
+    else
+        echo -e "${YELLOW}⚠${NC} API endpoint not yet accessible (may need more time)"
+    fi
 fi
-
-echo -e "${GREEN}✓${NC} Verification completed"
 
 # =============================================================================
-# 8. Setup Auto-renewal for SSL
+# 7. Post-Deployment Setup
 # =============================================================================
-echo -e "${BLUE}[8/8]${NC} Setting up SSL auto-renewal..."
+echo -e "${BLUE}[7/7]${NC} Running post-deployment setup..."
 
-# Add certbot renewal hook
-if command -v certbot &> /dev/null; then
-    # Create renewal hook
-    sudo mkdir -p /etc/letsencrypt/renewal-hooks/deploy
-    
-    cat << EOF | sudo tee /etc/letsencrypt/renewal-hooks/deploy/school-hub.sh > /dev/null
-#!/bin/bash
-# Copy new certificates to app directory
-cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /opt/school-hub/nginx/ssl/
-cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /opt/school-hub/nginx/ssl/
-cp /etc/letsencrypt/live/$DOMAIN/chain.pem /opt/school-hub/nginx/ssl/
-chown -R deploy:deploy /opt/school-hub/nginx/ssl/
-
-# Reload nginx
-cd /opt/school-hub && docker-compose -f docker-compose.prod.yml exec nginx nginx -s reload
-EOF
-    
-    sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/school-hub.sh
-    
-    # Add cron job for renewal
-    (sudo crontab -l 2>/dev/null | grep -v certbot; echo "0 2 * * * certbot renew --quiet") | sudo crontab -
-    
-    echo -e "${GREEN}✓${NC} SSL auto-renewal configured"
+# Set up log rotation
+if [ -f "$SCRIPT_DIR/setup-logrotate.sh" ]; then
+    echo "  Setting up log rotation..."
+    "$SCRIPT_DIR/setup-logrotate.sh" > /dev/null 2>&1 || true
 fi
+
+echo -e "${GREEN}✓${NC} Post-deployment setup complete"
 
 # =============================================================================
 # Done
@@ -288,15 +308,31 @@ echo "========================================"
 echo -e "${GREEN}  PRODUCTION DEPLOYMENT COMPLETE!${NC}"
 echo "========================================"
 echo ""
-echo "Your application is now live at:"
-echo "  https://$DOMAIN"
+
+# Show final status
+$COMPOSE_CMD -f docker-compose.prod.yml ps
+
+echo ""
+echo "Your application should be live at:"
+if [ -n "$DOMAIN" ]; then
+    echo "  https://$DOMAIN"
+else
+    echo "  https://<your-domain> (configure DOMAIN_NAME in .env)"
+fi
 echo ""
 echo "API Documentation:"
-echo "  https://$DOMAIN/api/docs"
+if [ -n "$DOMAIN" ]; then
+    echo "  https://$DOMAIN/api/docs"
+else
+    echo "  https://<your-domain>/api/docs"
+fi
 echo ""
 echo "Useful commands:"
-echo "  View logs: docker-compose -f docker-compose.prod.yml logs -f"
-echo "  Scale API: docker-compose -f docker-compose.prod.yml up -d --scale server=3"
-echo "  Backup:    ./scripts/backup.sh"
-echo "  Update:    ./scripts/deploy-production.sh $DOMAIN $EMAIL"
+echo "  View logs:        $COMPOSE_CMD -f docker-compose.prod.yml logs -f"
+echo "  Server logs:      $COMPOSE_CMD -f docker-compose.prod.yml logs -f server"
+echo "  Restart:          $COMPOSE_CMD -f docker-compose.prod.yml restart"
+echo "  Stop:             $COMPOSE_CMD -f docker-compose.prod.yml down"
+echo "  Backup DB:        $COMPOSE_CMD -f docker-compose.prod.yml exec postgres pg_dump -U $DB_USER school_messaging | gzip > backup_$(date +%Y%m%d).sql.gz"
+echo ""
+echo "Need to update? Just run this script again!"
 echo ""

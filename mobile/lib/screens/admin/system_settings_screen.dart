@@ -8,7 +8,8 @@ class SystemSettingsScreen extends ConsumerStatefulWidget {
   const SystemSettingsScreen({super.key});
 
   @override
-  ConsumerState<SystemSettingsScreen> createState() => _SystemSettingsScreenState();
+  ConsumerState<SystemSettingsScreen> createState() =>
+      _SystemSettingsScreenState();
 }
 
 class _SystemSettingsScreenState extends ConsumerState<SystemSettingsScreen> {
@@ -25,7 +26,9 @@ class _SystemSettingsScreenState extends ConsumerState<SystemSettingsScreen> {
           'This action cannot be undone.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.warning),
@@ -54,7 +57,8 @@ class _SystemSettingsScreenState extends ConsumerState<SystemSettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
         );
       }
     } finally {
@@ -76,7 +80,8 @@ class _SystemSettingsScreenState extends ConsumerState<SystemSettingsScreen> {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.school_outlined, color: AppColors.primary),
+                  leading: const Icon(Icons.school_outlined,
+                      color: AppColors.primary),
                   title: const Text('Promote All Students'),
                   subtitle: const Text(
                     'Advance all students to next grade level. Grade 12 → Graduated.',
@@ -96,9 +101,11 @@ class _SystemSettingsScreenState extends ConsumerState<SystemSettingsScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.archive_outlined, color: AppColors.textSecondary),
+                  leading: const Icon(Icons.archive_outlined,
+                      color: AppColors.textSecondary),
                   title: const Text('Archive Current Enrollments'),
-                  subtitle: const Text('Mark all active enrollments as completed.'),
+                  subtitle:
+                      const Text('Mark all active enrollments as completed.'),
                   trailing: OutlinedButton(
                     onPressed: () {},
                     child: const Text('Archive'),
@@ -118,7 +125,8 @@ class _SystemSettingsScreenState extends ConsumerState<SystemSettingsScreen> {
                 SwitchListTile(
                   secondary: const Icon(Icons.chat_bubble_outlined),
                   title: const Text('Allow Direct Messages'),
-                  subtitle: const Text('Students can message each other directly'),
+                  subtitle:
+                      const Text('Students can message each other directly'),
                   value: true,
                   onChanged: (_) {},
                 ),
@@ -139,18 +147,20 @@ class _SystemSettingsScreenState extends ConsumerState<SystemSettingsScreen> {
           Text('Danger Zone', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           Card(
-            color: AppColors.danger.withOpacity(0.05),
+            color: AppColors.danger.withValues(alpha: 0.05),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: AppColors.danger.withOpacity(0.3)),
+              side: BorderSide(color: AppColors.danger.withValues(alpha: 0.3)),
             ),
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.delete_forever_outlined, color: AppColors.danger),
+                  leading: const Icon(Icons.delete_forever_outlined,
+                      color: AppColors.danger),
                   title: const Text('Clear All Messages',
                       style: TextStyle(color: AppColors.danger)),
-                  subtitle: const Text('Permanently delete all channel messages'),
+                  subtitle:
+                      const Text('Permanently delete all channel messages'),
                   trailing: OutlinedButton(
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(

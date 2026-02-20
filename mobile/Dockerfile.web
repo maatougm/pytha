@@ -19,14 +19,22 @@ COPY . .
 # This avoids network download issues
 COPY flutter_web_sdk/ /usr/local/flutter/bin/cache/flutter_web_sdk/ 2>/dev/null || true
 
-# Accept API_BASE_URL build argument
+# Accept API_BASE_URL build argument (REQUIRED)
 ARG API_BASE_URL=http://localhost:3000
+ARG WS_BASE_URL=${API_BASE_URL}
+
+# Validate that API_BASE_URL is set
+RUN if [ "$API_BASE_URL" = "http://localhost:3000" ]; then \
+  echo "WARNING: Using default API_BASE_URL. Make sure to set it in docker-compose.prod.yml"; \
+  fi
 
 # Build for web - skip download if SDK exists
 RUN if [ -d "/usr/local/flutter/bin/cache/flutter_web_sdk" ]; then \
   echo "Using cached Flutter Web SDK"; \
   fi && \
-  flutter build web --release --dart-define=API_BASE_URL=$API_BASE_URL
+  flutter build web --release \
+    --dart-define=API_BASE_URL=$API_BASE_URL \
+    --dart-define=WS_BASE_URL=$WS_BASE_URL
 
 # Stage 2: Serve with nginx
 FROM nginx:alpine

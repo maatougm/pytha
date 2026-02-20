@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { MentionsModule } from './mentions/mentions.module';
 import { RedisModule } from './redis/redis.module';
 import { SoftDeleteModule } from './common/soft-delete/soft-delete.module';
+import { UpdateModule } from './update/update.module';
 import { winstonConfig } from './common/logger/winston.config';
 
 @Module({
@@ -60,6 +61,7 @@ import { winstonConfig } from './common/logger/winston.config';
         NotificationsModule,
         MentionsModule,
         SoftDeleteModule,
+        UpdateModule,
     ],
     providers: [
         {

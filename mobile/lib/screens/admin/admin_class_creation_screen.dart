@@ -45,14 +45,9 @@ class _AdminClassCreationScreenState extends ConsumerState<AdminClassCreationScr
       courseName: c['name'],
       courseCode: c['code'],
       // dummy values for required fields
-      teacherLoginId: '', 
       term: '', 
       section: '', 
-      room: '', 
       schedules: [],
-      enrollments: [],
-      assignments: [],
-      description: c['description'],
     )).toList();
   }
 

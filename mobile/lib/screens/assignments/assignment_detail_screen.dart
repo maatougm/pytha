@@ -49,12 +49,13 @@ class _AssignmentDetailScreenState
             backgroundColor: AppColors.success,
           ),
         );
-        ref.refresh(assignmentDetailProvider(widget.assignmentId));
+        ref.invalidate(assignmentDetailProvider(widget.assignmentId));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
         );
       }
     } finally {
@@ -64,7 +65,8 @@ class _AssignmentDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final assignmentAsync = ref.watch(assignmentDetailProvider(widget.assignmentId));
+    final assignmentAsync =
+        ref.watch(assignmentDetailProvider(widget.assignmentId));
     final user = ref.watch(currentUserProvider);
 
     return Scaffold(
@@ -124,7 +126,8 @@ class _AssignmentDetailScreenState
                               Text(
                                 '${assignment.maxScore!.toInt()} points',
                                 style: const TextStyle(
-                                    color: AppColors.textSecondary, fontSize: 13),
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13),
                               ),
                             ],
                           ],
@@ -166,13 +169,16 @@ class _AssignmentDetailScreenState
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle, color: AppColors.success, size: 32),
+                        const Icon(Icons.check_circle,
+                            color: AppColors.success, size: 32),
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('Grade',
-                                style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w600)),
+                                style: TextStyle(
+                                    color: AppColors.success,
+                                    fontWeight: FontWeight.w600)),
                             Text(
                               '${assignment.mySubmission!.score!.toInt()} / ${assignment.maxScore?.toInt() ?? 100}',
                               style: const TextStyle(
@@ -185,7 +191,8 @@ class _AssignmentDetailScreenState
                           Expanded(
                             child: Text(
                               assignment.mySubmission!.feedback!,
-                              style: const TextStyle(color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                  color: AppColors.textSecondary),
                             ),
                           ),
                         ],
@@ -197,7 +204,8 @@ class _AssignmentDetailScreenState
               ],
 
               // Submission form (students only, not yet submitted)
-              if (user?.isStudent == true && assignment.mySubmission == null) ...[
+              if (user?.isStudent == true &&
+                  assignment.mySubmission == null) ...[
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -216,9 +224,8 @@ class _AssignmentDetailScreenState
                         ),
                         const SizedBox(height: 12),
                         ElevatedButton.icon(
-                          onPressed: _isSubmitting
-                              ? null
-                              : () => _submit(assignment),
+                          onPressed:
+                              _isSubmitting ? null : () => _submit(assignment),
                           icon: _isSubmitting
                               ? const SizedBox(
                                   width: 16,
@@ -227,7 +234,9 @@ class _AssignmentDetailScreenState
                                       strokeWidth: 2, color: Colors.white),
                                 )
                               : const Icon(Icons.upload_outlined),
-                          label: Text(_isSubmitting ? 'Submitting...' : 'Submit Assignment'),
+                          label: Text(_isSubmitting
+                              ? 'Submitting...'
+                              : 'Submit Assignment'),
                         ),
                       ],
                     ),
@@ -242,8 +251,20 @@ class _AssignmentDetailScreenState
   }
 
   String _formatDate(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 }
@@ -256,20 +277,28 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color;
     switch (status) {
-      case 'Graded': color = AppColors.success; break;
-      case 'Submitted': color = AppColors.info; break;
-      case 'Overdue': color = AppColors.danger; break;
-      default: color = AppColors.warning;
+      case 'Graded':
+        color = AppColors.success;
+        break;
+      case 'Submitted':
+        color = AppColors.info;
+        break;
+      case 'Overdue':
+        color = AppColors.danger;
+        break;
+      default:
+        color = AppColors.warning;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(status,
-          style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12)),
+          style: TextStyle(
+              color: color, fontWeight: FontWeight.w600, fontSize: 12)),
     );
   }
 }

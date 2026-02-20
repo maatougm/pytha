@@ -35,9 +35,11 @@ class GradesScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.grade_outlined, size: 64, color: AppColors.textMuted),
+                  Icon(Icons.grade_outlined,
+                      size: 64, color: AppColors.textMuted),
                   SizedBox(height: 16),
-                  Text('No grades yet', style: TextStyle(color: AppColors.textSecondary)),
+                  Text('No grades yet',
+                      style: TextStyle(color: AppColors.textSecondary)),
                 ],
               ),
             );
@@ -67,11 +69,13 @@ class GradesScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text('Overall Average',
-                                    style: TextStyle(color: AppColors.textSecondary)),
+                                    style: TextStyle(
+                                        color: AppColors.textSecondary)),
                                 Text(
                                   '${avg.toStringAsFixed(1)}%',
                                   style: const TextStyle(
-                                      fontSize: 28, fontWeight: FontWeight.w800),
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w800),
                                 ),
                                 Text(
                                   '${grades.length} graded assignments',
@@ -112,10 +116,15 @@ class _GradeCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color;
-    if (percentage >= 90) color = AppColors.success;
-    else if (percentage >= 70) color = AppColors.info;
-    else if (percentage >= 60) color = AppColors.warning;
-    else color = AppColors.danger;
+    if (percentage >= 90) {
+      color = AppColors.success;
+    } else if (percentage >= 70) {
+      color = AppColors.info;
+    } else if (percentage >= 60) {
+      color = AppColors.warning;
+    } else {
+      color = AppColors.danger;
+    }
 
     return SizedBox(
       width: 72,
@@ -126,7 +135,7 @@ class _GradeCircle extends StatelessWidget {
           CircularProgressIndicator(
             value: percentage / 100,
             strokeWidth: 6,
-            backgroundColor: color.withOpacity(0.15),
+            backgroundColor: color.withValues(alpha: 0.15),
             valueColor: AlwaysStoppedAnimation(color),
           ),
           Text(
@@ -155,10 +164,15 @@ class _GradeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color;
-    if (grade.percentage >= 90) color = AppColors.success;
-    else if (grade.percentage >= 70) color = AppColors.info;
-    else if (grade.percentage >= 60) color = AppColors.warning;
-    else color = AppColors.danger;
+    if (grade.percentage >= 90) {
+      color = AppColors.success;
+    } else if (grade.percentage >= 70) {
+      color = AppColors.info;
+    } else if (grade.percentage >= 60) {
+      color = AppColors.warning;
+    } else {
+      color = AppColors.danger;
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),

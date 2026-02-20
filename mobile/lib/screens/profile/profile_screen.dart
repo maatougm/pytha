@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/update_service.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -71,7 +72,7 @@ class ProfileScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.roleColor(user.primaryRole).withOpacity(0.1),
+                      color: AppColors.roleColor(user.primaryRole).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -129,6 +130,28 @@ class ProfileScreen extends ConsumerWidget {
                     title: const Text('Change Password'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {},
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.system_update),
+                    title: const Text('Check for Updates'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final updateService = UpdateService();
+                      final updateInfo = await updateService.checkForUpdate();
+                      if (context.mounted) {
+                        if (updateInfo != null && updateInfo.hasUpdate) {
+                          updateService.showUpdateDialog(context, updateInfo);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('You are using the latest version!'),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                        }
+                      }
+                    },
                   ),
                 ],
               ),

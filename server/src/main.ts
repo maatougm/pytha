@@ -7,12 +7,26 @@ import helmet from 'helmet';
 import compression from 'compression';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 
 dotenv.config({ path: '../.env' });
 
 async function bootstrap() {
     const logger = new Logger('Bootstrap');
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+    // Ensure downloads directory exists
+    const downloadsDir = join(__dirname, '..', 'downloads');
+    if (!existsSync(downloadsDir)) {
+        mkdirSync(downloadsDir, { recursive: true });
+    }
+
+    // Serve static files from downloads directory
+    app.useStaticAssets(join(__dirname, '..', 'downloads'), {
+        prefix: '/downloads/',
+    });
 
     // Security headers
     app.use(helmet({

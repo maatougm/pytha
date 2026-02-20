@@ -2,30 +2,24 @@ import 'package:flutter/foundation.dart';
 
 class AppConfig {
   // API Configuration
-  static const String apiBaseUrl = kIsWeb
-      ? String.fromEnvironment(
-          'API_BASE_URL',
-          defaultValue: 'http://localhost:3000',
-        )
-      : String.fromEnvironment(
-          'API_BASE_URL',
-          defaultValue: 'http://192.168.1.100:3000',
-        );
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: kIsWeb ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
+  );
 
-  // WebSocket Configuration  
-  static const String wsBaseUrl = kIsWeb
-      ? String.fromEnvironment(
-          'WS_BASE_URL',
-          defaultValue: 'http://localhost:3000',
-        )
-      : String.fromEnvironment(
-          'WS_BASE_URL',
-          defaultValue: 'http://192.168.1.100:3000',
-        );
+  // WebSocket Configuration
+  static const String wsBaseUrl = String.fromEnvironment(
+    'WS_BASE_URL',
+    defaultValue: kIsWeb ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
+  );
 
   // App Configuration
-  static const String appName = 'School Hub';
+  static const String appName = 'MiniVirson';
   static const String appVersion = '1.0.0';
+
+  // Use HTTPS Domain instead of HTTP localhost
+  static const String baseUrl = 'https://pythagore-init.com/api';
+  static const String wsUrl = 'wss://pythagore-init.com';
 
   // Feature Flags
   static const bool enableLogging = !kReleaseMode;

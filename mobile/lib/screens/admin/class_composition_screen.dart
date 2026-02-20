@@ -34,7 +34,7 @@ class _ClassCompositionScreenState
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: ElevatedButton(
-            onPressed: () => ref.refresh(classCompositionProvider),
+            onPressed: () => ref.invalidate(classCompositionProvider),
             child: const Text('Retry'),
           ),
         ),
@@ -61,7 +61,8 @@ class _ClassCompositionScreenState
                   width: 220,
                   child: _ClassSidebar(
                     classes: classes,
-                    selectedId: _selectedClassId ?? classes.first['id'] as String,
+                    selectedId:
+                        _selectedClassId ?? classes.first['id'] as String,
                     onSelect: (id) => setState(() => _selectedClassId = id),
                   ),
                 )
@@ -77,8 +78,10 @@ class _ClassCompositionScreenState
                       Padding(
                         padding: const EdgeInsets.all(12),
                         child: DropdownButtonFormField<String>(
-                          value: _selectedClassId ?? classes.first['id'] as String,
-                          decoration: const InputDecoration(labelText: 'Select Class'),
+                          initialValue:
+                              _selectedClassId ?? classes.first['id'] as String,
+                          decoration:
+                              const InputDecoration(labelText: 'Select Class'),
                           items: classes.map((c) {
                             return DropdownMenuItem<String>(
                               value: c['id'] as String,
@@ -88,7 +91,8 @@ class _ClassCompositionScreenState
                               ),
                             );
                           }).toList(),
-                          onChanged: (id) => setState(() => _selectedClassId = id),
+                          onChanged: (id) =>
+                              setState(() => _selectedClassId = id),
                         ),
                       ),
                     // Students in class
@@ -114,7 +118,7 @@ class _ClassCompositionScreenState
     final api = ref.read(apiClientProvider);
     try {
       await api.delete(ApiEndpoints.adminEnrollment(enrollmentId));
-      ref.refresh(classCompositionProvider);
+      ref.invalidate(classCompositionProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -126,7 +130,8 @@ class _ClassCompositionScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
         );
       }
     }
@@ -257,7 +262,8 @@ class _ClassStudentsList extends StatelessWidget {
                       trailing: IconButton(
                         icon: const Icon(Icons.remove_circle_outline,
                             color: AppColors.danger),
-                        onPressed: () => onRemoveStudent(s['enrollmentId'] as String),
+                        onPressed: () =>
+                            onRemoveStudent(s['enrollmentId'] as String),
                       ),
                     );
                   },

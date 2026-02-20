@@ -43,7 +43,7 @@ class TeacherAllocationScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: ElevatedButton(
-            onPressed: () => ref.refresh(teacherAllocationsProvider),
+            onPressed: () => ref.invalidate(teacherAllocationsProvider),
             child: const Text('Retry'),
           ),
         ),
@@ -70,7 +70,7 @@ class TeacherAllocationScreen extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            onRefresh: () async => ref.refresh(teacherAllocationsProvider),
+            onRefresh: () async => ref.invalidate(teacherAllocationsProvider),
             child: ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: allocations.length,
@@ -92,7 +92,8 @@ class TeacherAllocationScreen extends ConsumerWidget {
                           ? Text(
                               '${teacher?['firstName']?[0] ?? 'T'}',
                               style: const TextStyle(
-                                  color: Colors.white, fontWeight: FontWeight.w700),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
                             )
                           : null,
                     ),
@@ -116,7 +117,8 @@ class TeacherAllocationScreen extends ConsumerWidget {
                     trailing: IconButton(
                       icon: const Icon(Icons.remove_circle_outline,
                           color: AppColors.danger),
-                      onPressed: () => _removeAllocation(context, ref, a['id'] as String),
+                      onPressed: () =>
+                          _removeAllocation(context, ref, a['id'] as String),
                     ),
                   ),
                 );
@@ -141,7 +143,8 @@ class TeacherAllocationScreen extends ConsumerWidget {
               child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove', style: TextStyle(color: AppColors.danger)),
+            child:
+                const Text('Remove', style: TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -151,11 +154,12 @@ class TeacherAllocationScreen extends ConsumerWidget {
     final api = ref.read(apiClientProvider);
     try {
       await api.delete(ApiEndpoints.adminTeacherAllocationById(allocationId));
-      ref.refresh(teacherAllocationsProvider);
+      ref.invalidate(teacherAllocationsProvider);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
         );
       }
     }
@@ -174,7 +178,8 @@ class _AssignTeacherSheet extends ConsumerStatefulWidget {
   const _AssignTeacherSheet();
 
   @override
-  ConsumerState<_AssignTeacherSheet> createState() => _AssignTeacherSheetState();
+  ConsumerState<_AssignTeacherSheet> createState() =>
+      _AssignTeacherSheetState();
 }
 
 class _AssignTeacherSheetState extends ConsumerState<_AssignTeacherSheet> {
@@ -242,12 +247,13 @@ class _AssignTeacherSheetState extends ConsumerState<_AssignTeacherSheet> {
           'classId': _selectedClassId,
         },
       );
-      ref.refresh(teacherAllocationsProvider);
+      ref.invalidate(teacherAllocationsProvider);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+              content: Text('Failed: $e'), backgroundColor: AppColors.danger),
         );
       }
     } finally {

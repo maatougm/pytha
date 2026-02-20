@@ -2,14 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/update_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user.dart';
+import '../../services/update_service.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Check for app updates after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdates();
+    });
+  }
+
+  Future<void> _checkForUpdates() async {
+    await Future.delayed(const Duration(seconds: 2)); // Wait for app to settle
+    if (mounted) {
+      await ref.read(updateProvider.notifier).checkForUpdate(context);
+    }
+  }
+
+  void _showUpdateDialog(BuildContext context) async {
+    final updateInfo = await UpdateService().checkForUpdate();
+    if (updateInfo != null && updateInfo.hasUpdate && mounted) {
+      if (context.mounted) {
+        UpdateService().showUpdateDialog(
+          context,
+          updateInfo,
+          showSkip: !updateInfo.forceUpdate,
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     if (user == null) return const SizedBox.shrink();
 
@@ -33,6 +69,27 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // Update indicator
+          Consumer(
+            builder: (context, ref, child) {
+              final updateState = ref.watch(updateProvider);
+              if (updateState.hasUpdate) {
+                return IconButton(
+                  icon: Badge(
+                    smallSize: 8,
+                    backgroundColor: AppColors.danger,
+                    child: Icon(
+                      Icons.system_update,
+                      color: updateState.forceUpdate ? AppColors.danger : AppColors.primary,
+                    ),
+                  ),
+                  onPressed: () => _showUpdateDialog(context),
+                  tooltip: 'Update Available',
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
@@ -221,7 +278,7 @@ class _ActionTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: action.color.withOpacity(0.1),
+                color: action.color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(action.icon, color: action.color, size: 22),
@@ -254,7 +311,7 @@ class _NavCard extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color),

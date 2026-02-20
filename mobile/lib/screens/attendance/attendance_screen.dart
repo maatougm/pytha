@@ -5,11 +5,14 @@ import '../../core/api/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/file_model.dart';
 
-final myAttendanceProvider = FutureProvider<List<AttendanceRecord>>((ref) async {
+final myAttendanceProvider =
+    FutureProvider<List<AttendanceRecord>>((ref) async {
   final api = ref.read(apiClientProvider);
   final response = await api.get(ApiEndpoints.myAttendance);
   final list = response.data as List<dynamic>;
-  return list.map((a) => AttendanceRecord.fromJson(a as Map<String, dynamic>)).toList();
+  return list
+      .map((a) => AttendanceRecord.fromJson(a as Map<String, dynamic>))
+      .toList();
 });
 
 class AttendanceScreen extends ConsumerWidget {
@@ -52,7 +55,8 @@ class AttendanceScreen extends ConsumerWidget {
                             child: Column(
                               children: [
                                 Text('Attendance Rate',
-                                    style: Theme.of(context).textTheme.titleLarge),
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge),
                                 const SizedBox(height: 12),
                                 SizedBox(
                                   height: 120,
@@ -75,17 +79,21 @@ class AttendanceScreen extends ConsumerWidget {
                                       Text(
                                         '${rate.toStringAsFixed(0)}%',
                                         style: const TextStyle(
-                                            fontSize: 24, fontWeight: FontWeight.w800),
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w800),
                                       ),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    _StatChip('Present', present, AppColors.success),
-                                    _StatChip('Absent', absent, AppColors.danger),
+                                    _StatChip(
+                                        'Present', present, AppColors.success),
+                                    _StatChip(
+                                        'Absent', absent, AppColors.danger),
                                     _StatChip('Late', late, AppColors.warning),
                                   ],
                                 ),
@@ -130,7 +138,8 @@ class _StatChip extends StatelessWidget {
               style: TextStyle(
                   fontSize: 22, fontWeight: FontWeight.w800, color: color)),
           Text(label,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontSize: 12)),
         ],
       );
 }
@@ -170,12 +179,13 @@ class _AttendanceRow extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             record.status[0].toUpperCase() + record.status.substring(1),
-            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12),
+            style: TextStyle(
+                color: color, fontWeight: FontWeight.w600, fontSize: 12),
           ),
         ),
       ),
@@ -183,8 +193,20 @@ class _AttendanceRow extends StatelessWidget {
   }
 
   String _formatDate(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return '${days[dt.weekday - 1]}, ${months[dt.month - 1]} ${dt.day}';
   }

@@ -309,7 +309,7 @@ class _MessageBubble extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 10,
                                 color: isMe
-                                    ? Colors.white.withOpacity(0.7)
+                                    ? Colors.white.withValues(alpha: 0.7)
                                     : AppColors.textMuted,
                               ),
                             ),
@@ -320,7 +320,7 @@ class _MessageBubble extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: isMe
-                                      ? Colors.white.withOpacity(0.7)
+                                      ? Colors.white.withValues(alpha: 0.7)
                                       : AppColors.textMuted,
                                   fontStyle: FontStyle.italic,
                                 ),
@@ -346,7 +346,7 @@ class _MessageBubble extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: AppColors.primaryLight,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                               ),
                               child: Text(
                                 '${e.key} ${e.value.length}',
@@ -432,7 +432,7 @@ class _TypingDotsState extends State<_TypingDots>
               width: 6,
               height: 6,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(opacity),
+                color: AppColors.primary.withValues(alpha: opacity),
                 shape: BoxShape.circle,
               ),
             );

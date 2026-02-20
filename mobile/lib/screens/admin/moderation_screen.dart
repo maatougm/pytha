@@ -4,8 +4,8 @@ import '../../core/api/api_client.dart';
 import '../../core/api/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 
-final reportsProvider = FutureProvider.family<Map<String, dynamic>, String>(
-    (ref, status) async {
+final reportsProvider =
+    FutureProvider.family<Map<String, dynamic>, String>((ref, status) async {
   final api = ref.read(apiClientProvider);
   final response = await api.get(
     ApiEndpoints.moderationReports,
@@ -24,8 +24,20 @@ class ModerationScreen extends ConsumerStatefulWidget {
 class _ModerationScreenState extends ConsumerState<ModerationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabs;
-  static const _statuses = ['', 'pending', 'investigating', 'resolved', 'dismissed'];
-  static const _labels = ['All', 'Pending', 'Investigating', 'Resolved', 'Dismissed'];
+  static const _statuses = [
+    '',
+    'pending',
+    'investigating',
+    'resolved',
+    'dismissed'
+  ];
+  static const _labels = [
+    'All',
+    'Pending',
+    'Investigating',
+    'Resolved',
+    'Dismissed'
+  ];
 
   @override
   void initState() {
@@ -52,9 +64,7 @@ class _ModerationScreenState extends ConsumerState<ModerationScreen>
       ),
       body: TabBarView(
         controller: _tabs,
-        children: _statuses
-            .map((s) => _ReportsList(status: s))
-            .toList(),
+        children: _statuses.map((s) => _ReportsList(status: s)).toList(),
       ),
     );
   }
@@ -72,7 +82,7 @@ class _ReportsList extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
         child: ElevatedButton(
-          onPressed: () => ref.refresh(reportsProvider(status)),
+          onPressed: () => ref.invalidate(reportsProvider(status)),
           child: const Text('Retry'),
         ),
       ),
@@ -83,9 +93,11 @@ class _ReportsList extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.shield_outlined, size: 64, color: AppColors.textMuted),
+                Icon(Icons.shield_outlined,
+                    size: 64, color: AppColors.textMuted),
                 SizedBox(height: 16),
-                Text('No reports', style: TextStyle(color: AppColors.textSecondary)),
+                Text('No reports',
+                    style: TextStyle(color: AppColors.textSecondary)),
               ],
             ),
           );
@@ -103,7 +115,7 @@ class _ReportsList extends ConsumerWidget {
                   ApiEndpoints.moderationReportById(report['id'] as String),
                   data: {'status': newStatus},
                 );
-                ref.refresh(reportsProvider(status));
+                ref.invalidate(reportsProvider(status));
               },
             );
           },
@@ -124,10 +136,17 @@ class _ReportCard extends StatelessWidget {
     final reportStatus = report['status'] as String? ?? 'pending';
     Color statusColor;
     switch (reportStatus) {
-      case 'resolved': statusColor = AppColors.success; break;
-      case 'dismissed': statusColor = AppColors.textMuted; break;
-      case 'investigating': statusColor = AppColors.warning; break;
-      default: statusColor = AppColors.danger;
+      case 'resolved':
+        statusColor = AppColors.success;
+        break;
+      case 'dismissed':
+        statusColor = AppColors.textMuted;
+        break;
+      case 'investigating':
+        statusColor = AppColors.warning;
+        break;
+      default:
+        statusColor = AppColors.danger;
     }
 
     final reporter = report['reporter'] as Map<String, dynamic>?;
@@ -149,14 +168,18 @@ class _ReportCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     reportStatus,
-                    style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: statusColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -165,12 +188,14 @@ class _ReportCard extends StatelessWidget {
             if (reporter != null)
               Text(
                 'Reported by: ${reporter['firstName']} ${reporter['lastName']}',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 12),
               ),
             if (channel != null)
               Text(
                 'Channel: #${channel['name']}',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 12),
               ),
             if (report['description'] != null) ...[
               const SizedBox(height: 6),
@@ -197,7 +222,8 @@ class _ReportCard extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => onUpdateStatus('resolved'),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success),
                       child: const Text('Resolve'),
                     ),
                   ),

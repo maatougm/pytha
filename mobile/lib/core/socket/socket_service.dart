@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../api/api_client.dart';
 import '../config/app_config.dart';
 
@@ -27,33 +27,23 @@ class SocketService {
     _initialized = true;
   }
 
-  Future<String?> _readToken() async {
-    await _initStorage();
-    if (kIsWeb) {
-      return _webStorage?.get('access_token');
-    }
-    // For mobile, use the same initStorage from api_client
-    return null;
-  }
-
   Future<void> connect() async {
     if (_socket?.connected == true) return;
 
     await _initStorage();
     String? token;
-    
+
     if (kIsWeb) {
       token = _webStorage?.get('access_token');
     } else {
-      // Mobile uses secure storage - need to import and use the same method
-      // For now, return as token management is handled by api_client
-      return;
+      // Mobile: read from secure storage via api_client
+      token = await readToken('access_token');
     }
-    
+
     if (token == null) return;
 
     _socket = io.io(
-      AppConfig.wsBaseUrl,
+      '${AppConfig.wsUrl}/messaging',
       io.OptionBuilder()
           .setTransports(_transports)
           .setAuth({'token': token})
@@ -89,50 +79,50 @@ class SocketService {
   // ─── Messaging Events ─────────────────────────────────────────────────────
 
   void joinChannel(String channelId) {
-    emit('join_channel', {'channelId': channelId});
+    emit('channel:join', {'channelId': channelId});
   }
 
-  void sendMessage(String channelId, String content, {String? fileId}) {
-    emit('send_message', {
+  void sendMessage(String channelId, String content, {String? replyTo}) {
+    emit('message:send', {
       'channelId': channelId,
       'content': content,
-      if (fileId != null) 'fileId': fileId,
+      if (replyTo != null) 'replyTo': replyTo,
     });
   }
 
   void editMessage(String messageId, String content) {
-    emit('edit_message', {'messageId': messageId, 'content': content});
+    emit('message:edit', {'messageId': messageId, 'content': content});
   }
 
   void deleteMessage(String messageId, String channelId) {
-    emit('delete_message', {'messageId': messageId, 'channelId': channelId});
+    emit('message:delete', {'messageId': messageId, 'channelId': channelId});
   }
 
   void startTyping(String channelId) {
-    emit('typing_start', {'channelId': channelId});
+    emit('typing:start', {'channelId': channelId});
   }
 
   void stopTyping(String channelId) {
-    emit('typing_stop', {'channelId': channelId});
+    emit('typing:stop', {'channelId': channelId});
   }
 
   void markMessageRead(String messageId, String channelId) {
-    emit('message_read', {'messageId': messageId, 'channelId': channelId});
+    emit('message:read', {'messageId': messageId, 'channelId': channelId});
   }
 
   void addReaction(String messageId, String channelId, String emoji) {
-    emit('add_reaction', {
+    emit('reaction:add', {
       'messageId': messageId,
       'channelId': channelId,
-      'emoji': emoji,
+      'reaction': emoji,
     });
   }
 
   void removeReaction(String messageId, String channelId, String emoji) {
-    emit('remove_reaction', {
+    emit('reaction:remove', {
       'messageId': messageId,
       'channelId': channelId,
-      'emoji': emoji,
+      'reaction': emoji,
     });
   }
 }

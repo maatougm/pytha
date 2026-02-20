@@ -34,7 +34,11 @@ class AdminDashboardScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppColors.danger,
+              ),
               const SizedBox(height: 12),
               Text('$e'),
               const SizedBox(height: 8),
@@ -58,7 +62,10 @@ class AdminDashboardScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Overview', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Overview',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 12),
                   GridView.count(
                     crossAxisCount: 2,
@@ -99,7 +106,10 @@ class AdminDashboardScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Quick Actions',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 12),
                   _ActionRow(
                     icon: Icons.people_outlined,
@@ -167,41 +177,60 @@ class _MetricCard extends StatelessWidget {
   final Color color;
   final String? subtitle;
 
-  const _MetricCard(this.title, this.value, this.icon, this.color, {this.subtitle});
+  const _MetricCard(
+    this.title,
+    this.value,
+    this.icon,
+    this.color, {
+    this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          color: AppColors.textSecondary, fontSize: 12)),
-                  Icon(icon, color: color, size: 18),
-                ],
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(value,
-                      style: TextStyle(
-                          fontSize: 26, fontWeight: FontWeight.w800, color: color)),
-                  if (subtitle != null)
-                    Text(subtitle!,
-                        style: const TextStyle(
-                            color: AppColors.textMuted, fontSize: 11)),
-                ],
-              ),
+              Icon(icon, color: color, size: 18),
             ],
           ),
-        ),
-      );
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                ),
+              ),
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _ActionRow extends StatelessWidget {
@@ -221,20 +250,20 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        margin: const EdgeInsets.only(bottom: 8),
-        child: ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color),
-          ),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: onTap,
+    margin: const EdgeInsets.only(bottom: 8),
+    child: ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
         ),
-      );
+        child: Icon(icon, color: color),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    ),
+  );
 }

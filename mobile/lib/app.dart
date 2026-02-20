@@ -1,32 +1,32 @@
-import 'package:flutter/material.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/auth_provider.dart';
-import '../screens/auth/login_screen.dart';
-import '../screens/auth/register_screen.dart';
-import '../screens/home/home_screen.dart';
-import '../screens/messaging/channels_screen.dart';
-import '../screens/messaging/chat_screen.dart';
-import '../screens/courses/courses_screen.dart';
-import '../screens/assignments/assignments_screen.dart';
-import '../screens/assignments/assignment_detail_screen.dart';
-import '../screens/grades/grades_screen.dart';
-import '../screens/attendance/attendance_screen.dart';
-import '../screens/files/files_screen.dart';
-import '../screens/profile/profile_screen.dart';
-import '../screens/admin/admin_shell_screen.dart';
-import '../screens/admin/admin_dashboard_screen.dart';
-import '../screens/admin/user_management_screen.dart';
-import '../screens/admin/moderation_screen.dart';
-import '../screens/admin/audit_logs_screen.dart';
-import '../screens/admin/system_settings_screen.dart';
-import '../screens/admin/admin_classes_screen.dart';
-import '../screens/admin/class_composition_screen.dart';
-import '../screens/admin/teacher_allocation_screen.dart';
-import '../screens/admin/admin_user_creation_screen.dart';
-import '../screens/admin/admin_parent_link_screen.dart';
-import '../screens/admin/admin_class_creation_screen.dart';
-import '../screens/admin/admin_course_management_screen.dart';
+import 'providers/auth_provider.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/messaging/channels_screen.dart';
+import 'screens/messaging/chat_screen.dart';
+import 'screens/courses/courses_screen.dart';
+import 'screens/assignments/assignments_screen.dart';
+import 'screens/assignments/assignment_detail_screen.dart';
+import 'screens/grades/grades_screen.dart';
+import 'screens/attendance/attendance_screen.dart';
+import 'screens/files/files_screen.dart';
+import 'screens/profile/profile_screen.dart';
+import 'screens/admin/admin_shell_screen.dart';
+import 'screens/admin/admin_dashboard_screen.dart';
+import 'screens/admin/user_management_screen.dart';
+import 'screens/admin/moderation_screen.dart';
+import 'screens/admin/audit_logs_screen.dart';
+import 'screens/admin/system_settings_screen.dart';
+import 'screens/admin/admin_classes_screen.dart';
+import 'screens/admin/class_composition_screen.dart';
+import 'screens/admin/teacher_allocation_screen.dart';
+import 'screens/admin/admin_user_creation_screen.dart';
+import 'screens/admin/admin_parent_link_screen.dart';
+import 'screens/admin/admin_class_creation_screen.dart';
+import 'screens/admin/admin_course_management_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -36,7 +36,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isAuthenticated = authState.isAuthenticated;
       final isLoading = authState.isLoading;
-      final isAuthRoute = state.matchedLocation == '/login' ||
+      final isAuthRoute =
+          state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
 
       if (isLoading) return null;
@@ -56,14 +57,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/channels', builder: (_, __) => const ChannelsScreen()),
       GoRoute(
         path: '/channels/:id',
-        builder: (_, state) => ChatScreen(channelId: state.pathParameters['id']!),
+        builder: (_, state) =>
+            ChatScreen(channelId: state.pathParameters['id']!),
       ),
 
       // Courses
       GoRoute(path: '/courses', builder: (_, __) => const CoursesScreen()),
 
       // Assignments
-      GoRoute(path: '/assignments', builder: (_, __) => const AssignmentsScreen()),
+      GoRoute(
+        path: '/assignments',
+        builder: (_, __) => const AssignmentsScreen(),
+      ),
       GoRoute(
         path: '/assignments/:id',
         builder: (_, state) =>
@@ -74,7 +79,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/grades', builder: (_, __) => const GradesScreen()),
 
       // Attendance
-      GoRoute(path: '/attendance', builder: (_, __) => const AttendanceScreen()),
+      GoRoute(
+        path: '/attendance',
+        builder: (_, __) => const AttendanceScreen(),
+      ),
 
       // Files
       GoRoute(path: '/files', builder: (_, __) => const FilesScreen()),

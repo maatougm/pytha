@@ -2,9 +2,15 @@
 # School Hub - PRODUCTION DEPLOYMENT
 # =============================================================================
 # ⚠️  PRODUCTION USE ONLY - Requires SSL certificates and proper secrets
+#
+# USAGE:
+#   1. Copy .env.production to .env and fill in your secrets
+#   2. Generate strong secrets (see .env.production comments)
+#   3. Run: docker-compose -f docker-compose.prod.yml up -d --build
+#
+#   For first deployment with monitoring:
+#   docker-compose -f docker-compose.prod.yml --profile with-backup --profile with-logging up -d --build
 # =============================================================================
-
-version: "3.8"
 
 services:
   # ===========================================================================
@@ -77,7 +83,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: sms_server_prod
+    #container_name: sms_server_prod
     restart: always
     environment:
       # Database
@@ -110,6 +116,12 @@ services:
       # Security
       BCRYPT_ROUNDS: 12
       
+      # Email Configuration
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      
       # S3/Object Storage (for production file storage)
       S3_ENDPOINT: ${S3_ENDPOINT:-}
       S3_BUCKET: ${S3_BUCKET:-}
@@ -122,8 +134,8 @@ services:
     volumes:
       - uploads_data:/app/uploads
       - logs_data:/app/logs
-    expose:
-      - "3000"
+    ports:
+      - "127.0.0.1:3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -139,7 +151,6 @@ services:
       retries: 3
       start_period: 60s
     deploy:
-      replicas: ${API_REPLICAS:-2}
       resources:
         limits:
           cpus: '1'
@@ -157,20 +168,24 @@ services:
         max_attempts: 3
 
   # ===========================================================================
-  # Flutter Web Frontend (Production)
+  # Flutter Web Frontend (Production Build)
+  # ===========================================================================
+  # This service builds the Flutter web app WITHIN Docker using the
+  # provided API_BASE_URL build argument. No local build required.
   # ===========================================================================
   flutter_web:
-    image: nginx:alpine
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile.web
+      args:
+        # Pass the API URL at BUILD time - this is baked into the Flutter app
+        API_BASE_URL: ${API_BASE_URL}
+        # Also pass WebSocket URL if different (defaults to API_BASE_URL)
+        WS_BASE_URL: ${WS_BASE_URL:-${API_BASE_URL}}
     container_name: sms_flutter_web_prod
     restart: always
-    volumes:
-      - ./mobile/build/web:/usr/share/nginx/html:ro
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./logs/nginx:/var/log/nginx
-    ports:
-      - "80:80"
-      - "443:443"
+    expose:
+      - "80"
     depends_on:
       - server
     networks:
@@ -185,16 +200,26 @@ services:
   # Nginx Load Balancer / Reverse Proxy
   # ===========================================================================
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: sms_nginx_prod
     restart: always
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      # These are substituted into nginx.conf at container startup
+      DOMAIN_NAME: ${DOMAIN_NAME}
+      API_BASE_URL: ${API_BASE_URL}
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # SSL certificates - mount your certs here
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      # Logs
       - ./logs/nginx:/var/log/nginx
+      # Certbot for Let's Encrypt (optional)
+      - ./certbot/data:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
     depends_on:
       - server
       - flutter_web
@@ -209,6 +234,8 @@ services:
 
   # ===========================================================================
   # Backup Service (Automated backups)
+  # ===========================================================================
+  # Enable with: --profile with-backup
   # ===========================================================================
   backup:
     image: postgres:16-alpine
@@ -278,6 +305,7 @@ services:
       - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:3001}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro

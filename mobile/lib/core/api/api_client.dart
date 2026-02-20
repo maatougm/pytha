@@ -2,19 +2,15 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'api_endpoints.dart';
+import '../config/app_config.dart';
 
-// Use different base URL for web vs mobile
-const String _baseUrl = kIsWeb
-    ? String.fromEnvironment(
-        'API_BASE_URL',
-        defaultValue: 'http://localhost:3000',
-      )
-    : String.fromEnvironment(
-        'API_BASE_URL',
-        defaultValue: 'http://192.168.1.100:3000',
-      );
+// ==========================================
+// SERVER CONFIGURATION
+// ==========================================
+// Using AppConfig for centralized configuration
+const String _baseUrl = AppConfig.baseUrl;
 
 // Secure storage for mobile, Hive for web
 final _storage = kIsWeb ? null : const FlutterSecureStorage();
