@@ -32,6 +32,11 @@ export class GradingController {
         return this.gradingService.createAssignment(classId, req.user.sub, dto);
     }
 
+    @Get('assignments/pending/count')
+    getPendingAssignmentsCount(@Request() req) {
+        return this.gradingService.getPendingAssignmentsCount(req.user.sub);
+    }
+
     @Get('classes/:classId/assignments')
     getClassAssignments(
         @Param('classId') classId: string,
