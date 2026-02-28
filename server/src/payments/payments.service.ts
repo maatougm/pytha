@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
@@ -25,6 +25,24 @@ export interface CreateInvoiceInput {
 @Injectable()
 export class PaymentsService {
   constructor(private prisma: PrismaService) {}
+  async verifyAccess(userId: string, userRoles: string[], studentId: string) {
+    if (userRoles?.includes('admin')) return;
+    if (userId === studentId) return;
+
+    const link = await this.prisma.parentStudent.findUnique({
+      where: {
+        parentId_studentId: {
+          parentId: userId,
+          studentId,
+        },
+      },
+    });
+
+    if (!link) {
+      throw new ForbiddenException("You are not authorized to access this student's records");
+    }
+  }
+
 
   async createPaymentIntent(input: CreatePaymentIntentInput, payerId: string) {
     // Validate student exists
@@ -150,7 +168,8 @@ export class PaymentsService {
     });
   }
 
-  async getFeeBalance(studentId: string) {
+  async getFeeBalance(studentId: string, userId: string, userRoles: string[]) {
+    await this.verifyAccess(userId, userRoles, studentId);
     const invoices = await this.prisma.feeInvoice.findMany({
       where: { studentId },
       include: {
@@ -187,7 +206,8 @@ export class PaymentsService {
     };
   }
 
-  async getPaymentHistory(studentId: string, page = 1, limit = 20) {
+  async getPaymentHistory(studentId: string, userId: string, userRoles: string[], page = 1, limit = 20) {
+    await this.verifyAccess(userId, userRoles, studentId);
     const skip = (page - 1) * limit;
 
     const [payments, total] = await Promise.all([
@@ -239,7 +259,7 @@ export class PaymentsService {
     });
   }
 
-  async getReceipt(paymentId: string, userId: string) {
+  async getReceipt(paymentId: string, userId: string, userRoles: string[]) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
       include: {
@@ -259,8 +279,9 @@ export class PaymentsService {
 
     // Check if user is authorized (parent who paid or admin)
     if (payment.payerId !== userId && payment.studentId !== userId) {
-      // TODO: Check if user is admin
-      throw new BadRequestException('You are not authorized to view this receipt');
+      if (!userRoles?.includes('admin')) {
+        throw new ForbiddenException('You are not authorized to view this receipt');
+      }
     }
 
     return {

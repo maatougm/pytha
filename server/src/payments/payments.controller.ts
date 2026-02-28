@@ -29,8 +29,7 @@ export class PaymentsController {
   @Get('balance/:studentId')
   @ApiOperation({ summary: 'Get fee balance and invoice list for a student' })
   async getFeeBalance(@Param('studentId') studentId: string, @Request() req) {
-    // TODO: Check if user is parent of student or admin
-    return this.paymentsService.getFeeBalance(studentId);
+    return this.paymentsService.getFeeBalance(studentId, req.user.sub, req.user.roles);
   }
 
   @Get('history/:studentId')
@@ -41,9 +40,10 @@ export class PaymentsController {
     @Query('limit') limit?: string,
     @Request() req?: any,
   ) {
-    // TODO: Check if user is parent of student or admin
     return this.paymentsService.getPaymentHistory(
       studentId,
+      req.user.sub,
+      req.user.roles,
       page ? parseInt(page) : 1,
       limit ? parseInt(limit) : 20,
     );
@@ -67,7 +67,7 @@ export class PaymentsController {
   @Get('receipt/:paymentId')
   @ApiOperation({ summary: 'Get payment receipt' })
   async getReceipt(@Param('paymentId') paymentId: string, @Request() req) {
-    return this.paymentsService.getReceipt(paymentId, req.user.sub);
+    return this.paymentsService.getReceipt(paymentId, req.user.sub, req.user.roles);
   }
 
   // Admin endpoints
