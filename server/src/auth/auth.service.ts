@@ -8,7 +8,9 @@ import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { Redis } from 'ioredis';
 
-interface TokenPayload {
+export interface TokenPayload {
+    iat?: number;
+    pwdVersion?: number;
     sub: string;
     email: string;
     roles: string[];
@@ -75,7 +77,7 @@ export class AuthService {
         this.logger.log(`User registered: ${user.email} (${dto.role})`);
 
         // Generate tokens
-        const tokens = await this.generateTokens(user.id, user.email, [dto.role]);
+        const tokens = await this.generateTokens(user.id, user.email, [dto.role], (user as any).passwordVersion);
         return {
             user: sanitizeUser(user),
             ...tokens,
@@ -115,7 +117,7 @@ export class AuthService {
         });
 
         const roles = user.userRoles.map((ur) => ur.role.name);
-        const tokens = await this.generateTokens(user.id, user.email, roles);
+        const tokens = await this.generateTokens(user.id, user.email, roles, (user as any).passwordVersion);
 
         this.logger.log(`User logged in: ${user.email}`);
 
@@ -147,7 +149,7 @@ export class AuthService {
         // HIGH-002 fix: use a transaction so the old token is only deleted
         // after the new one is successfully created. Prevents logout on failure.
         const tokens = await this.prisma.$transaction(async (tx) => {
-            const newTokens = await this.generateTokens(stored.user.id, stored.user.email, roles);
+            const newTokens = await this.generateTokens(stored.user.id, stored.user.email, roles, (stored.user as any).passwordVersion);
             await tx.refreshToken.delete({ where: { id: stored.id } });
             return newTokens;
         });
@@ -197,9 +199,9 @@ export class AuthService {
         return { loggedOut: true };
     }
 
-    private async generateTokens(userId: string, email: string, roles: string[]) {
+    private async generateTokens(userId: string, email: string, roles: string[], pwdVersion?: number) {
         const jti = uuidv4(); // Unique token ID for revocation
-        const payload: TokenPayload = { sub: userId, email, roles, jti };
+        const payload: TokenPayload = { sub: userId, email, roles, jti, pwdVersion, iat: Math.floor(Date.now() / 1000) };
 
         const secret = this.configService.get<string>('JWT_SECRET');
         const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');

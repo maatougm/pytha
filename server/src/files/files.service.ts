@@ -587,9 +587,10 @@ export class FilesService {
         }
         const category = rawCategory as FileUploadCategory;
 
-        const categoryDir = path.join(this.uploadsDir, category);
+        const sanitizedCategory = path.basename(category);
+        const categoryDir = path.join(this.uploadsDir, sanitizedCategory);
         const finalPath = path.join(categoryDir, secureFilename);
-        const relativePath = path.join('uploads', category, secureFilename);
+        const relativePath = path.join('uploads', sanitizedCategory, secureFilename);
 
         let thumbnailPath: string | null = null;
 
