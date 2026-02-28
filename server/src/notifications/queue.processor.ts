@@ -278,58 +278,48 @@ export class QueueProcessor {
         userId: string, 
         since: Date
     ): Promise<Array<{ channelName: string; senderName: string; messagePreview: string; count: number }>> {
-        // Get user's channel memberships with lastReadAt
-        const memberships = await this.prisma.channelMember.findMany({
-            where: { userId },
-            include: {
-                channel: {
-                    select: { name: true, id: true },
-                },
-            },
-        });
+        // Optimize N+1 issue: Retrieve unread messages and their counts per channel using a single raw SQL query.
+        // This avoids making `1 + 2 * N` queries (where N is number of channels) in a loop, reducing it to exactly 1 query.
+        const result = await this.prisma.$queryRaw<Array<{
+            channelName: string | null;
+            firstName: string;
+            lastName: string;
+            messagePreview: string;
+            count: number;
+        }>>`
+            WITH UnreadMessages AS (
+                SELECT
+                    c.name as "channelName",
+                    u.first_name as "firstName",
+                    u.last_name as "lastName",
+                    m.content as "messagePreview",
+                    COUNT(*) OVER(PARTITION BY m.channel_id) as "totalCount",
+                    ROW_NUMBER() OVER(PARTITION BY m.channel_id ORDER BY m.created_at DESC) as rn
+                FROM messages m
+                JOIN channel_members cm ON m.channel_id = cm.channel_id AND cm.user_id = ${userId}
+                JOIN channels c ON m.channel_id = c.id
+                JOIN users u ON m.sender_id = u.id
+                WHERE m.created_at >= ${since}
+                  AND m.sender_id != ${userId}
+                  AND m.is_deleted = false
+                  AND (cm.last_read_at IS NULL OR m.created_at > cm.last_read_at)
+            )
+            SELECT
+                "channelName",
+                "firstName",
+                "lastName",
+                "messagePreview",
+                CAST("totalCount" AS INTEGER) as "count"
+            FROM UnreadMessages
+            WHERE rn = 1
+        `;
 
-        const result: Array<{ channelName: string; senderName: string; messagePreview: string; count: number }> = [];
-
-        for (const membership of memberships) {
-            const unreadMessages = await this.prisma.message.findMany({
-                where: {
-                    channelId: membership.channelId,
-                    createdAt: { gte: since },
-                    senderId: { not: userId },
-                    isDeleted: false,
-                    ...(membership.lastReadAt ? { createdAt: { gt: membership.lastReadAt } } : {}),
-                },
-                orderBy: { createdAt: 'desc' },
-                take: 5,
-                include: {
-                    sender: {
-                        select: { firstName: true, lastName: true },
-                    },
-                },
-            });
-
-            if (unreadMessages.length > 0) {
-                const latest = unreadMessages[0];
-                const totalCount = await this.prisma.message.count({
-                    where: {
-                        channelId: membership.channelId,
-                        createdAt: { gte: since },
-                        senderId: { not: userId },
-                        isDeleted: false,
-                        ...(membership.lastReadAt ? { createdAt: { gt: membership.lastReadAt } } : {}),
-                    },
-                });
-
-                result.push({
-                    channelName: membership.channel.name || 'Unnamed Channel',
-                    senderName: `${latest.sender.firstName} ${latest.sender.lastName}`,
-                    messagePreview: latest.content,
-                    count: totalCount,
-                });
-            }
-        }
-
-        return result;
+        return result.map(row => ({
+            channelName: row.channelName || 'Unnamed Channel',
+            senderName: `${row.firstName} ${row.lastName}`,
+            messagePreview: row.messagePreview,
+            count: row.count,
+        }));
     }
 
     /**
