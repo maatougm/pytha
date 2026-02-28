@@ -376,12 +376,13 @@ export class FilesService {
         return new Promise((resolve) => {
             // Use ImageMagick's convert command
             const convert = spawn('convert', [
-                filePath,
                 '-resize', `${width}x${height}>`,
                 '-background', 'white',
                 '-flatten',
                 '-quality', '85',
-                thumbnailPath
+                '--',
+                `${filePath}[0]`,
+                `jpeg:${thumbnailPath}`
             ]);
 
             convert.on('close', (code) => {
@@ -422,10 +423,11 @@ export class FilesService {
 
         return new Promise((resolve) => {
             const convert = spawn('convert', [
-                filePath,
                 '-resize', `${width}x${height}>`,
                 '-quality', '90',
-                previewPath
+                '--',
+                `${filePath}[0]`,
+                `${format}:${previewPath}`
             ]);
 
             convert.on('close', (code) => {
