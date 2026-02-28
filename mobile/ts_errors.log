@@ -1,0 +1,119 @@
+app/(app)/admin/analytics.tsx(523,14): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: AbstractChartProps & BarChartProps): BarChart', gave the following error.
+    Type '{ data: { labels: string[]; datasets: { data: number[]; }[]; }; width: number; height: number; chartConfig: { color: (opacity?: number) => string; backgroundColor: string; backgroundGradientFrom: string; ... 4 more ...; propsForDots: { ...; }; }; style: { ...; }; showValuesOnTopOfBars: true; }' is missing the following properties from type 'Readonly<AbstractChartProps & BarChartProps>': yAxisLabel, yAxisSuffix
+  Overload 2 of 2, '(props: AbstractChartProps & BarChartProps, context: any): BarChart', gave the following error.
+    Type '{ data: { labels: string[]; datasets: { data: number[]; }[]; }; width: number; height: number; chartConfig: { color: (opacity?: number) => string; backgroundColor: string; backgroundGradientFrom: string; ... 4 more ...; propsForDots: { ...; }; }; style: { ...; }; showValuesOnTopOfBars: true; }' is missing the following properties from type 'Readonly<AbstractChartProps & BarChartProps>': yAxisLabel, yAxisSuffix
+app/(app)/assignment/[assignmentId].tsx(665,71): error TS2532: Object is possibly 'undefined'.
+app/(app)/assignment/[assignmentId].tsx(665,116): error TS2532: Object is possibly 'undefined'.
+app/(app)/attendance/mark.tsx(124,5): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(options: DefinedInitialDataOptions<unknown, Error, unknown, string[]>, queryClient?: QueryClient | undefined): DefinedUseQueryResult<unknown, Error>', gave the following error.
+    Object literal may only specify known properties, and 'onSuccess' does not exist in type 'DefinedInitialDataOptions<unknown, Error, unknown, string[]>'.
+  Overload 2 of 3, '(options: UndefinedInitialDataOptions<Student[], Error, Student[], string[]>, queryClient?: QueryClient | undefined): UseQueryResult<...>', gave the following error.
+    Object literal may only specify known properties, and 'onSuccess' does not exist in type 'UndefinedInitialDataOptions<Student[], Error, Student[], string[]>'.
+  Overload 3 of 3, '(options: UseQueryOptions<Student[], Error, Student[], string[]>, queryClient?: QueryClient | undefined): UseQueryResult<Student[], Error>', gave the following error.
+    Object literal may only specify known properties, and 'onSuccess' does not exist in type 'UseQueryOptions<Student[], Error, Student[], string[]>'.
+app/(app)/attendance/mark.tsx(124,17): error TS7006: Parameter 'data' implicitly has an 'any' type.
+app/(app)/attendance/mark.tsx(737,14): error TS2304: Cannot find name 'TextInput'.
+app/(app)/course/[courseId].tsx(282,33): error TS2339: Property 'instructorInitials' does not exist on type '{ container: { flex: number; backgroundColor: string; }; header: { backgroundColor: string; paddingHorizontal: number; paddingTop: number; paddingBottom: number; }; headerTop: { flexDirection: "row"; alignItems: "center"; marginBottom: number; }; ... 55 more ...; actionButtonText: { ...; }; }'.
+app/(tabs)/assignments.tsx(76,68): error TS2345: Argument of type 'FilterTab' is not assignable to parameter of type '{ status?: string | undefined; courseId?: string | undefined; } | undefined'.
+  Type '"pending"' has no properties in common with type '{ status?: string | undefined; courseId?: string | undefined; }'.
+app/(tabs)/assignments.tsx(176,39): error TS2339: Property 'status' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(177,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/(tabs)/assignments.tsx(178,27): error TS2339: Property 'status' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(178,55): error TS2339: Property 'earnedPoints' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(179,33): error TS2339: Property 'submissionCount' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(186,16): error TS2339: Property 'status' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(204,25): error TS2339: Property 'earnedPoints' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(204,45): error TS2339: Property 'points' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(215,19): error TS2339: Property 'courseName' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(224,39): error TS2339: Property 'status' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(235,21): error TS2339: Property 'points' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(246,25): error TS2339: Property 'submissionCount' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(261,31): error TS2339: Property 'studentName' does not exist on type 'Assignment'.
+app/(tabs)/assignments.tsx(265,23): error TS2339: Property 'studentName' does not exist on type 'Assignment'.
+app/(tabs)/courses.tsx(87,60): error TS2345: Argument of type 'FilterType' is not assignable to parameter of type '{ department?: string | undefined; search?: string | undefined; } | undefined'.
+  Type 'string' is not assignable to type '{ department?: string | undefined; search?: string | undefined; }'.
+app/(tabs)/courses.tsx(97,36): error TS2339: Property 'filter' does not exist on type 'PaginatedResponse<Course>'.
+app/(tabs)/courses.tsx(97,44): error TS7006: Parameter 'course' implicitly has an 'any' type.
+app/(tabs)/courses.tsx(109,34): error TS2339: Property 'filter' does not exist on type 'PaginatedResponse<Course>'.
+app/(tabs)/courses.tsx(109,42): error TS7006: Parameter 'c' implicitly has an 'any' type.
+app/(tabs)/courses.tsx(148,41): error TS2538: Type 'undefined' cannot be used as an index type.
+app/(tabs)/courses.tsx(149,29): error TS2339: Property 'enrollmentStatus' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(150,27): error TS2339: Property 'progress' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(164,19): error TS2339: Property 'title' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(172,55): error TS18048: 'item.department' is possibly 'undefined'.
+app/(tabs)/courses.tsx(178,19): error TS2339: Property 'title' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(186,21): error TS2339: Property 'teacher' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(207,19): error TS2339: Property 'schedule' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(211,25): error TS2339: Property 'schedule' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(215,19): error TS2339: Property 'room' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(219,25): error TS2339: Property 'room' does not exist on type 'Course'.
+app/(tabs)/courses.tsx(243,21): error TS2339: Property 'totalStudents' does not exist on type 'Course'.
+app/(tabs)/index.tsx(46,5): error TS2554: Expected 0 arguments, but got 2.
+app/(tabs)/index.tsx(50,5): error TS2554: Expected 0 arguments, but got 2.
+app/(tabs)/index.tsx(54,5): error TS2554: Expected 0 arguments, but got 1.
+app/(tabs)/index.tsx(131,23): error TS2339: Property 'todaysClasses' does not exist on type '{}'.
+app/(tabs)/index.tsx(138,23): error TS2339: Property 'pendingGrading' does not exist on type '{}'.
+app/(tabs)/index.tsx(145,23): error TS2339: Property 'parentMessages' does not exist on type '{}'.
+app/(tabs)/index.tsx(159,23): error TS2339: Property 'totalUsers' does not exist on type '{}'.
+app/(tabs)/index.tsx(166,23): error TS2339: Property 'activeClasses' does not exist on type '{}'.
+app/(tabs)/index.tsx(173,23): error TS2339: Property 'pendingApprovals' does not exist on type '{}'.
+app/(tabs)/index.tsx(187,21): error TS2339: Property 'upcomingClasses' does not exist on type '{}'.
+app/(tabs)/index.tsx(194,21): error TS2339: Property 'pendingAssignments' does not exist on type '{}'.
+app/(tabs)/index.tsx(201,21): error TS2339: Property 'unreadMessages' does not exist on type '{}'.
+app/(tabs)/messages.tsx(86,5): error TS2339: Property 'channels' does not exist on type 'UseQueryResult<Channel[], Error>'.
+app/(tabs)/messages.tsx(89,5): error TS2339: Property 'clearUnreadCount' does not exist on type 'UseQueryResult<Channel[], Error>'.
+app/(tabs)/messages.tsx(90,5): error TS2339: Property 'totalUnreadCount' does not exist on type 'UseQueryResult<Channel[], Error>'.
+app/(tabs)/messages.tsx(91,19): error TS2554: Expected 0 arguments, but got 1.
+app/(tabs)/messages.tsx(99,46): error TS7006: Parameter 'channel' implicitly has an 'any' type.
+app/(tabs)/messages.tsx(145,30): error TS2339: Property 'lastMessage' does not exist on type 'Channel'.
+app/(tabs)/profile.tsx(42,70): error TS2554: Expected 0 arguments, but got 1.
+app/modal.tsx(26,10): error TS2305: Module '"@/src/components"' has no exported member 'Card'.
+app/modal.tsx(128,24): error TS2339: Property 'firstName' does not exist on type 'User'.
+app/modal.tsx(128,46): error TS2339: Property 'lastName' does not exist on type 'User'.
+app/modal.tsx(133,24): error TS2339: Property 'firstName' does not exist on type 'User'.
+app/modal.tsx(133,42): error TS2339: Property 'lastName' does not exist on type 'User'.
+app/modal.tsx(140,26): error TS2551: Property 'roles' does not exist on type 'User'. Did you mean 'role'?
+services/api.ts(329,7): error TS18048: 'c.name' is possibly 'undefined'.
+src/components/Card.tsx(68,8): error TS2322: Type '{ children: ReactNode; hitSlop?: number | Insets | null | undefined; id?: string | undefined; needsOffscreenAlphaCompositing?: boolean | undefined; onLayout?: ((event: LayoutChangeEvent) => void) | undefined; ... 86 more ...; style: (false | ... 4 more ... | undefined)[]; }' is not assignable to type 'TouchableOpacityProps'.
+  Types of property 'onBlur' are incompatible.
+    Type '((e: BlurEvent) => void) | null | undefined' is not assignable to type '((e: NativeSyntheticEvent<TargetedEvent>) => void) | undefined'.
+      Type 'null' is not assignable to type '((e: NativeSyntheticEvent<TargetedEvent>) => void) | undefined'.
+src/components/Skeleton.tsx(87,7): error TS2322: Type 'string | number' is not assignable to type 'DimensionValue | undefined'.
+  Type 'string' is not assignable to type 'DimensionValue | undefined'.
+src/hooks/useAssignments.ts(8,50): error TS2345: Argument of type '{ status?: string | undefined; courseId?: string | undefined; } | undefined' is not assignable to parameter of type 'AssignmentFilters | undefined'.
+  Type '{ status?: string | undefined; courseId?: string | undefined; }' has no properties in common with type 'AssignmentFilters'.
+src/hooks/useAssignments.ts(23,35): error TS2551: Property 'getMySubmissions' does not exist on type '{ getAssignments: (filters?: AssignmentFilters | undefined) => Promise<Assignment[]>; getAssignmentById: (id: string) => Promise<Assignment>; ... 11 more ...; getGradebook: (classId: string) => Promise<...>; }'. Did you mean 'getMySubmission'?
+src/hooks/useChannels.ts(58,11): error TS2353: Object literal may only specify known properties, and 'lastMessage' does not exist in type 'Partial<ChannelWithActivity>'.
+src/hooks/useChannels.ts(84,28): error TS2339: Property 'lastMessage' does not exist on type 'Partial<ChannelWithActivity>'.
+src/hooks/useChannels.ts(88,13): error TS2353: Object literal may only specify known properties, and 'lastMessage' does not exist in type 'Partial<ChannelWithActivity>'.
+src/hooks/useChannels.ts(89,32): error TS2339: Property 'lastMessage' does not exist on type 'Partial<ChannelWithActivity>'.
+src/hooks/useChat.ts(106,17): error TS2352: Conversion of type 'User | null' to type 'User | undefined' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'User' is missing the following properties from type 'User': firstName, lastName, status
+src/hooks/useChat.ts(218,12): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/hooks/useChat.ts(235,19): error TS2352: Conversion of type 'User | null' to type 'User | undefined' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'User' is missing the following properties from type 'User': firstName, lastName, status
+src/hooks/useChat.ts(253,12): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/hooks/useChat.ts(276,12): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/hooks/useChat.ts(299,12): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/hooks/useChat.ts(310,15): error TS2352: Conversion of type 'User | null' to type 'User | undefined' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'User' is missing the following properties from type 'User': firstName, lastName, status
+src/hooks/useChat.ts(331,12): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/hooks/useDashboard.ts(15,41): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'AssignmentFilters'.
+src/hooks/useDashboard.ts(21,42): error TS2339: Property 'data' does not exist on type 'Assignment[]'.
+src/hooks/useMessages.ts(33,56): error TS2345: Argument of type 'any[] | undefined' is not assignable to parameter of type '{ replyToId?: string | undefined; attachmentIds?: string[] | undefined; } | undefined'.
+  Type 'any[]' has no properties in common with type '{ replyToId?: string | undefined; attachmentIds?: string[] | undefined; }'.
+src/hooks/useMessages.ts(45,60): error TS2554: Expected 2 arguments, but got 1.
+src/services/socket.service.ts(210,13): error TS2345: Argument of type '"reconnect"' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents>'.
+src/services/socket.service.ts(210,27): error TS7006: Parameter 'attemptNumber' implicitly has an 'any' type.
+src/services/socket.service.ts(216,13): error TS2345: Argument of type '"reconnect_attempt"' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents>'.
+src/services/socket.service.ts(216,35): error TS7006: Parameter 'attemptNumber' implicitly has an 'any' type.
+src/services/socket.service.ts(222,13): error TS2345: Argument of type '"reconnect_error"' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents>'.
+src/services/socket.service.ts(222,33): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/services/socket.service.ts(227,13): error TS2345: Argument of type '"reconnect_failed"' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents>'.
+src/services/socket.service.ts(398,13): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents>'.
+src/services/socket.service.ts(402,17): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents> | undefined'.
+src/services/socket.service.ts(416,16): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents> | undefined'.
+src/services/socket.service.ts(418,16): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents> | undefined'.
+src/services/socket.service.ts(434,15): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ReservedOrUserEventNames<SocketReservedEvents, ServerToClientEvents>'.
