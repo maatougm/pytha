@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Switch, SafeAreaView, StatusBar, Alert } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { ArrowLeft, Calendar, Clock, Paperclip, Plus, ChevronDown, X } from 'lucide-react-native';
+import { createAssignment } from '@/src/services/grading.service';
 
 const COURSES = ['Mathematics 101', 'Physics A', 'Chemistry Honors', 'English Literature'];
 const ASSIGNMENT_TYPES = ['Homework', 'Quiz', 'Project', 'Essay', 'Lab Report'];
 
 export default function CreateAssignmentScreen() {
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('Mathematics 101');
@@ -48,11 +50,36 @@ export default function CreateAssignmentScreen() {
     
     setIsSubmitting(true);
     try {
-      // TODO: API call to create assignment
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert('Success', 'Assignment published successfully!');
+      // Find a mock classId based on selected course, or default to a static one
+      const courseIndex = COURSES.indexOf(selectedCourse);
+      const classId = `class-${courseIndex + 1}`; // Simple mock mapping
+
+      // Map selectedType to backend type
+      let apiType: 'homework' | 'quiz' | 'exam' | 'project' | 'participation' | 'other' = 'homework';
+      const lowercaseType = selectedType.toLowerCase();
+      if (['homework', 'quiz', 'project', 'other'].includes(lowercaseType)) {
+        apiType = lowercaseType as any;
+      } else if (lowercaseType === 'lab report' || lowercaseType === 'essay') {
+        apiType = 'project';
+      }
+
+      await createAssignment(classId, {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        type: apiType,
+        maxPoints: parseInt(points, 10),
+        allowLateSubmission: allowLate,
+        isPublished: true,
+        // Since we don't have a real date picker in the UI right now, we omit dueDate for now
+        // or we could hardcode one if required, but it is optional according to types.
+      });
+
+      Alert.alert('Success', 'Assignment published successfully!', [
+        { text: 'OK', onPress: () => router.back() }
+      ]);
     } catch (error) {
       Alert.alert('Error', 'Failed to publish assignment. Please try again.');
+      console.error('Failed to create assignment:', error);
     } finally {
       setIsSubmitting(false);
     }
