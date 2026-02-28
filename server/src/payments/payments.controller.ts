@@ -7,7 +7,6 @@ import {
   Query,
   UseGuards,
   Request,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
@@ -30,11 +29,7 @@ export class PaymentsController {
   @Get('balance/:studentId')
   @ApiOperation({ summary: 'Get fee balance and invoice list for a student' })
   async getFeeBalance(@Param('studentId') studentId: string, @Request() req) {
-    const hasAccess = await this.paymentsService.verifyAccess(req.user.sub, studentId);
-    if (!hasAccess) {
-      throw new ForbiddenException('You do not have permission to view this fee balance');
-    }
-    return this.paymentsService.getFeeBalance(studentId);
+    return this.paymentsService.getFeeBalance(studentId, req.user.sub, req.user.roles);
   }
 
   @Get('history/:studentId')
@@ -45,12 +40,10 @@ export class PaymentsController {
     @Query('limit') limit?: string,
     @Request() req?: any,
   ) {
-    const hasAccess = await this.paymentsService.verifyAccess(req.user.sub, studentId);
-    if (!hasAccess) {
-      throw new ForbiddenException('You do not have permission to view this payment history');
-    }
     return this.paymentsService.getPaymentHistory(
       studentId,
+      req.user.sub,
+      req.user.roles,
       page ? parseInt(page) : 1,
       limit ? parseInt(limit) : 20,
     );
@@ -74,7 +67,7 @@ export class PaymentsController {
   @Get('receipt/:paymentId')
   @ApiOperation({ summary: 'Get payment receipt' })
   async getReceipt(@Param('paymentId') paymentId: string, @Request() req) {
-    return this.paymentsService.getReceipt(paymentId, req.user.sub);
+    return this.paymentsService.getReceipt(paymentId, req.user.sub, req.user.roles);
   }
 
   // Admin endpoints

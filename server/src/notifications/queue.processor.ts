@@ -1,402 +1,236 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
+import { PushNotificationService } from './push.service';
 import { EmailService } from './email.service';
 
-interface ProcessingResult {
-    processed: number;
-    succeeded: number;
-    failed: number;
+export interface NotificationJob {
+  type: 'message' | 'assignment' | 'grade' | 'attendance' | 'announcement' | 'reminder';
+  userId: string;
+  title: string;
+  body: string;
+  data?: Record<string, any>;
+  email?: {
+    subject: string;
+    html: string;
+  };
+}
+
+export interface DigestJob {
+  userId: string;
+  since: Date;
+  unreadCount: number;
 }
 
 @Injectable()
 export class QueueProcessor {
-    private readonly logger = new Logger(QueueProcessor.name);
-    private isProcessing = false;
-    private readonly maxRetries = 3;
-    private readonly baseDelayMs = 1000; // 1 second base for exponential backoff
-    private readonly maxConcurrent = 5; // Rate limiting: max concurrent emails
+  private readonly logger = new Logger(QueueProcessor.name);
 
-    constructor(
-        private prisma: PrismaService,
-        private emailService: EmailService,
-    ) { }
+  constructor(
+    private prisma: PrismaService,
+    private pushService: PushNotificationService,
+    private emailService: EmailService,
+  ) {}
 
-    /**
-     * Process email queue every minute
-     * This is the main entry point for scheduled queue processing
-     */
-    @Cron(CronExpression.EVERY_MINUTE)
-    async handleCron(): Promise<void> {
-        if (this.isProcessing) {
-            this.logger.debug('Queue processor already running, skipping...');
-            return;
-        }
+  /**
+   * Process a single notification job
+   */
+  async processNotification(job: NotificationJob): Promise<void> {
+    try {
+      this.logger.debug(`Processing notification: ${job.type} for user ${job.userId}`);
 
-        this.isProcessing = true;
-        try {
-            await this.processQueue();
-        } finally {
-            this.isProcessing = false;
-        }
-    }
+      // Check user preferences
+      const shouldSend = await this.pushService.shouldSendNotification(job.userId, this.mapTypeToPreference(job.type));
+      
+      if (!shouldSend) {
+        this.logger.debug(`Notification skipped due to user preferences: ${job.userId}`);
+        return;
+      }
 
-    /**
-     * Process digest emails daily at 9 AM
-     */
-    @Cron('0 9 * * *') // Daily at 9:00 AM
-    async sendDailyDigests(): Promise<void> {
-        this.logger.log('Starting daily digest generation...');
-        await this.generateDigests('daily');
-    }
+      // Send push notification
+      await this.pushService.sendToUser(job.userId, job.title, job.body, job.data);
 
-    /**
-     * Process digest emails weekly on Monday at 9 AM
-     */
-    @Cron('0 9 * * 1') // Weekly on Monday at 9:00 AM
-    async sendWeeklyDigests(): Promise<void> {
-        this.logger.log('Starting weekly digest generation...');
-        await this.generateDigests('weekly');
-    }
-
-    /**
-     * Clean up old sent/failed emails weekly (Sundays at 3 AM)
-     */
-    @Cron('0 3 * * 0') // Weekly on Sunday at 3:00 AM
-    async cleanupOldEmails(): Promise<void> {
-        this.logger.log('Starting email queue cleanup...');
-        const cleaned = await this.emailService.cleanupQueue(7);
-        this.logger.log(`Cleaned up ${cleaned} old email queue entries`);
-    }
-
-    /**
-     * Main queue processing logic
-     */
-    async processQueue(batchSize: number = 50): Promise<ProcessingResult> {
-        const result: ProcessingResult = { processed: 0, succeeded: 0, failed: 0 };
-
-        try {
-            // Fetch pending emails with retry limit not exceeded
-            const pendingEmails = await this.prisma.emailQueue.findMany({
-                where: {
-                    status: 'pending',
-                    attempts: { lt: this.maxRetries },
-                },
-                orderBy: [
-                    { createdAt: 'asc' }, // Oldest first
-                ],
-                take: batchSize,
-            });
-
-            if (pendingEmails.length === 0) {
-                return result;
-            }
-
-            this.logger.log(`Processing ${pendingEmails.length} emails from queue`);
-
-            // Process emails with rate limiting
-            for (let i = 0; i < pendingEmails.length; i += this.maxConcurrent) {
-                const batch = pendingEmails.slice(i, i + this.maxConcurrent);
-                
-                // Process batch concurrently
-                const batchResults = await Promise.allSettled(
-                    batch.map(email => this.processSingleEmail(email.id))
-                );
-
-                // Count results
-                batchResults.forEach(res => {
-                    result.processed++;
-                    if (res.status === 'fulfilled' && res.value) {
-                        result.succeeded++;
-                    } else {
-                        result.failed++;
-                    }
-                });
-
-                // Add delay between batches for rate limiting
-                if (i + this.maxConcurrent < pendingEmails.length) {
-                    await this.delay(1000);
-                }
-            }
-
-            this.logger.log(
-                `Queue processing complete: ${result.succeeded} succeeded, ${result.failed} failed`
-            );
-
-        } catch (error) {
-            this.logger.error('Error processing email queue:', error.message);
-        }
-
-        return result;
-    }
-
-    /**
-     * Process a single email from the queue
-     */
-    private async processSingleEmail(emailId: string): Promise<boolean> {
-        try {
-            // Mark as processing to prevent duplicate processing
-            const email = await this.prisma.emailQueue.update({
-                where: { id: emailId },
-                data: { 
-                    status: 'processing',
-                    attempts: { increment: 1 },
-                },
-            });
-
-            // Attempt to send email
-            const result = await this.emailService.sendEmail({
-                to: email.toEmail,
-                subject: email.subject,
-                html: email.body,
-            });
-
-            if (result.success) {
-                // Mark as sent
-                await this.prisma.emailQueue.update({
-                    where: { id: emailId },
-                    data: { 
-                        status: 'sent',
-                        sentAt: new Date(),
-                    },
-                });
-                this.logger.debug(`Email sent successfully to ${email.toEmail}`);
-                return true;
-            } else {
-                throw new Error(result.error || 'Unknown error');
-            }
-
-        } catch (error) {
-            this.logger.error(`Failed to send email ${emailId}:`, error.message);
-            
-            // Get current attempt count
-            const email = await this.prisma.emailQueue.findUnique({
-                where: { id: emailId },
-            });
-
-            if (email && email.attempts >= this.maxRetries) {
-                // Max retries reached, mark as failed
-                await this.prisma.emailQueue.update({
-                    where: { id: emailId },
-                    data: { status: 'failed' },
-                });
-                this.logger.warn(`Email ${emailId} marked as failed after ${this.maxRetries} attempts`);
-            } else {
-                // Schedule for retry with exponential backoff
-                const delayMs = this.calculateBackoffDelay(email?.attempts || 1);
-                this.logger.log(`Scheduling email ${emailId} for retry in ${delayMs}ms`);
-                
-                // Reset to pending status so it will be picked up again
-                await this.prisma.emailQueue.update({
-                    where: { id: emailId },
-                    data: { status: 'pending' },
-                });
-
-                // Wait before continuing (actual retry will happen in next cron cycle)
-                await this.delay(Math.min(delayMs, 5000)); // Cap at 5 seconds for cron-based retry
-            }
-
-            return false;
-        }
-    }
-
-    /**
-     * Calculate exponential backoff delay
-     */
-    private calculateBackoffDelay(attempt: number): number {
-        // Exponential backoff: 1s, 2s, 4s
-        return this.baseDelayMs * Math.pow(2, attempt - 1);
-    }
-
-    /**
-     * Generate digest emails for users
-     */
-    private async generateDigests(digestType: 'daily' | 'weekly'): Promise<void> {
-        try {
-            // Get users who have email notifications enabled and want digests
-            const users = await this.prisma.user.findMany({
-                where: {
-                    emailNotificationsEnabled: true,
-                    status: 'active',
-                    deletedAt: null,
-                },
-                select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                    notificationPreferences: true,
-                },
-            });
-
-            const cutoffDate = new Date();
-            if (digestType === 'daily') {
-                cutoffDate.setDate(cutoffDate.getDate() - 1);
-            } else {
-                cutoffDate.setDate(cutoffDate.getDate() - 7);
-            }
-
-            for (const user of users) {
-                try {
-                    // Check user digest preferences
-                    const prefs = user.notificationPreferences as Record<string, any> | null;
-                    const digestPref = prefs?.digestFrequency || 'daily';
-                    
-                    if (digestPref !== digestType && digestPref !== 'both') {
-                        continue; // Skip if user doesn't want this digest type
-                    }
-
-                    // Get unread messages
-                    const unreadChannels = await this.getUnreadMessagesForUser(user.id, cutoffDate);
-                    
-                    if (unreadChannels.length === 0) {
-                        continue; // No unread messages, skip
-                    }
-
-                    // Queue digest email
-                    await this.emailService.queueEmail({
-                        to: user.email,
-                        subject: `${digestType === 'daily' ? 'Daily' : 'Weekly'} Message Digest`,
-                        html: this.generateDigestHtml(unreadChannels, digestType),
-                        priority: 'normal',
-                    });
-
-                } catch (error) {
-                    this.logger.error(`Failed to generate digest for user ${user.id}:`, error.message);
-                }
-            }
-
-        } catch (error) {
-            this.logger.error('Error generating digests:', error.message);
-        }
-    }
-
-    /**
-     * Get unread messages for a user since a given date
-     */
-    private async getUnreadMessagesForUser(
-        userId: string, 
-        since: Date
-    ): Promise<Array<{ channelName: string; senderName: string; messagePreview: string; count: number }>> {
-        // Optimize N+1 issue: Retrieve unread messages and their counts per channel using a single raw SQL query.
-        // This avoids making `1 + 2 * N` queries (where N is number of channels) in a loop, reducing it to exactly 1 query.
-        const result = await this.prisma.$queryRaw<Array<{
-            channelName: string | null;
-            firstName: string;
-            lastName: string;
-            messagePreview: string;
-            count: number;
-        }>>`
-            WITH UnreadMessages AS (
-                SELECT
-                    c.name as "channelName",
-                    u.first_name as "firstName",
-                    u.last_name as "lastName",
-                    m.content as "messagePreview",
-                    COUNT(*) OVER(PARTITION BY m.channel_id) as "totalCount",
-                    ROW_NUMBER() OVER(PARTITION BY m.channel_id ORDER BY m.created_at DESC) as rn
-                FROM messages m
-                JOIN channel_members cm ON m.channel_id = cm.channel_id AND cm.user_id = ${userId}
-                JOIN channels c ON m.channel_id = c.id
-                JOIN users u ON m.sender_id = u.id
-                WHERE m.created_at >= ${since}
-                  AND m.sender_id != ${userId}
-                  AND m.is_deleted = false
-                  AND (cm.last_read_at IS NULL OR m.created_at > cm.last_read_at)
-            )
-            SELECT
-                "channelName",
-                "firstName",
-                "lastName",
-                "messagePreview",
-                CAST("totalCount" AS INTEGER) as "count"
-            FROM UnreadMessages
-            WHERE rn = 1
-        `;
-
-        return result.map(row => ({
-            channelName: row.channelName || 'Unnamed Channel',
-            senderName: `${row.firstName} ${row.lastName}`,
-            messagePreview: row.messagePreview,
-            count: row.count,
-        }));
-    }
-
-    /**
-     * Generate digest email HTML
-     */
-    private generateDigestHtml(
-        channels: Array<{ channelName: string; senderName: string; messagePreview: string; count: number }>,
-        digestType: 'daily' | 'weekly'
-    ): string {
-        const totalMessages = channels.reduce((sum, c) => sum + c.count, 0);
-        
-        return `
-            <h2>${digestType === 'daily' ? '📬 Daily' : '📊 Weekly'} Digest</h2>
-            <p>You have <strong>${totalMessages}</strong> unread messages across <strong>${channels.length}</strong> conversations.</p>
-            ${channels.map(c => `
-                <div style="margin: 16px 0; padding: 16px; border: 1px solid #E5E7EB; border-radius: 8px;">
-                    <h3 style="margin: 0 0 8px 0;">${c.channelName} ${c.count > 1 ? `(${c.count} new)` : ''}</h3>
-                    <p style="margin: 0; color: #6B7280;">From ${c.senderName}</p>
-                    <p style="margin: 8px 0 0 0;">${c.messagePreview.substring(0, 100)}${c.messagePreview.length > 100 ? '...' : ''}</p>
-                </div>
-            `).join('')}
-        `;
-    }
-
-    /**
-     * Utility method to delay execution
-     */
-    private delay(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    /**
-     * Manually trigger queue processing (for admin/debug use)
-     */
-    async forceProcessQueue(batchSize?: number): Promise<ProcessingResult> {
-        return this.processQueue(batchSize);
-    }
-
-    /**
-     * Get current queue status
-     */
-    async getQueueStatus(): Promise<{
-        isProcessing: boolean;
-        stats: Awaited<ReturnType<EmailService['getQueueStats']>>;
-    }> {
-        return {
-            isProcessing: this.isProcessing,
-            stats: await this.emailService.getQueueStats(),
-        };
-    }
-
-    /**
-     * Retry a specific failed email
-     */
-    async retryEmail(emailId: string): Promise<boolean> {
-        const email = await this.prisma.emailQueue.findUnique({
-            where: { id: emailId },
+      // Send email if provided and user has email notifications enabled
+      if (job.email) {
+        const user = await this.prisma.user.findUnique({
+          where: { id: job.userId },
+          select: { email: true, emailNotificationsEnabled: true },
         });
 
-        if (!email) {
-            throw new Error('Email not found');
+        if (user?.emailNotificationsEnabled !== false && user?.email) {
+          await this.emailService.sendEmail({
+            to: user.email,
+            subject: job.email.subject,
+            html: job.email.html,
+          });
         }
-
-        if (email.status === 'sent') {
-            throw new Error('Email already sent');
-        }
-
-        // Reset attempts and status
-        await this.prisma.emailQueue.update({
-            where: { id: emailId },
-            data: { 
-                status: 'pending',
-                attempts: 0,
-            },
-        });
-
-        // Process immediately
-        return this.processSingleEmail(emailId);
+      }
+    } catch (error) {
+      this.logger.error(`Failed to process notification: ${error.message}`, error.stack);
+      throw error;
     }
+  }
+
+  /**
+   * Process a batch of notifications
+   */
+  async processBatch(jobs: NotificationJob[]): Promise<void> {
+    await Promise.all(jobs.map(job => this.processNotification(job)));
+  }
+
+  /**
+   * Process digest notification
+   */
+  async processDigest(job: DigestJob): Promise<void> {
+    try {
+      this.logger.debug(`Processing digest for user ${job.userId} with ${job.unreadCount} unread`);
+
+      const digestContent = await this.generateDigestContent(job.userId, job.since);
+
+      if (digestContent.length === 0) {
+        this.logger.debug(`No digest content for user ${job.userId}`);
+        return;
+      }
+
+      const title = `You have ${job.unreadCount} new notifications`;
+      const body = this.formatDigestBody(digestContent);
+
+      await this.pushService.sendToUser(job.userId, title, body, {
+        type: 'digest',
+        unreadCount: job.unreadCount,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to process digest: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate digest content with optimized query
+   */
+  private async generateDigestContent(
+    userId: string,
+    since: Date,
+  ): Promise<Array<{ channelName: string; senderName: string; messagePreview: string; count: number }>> {
+    // Optimized: Retrieve unread messages using a single raw SQL query with CTE.
+    // This avoids N+1 queries by getting everything in one database call.
+    const result = await this.prisma.$queryRaw<Array<{
+      channelName: string | null;
+      firstName: string;
+      lastName: string;
+      messagePreview: string;
+      count: number;
+    }>>`
+      WITH UnreadMessages AS (
+        SELECT
+          c.name as "channelName",
+          u.first_name as "firstName",
+          u.last_name as "lastName",
+          m.content as "messagePreview",
+          COUNT(*) OVER(PARTITION BY m.channel_id) as "totalCount",
+          ROW_NUMBER() OVER(PARTITION BY m.channel_id ORDER BY m.created_at DESC) as rn
+        FROM messages m
+        JOIN channel_members cm ON m.channel_id = cm.channel_id AND cm.user_id = ${userId}
+        JOIN channels c ON m.channel_id = c.id
+        JOIN users u ON m.sender_id = u.id
+        WHERE m.created_at >= ${since}
+          AND m.sender_id != ${userId}
+          AND m.is_deleted = false
+          AND (cm.last_read_at IS NULL OR m.created_at > cm.last_read_at)
+      )
+      SELECT
+        "channelName",
+        "firstName",
+        "lastName",
+        "messagePreview",
+        CAST("totalCount" AS INTEGER) as "count"
+      FROM UnreadMessages
+      WHERE rn = 1
+    `;
+
+    return result.map(row => ({
+      channelName: row.channelName || 'Unnamed Channel',
+      senderName: `${row.firstName} ${row.lastName}`,
+      messagePreview: row.messagePreview,
+      count: row.count,
+    }));
+  }
+
+  /**
+   * Format digest body
+   */
+  private formatDigestBody(content: Array<{ channelName: string; senderName: string; messagePreview: string; count: number }>): string {
+    if (content.length === 0) {
+      return 'No new messages';
+    }
+
+    // Show first 3 items
+    const items = content.slice(0, 3);
+    const remaining = content.length - items.length;
+
+    let body = items.map(item => {
+      const preview = item.messagePreview.length > 50 
+        ? item.messagePreview.substring(0, 50) + '...' 
+        : item.messagePreview;
+      return `${item.channelName}: ${item.senderName} - "${preview}"`;
+    }).join('\n');
+
+    if (remaining > 0) {
+      body += `\n+ ${remaining} more...`;
+    }
+
+    return body;
+  }
+
+  /**
+   * Map notification type to preference key
+   */
+  private mapTypeToPreference(type: NotificationJob['type']): string {
+    const mapping: Record<string, string> = {
+      message: 'messages',
+      assignment: 'assignments',
+      grade: 'grades',
+      attendance: 'attendance',
+      announcement: 'announcements',
+      reminder: 'announcements',
+    };
+    return mapping[type] || 'announcements';
+  }
+
+  /**
+   * Schedule a notification (add to queue)
+   */
+  async scheduleNotification(job: NotificationJob, delayMs?: number): Promise<void> {
+    // For now, process immediately. In production, this would add to a proper queue (Bull, etc.)
+    if (delayMs && delayMs > 0) {
+      setTimeout(() => {
+        this.processNotification(job).catch(err => {
+          this.logger.error(`Delayed notification failed: ${err.message}`);
+        });
+      }, delayMs);
+    } else {
+      await this.processNotification(job);
+    }
+  }
+
+  /**
+   * Retry failed notification
+   */
+  async retryNotification(job: NotificationJob, attempt: number = 1): Promise<void> {
+    const maxRetries = 3;
+    const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+
+    try {
+      await this.processNotification(job);
+    } catch (error) {
+      if (attempt < maxRetries) {
+        this.logger.warn(`Notification failed, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
+        setTimeout(() => {
+          this.retryNotification(job, attempt + 1);
+        }, delay);
+      } else {
+        this.logger.error(`Notification failed after ${maxRetries} attempts`);
+        throw error;
+      }
+    }
+  }
 }
