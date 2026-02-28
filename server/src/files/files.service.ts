@@ -196,7 +196,7 @@ export class FilesService {
 
             try {
                 // Try clamdscan first (daemon mode - faster), fallback to clamscan
-                const scanner = spawn('clamdscan', ['--fdpass', '--no-summary', filePath]);
+                const scanner = spawn('clamdscan', ['--fdpass', '--no-summary', '--', filePath]);
 
                 let stdout = '';
                 let stderr = '';
@@ -269,7 +269,7 @@ export class FilesService {
             }, VIRUS_SCAN_TIMEOUT);
 
             try {
-                const scanner = spawn('clamscan', ['--no-summary', filePath]);
+                const scanner = spawn('clamscan', ['--no-summary', '--', filePath]);
 
                 let stdout = '';
                 let stderr = '';
