@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { File as FileEntity, Prisma } from '@prisma/client';
-import { UploadFileDto, SetFilePermissionDto } from './dto/files.dto';
+import { SetFilePermissionDto } from './dto/files.dto';
 import { FileUploadDto, FileUploadCategory, FileVisibility } from './dto/file-upload.dto';
 import { extname, join, resolve } from 'path';
 import * as path from 'path';

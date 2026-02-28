@@ -14,7 +14,7 @@ import { ApiTags, ApiOperation, ApiConsumes, ApiBearerAuth, ApiResponse, ApiQuer
 import { FilesService } from './files.service';
 import { StorageService } from './storage.service';
 import { MetricsService } from '../metrics/metrics.service';
-import { UploadFileDto, SetFilePermissionDto } from './dto/files.dto';
+import { SetFilePermissionDto } from './dto/files.dto';
 import { FileUploadDto, FileUploadResponseDto, UploadQuotaDto } from './dto/file-upload.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
