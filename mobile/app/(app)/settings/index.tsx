@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/src/services/api-client';
 import {
   View,
   Text,
@@ -274,7 +275,7 @@ export default function SettingsScreen() {
             setIsLoading(true);
             try {
               // Call backend to invalidate all refresh tokens
-              const { apiClient } = await import('@/src/services/api-client');
+              // Dynamic import removed
               await apiClient.post('/auth/logout-all', {});
               
               // Sign out locally

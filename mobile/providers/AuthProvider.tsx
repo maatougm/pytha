@@ -7,6 +7,7 @@ import { getAccessToken } from '@/src/services/api-client';
 import {
   initializePushNotifications,
   removeNotificationListeners,
+  unregisterPushToken,
   getDeepLinkPathFromNotification,
   clearAllNotifications,
   NotificationData,
@@ -158,8 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Unregister push token
       if (pushToken) {
-        const { unregisterPushToken } = await import('@/src/services/notifications.service');
-        await unregisterPushToken();
+                await unregisterPushToken();
         setPushToken(null);
       }
       
@@ -190,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  * This transforms the complex backend shape (firstName/lastName/roles[])
  * into a simpler app-friendly shape (name/role).
  */
-function mapBackendUser(backendUser: ApiUser): AppUser {
+function mapBackendUser(backendUser: ApiUser & { name?: string; role?: string; roles?: any[] }): AppUser {
   const firstName = backendUser.firstName || '';
   const lastName = backendUser.lastName || '';
   const name = backendUser.name || `${firstName} ${lastName}`.trim() || backendUser.email;
@@ -200,7 +200,7 @@ function mapBackendUser(backendUser: ApiUser): AppUser {
   if (backendUser.role) {
     role = backendUser.role as UserRole;
   } else if (backendUser.roles && backendUser.roles.length > 0) {
-    role = (backendUser.roles[0]?.role?.name || backendUser.roles[0]?.name || 'student') as UserRole;
+    role = ((backendUser.roles[0] as any)?.role?.name || (backendUser.roles[0] as any)?.name || 'student') as UserRole;
   }
 
   return {
