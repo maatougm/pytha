@@ -2,27 +2,23 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface PushNotificationPayload {
-  to: string[]; // Expo push tokens
+  to: string[];
   title: string;
   body: string;
   data?: Record<string, any>;
   sound?: string;
-  badge?: number;
-  priority?: 'default' | 'normal' | 'high';
+  priority?: 'high' | 'normal';
 }
 
 export interface NotificationPreferences {
-  enabled: boolean;
-  quietHoursStart?: string; // "22:00"
-  quietHoursEnd?: string; // "07:00"
-  types: {
-    messages: boolean;
-    assignments: boolean;
-    grades: boolean;
-    attendance: boolean;
-    announcements: boolean;
-    reminders: boolean;
-  };
+  messages: boolean;
+  assignments: boolean;
+  grades: boolean;
+  attendance: boolean;
+  announcements: boolean;
+  quietHoursEnabled: boolean;
+  quietHoursStart: string;
+  quietHoursEnd: string;
 }
 
 @Injectable()
@@ -31,154 +27,144 @@ export class PushNotificationService {
 
   constructor(private prisma: PrismaService) {}
 
-  async registerToken(
-    userId: string,
-    token: string,
-    deviceType: 'ios' | 'android' | 'web',
-    deviceName?: string,
-  ) {
-    // Check if token already exists
-    const existing = await this.prisma.pushToken.findUnique({
-      where: { token },
-    });
+  /**
+   * Register a push token for a user
+   */
+  async registerToken(userId: string, token: string, platform: 'ios' | 'android' | 'web'): Promise<void> {
+    try {
+      // Check if token already exists
+      const existing = await this.prisma.pushToken.findUnique({
+        where: { token },
+      });
 
-    if (existing) {
-      // Update existing token
-      return this.prisma.pushToken.update({
-        where: { id: existing.id },
+      if (existing) {
+        // Update userId if token moved to different user
+        if (existing.userId !== userId) {
+          await this.prisma.pushToken.update({
+            where: { token },
+            data: { userId },
+          });
+        }
+        return;
+      }
+
+      // Create new token
+      await this.prisma.pushToken.create({
         data: {
           userId,
-          deviceType,
-          deviceName,
-          isActive: true,
-          lastUsedAt: new Date(),
+          token,
+          platform,
         },
       });
+
+      this.logger.log(`Registered push token for user ${userId}`);
+    } catch (error) {
+      this.logger.error(`Failed to register push token: ${error.message}`);
+      throw error;
     }
-
-    // Create new token
-    return this.prisma.pushToken.create({
-      data: {
-        userId,
-        token,
-        deviceType,
-        deviceName,
-        isActive: true,
-        lastUsedAt: new Date(),
-      },
-    });
   }
 
-  async unregisterToken(token: string, userId: string) {
-    const pushToken = await this.prisma.pushToken.findUnique({
-      where: { token },
-    });
+  /**
+   * Unregister a push token
+   */
+  async unregisterToken(token: string, userId?: string): Promise<void> {
+    try {
+      const where: any = { token };
+      if (userId) {
+        where.userId = userId;
+      }
 
-    if (!pushToken || pushToken.userId !== userId) {
-      return null;
+      await this.prisma.pushToken.deleteMany({ where });
+      this.logger.log(`Unregistered push token`);
+    } catch (error) {
+      this.logger.error(`Failed to unregister push token: ${error.message}`);
     }
-
-    return this.prisma.pushToken.update({
-      where: { id: pushToken.id },
-      data: { isActive: false },
-    });
   }
 
-  async getUserTokens(userId: string) {
-    return this.prisma.pushToken.findMany({
-      where: {
-        userId,
-        isActive: true,
-      },
-      orderBy: { lastUsedAt: 'desc' },
-    });
-  }
-
-  async getNotificationPreferences(userId: string): Promise<NotificationPreferences> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        pushNotificationsEnabled: true,
-        notificationPreferences: true,
-      },
-    });
-
-    if (!user) {
-      return this.getDefaultPreferences();
+  /**
+   * Unregister all tokens for a user
+   */
+  async unregisterAllUserTokens(userId: string): Promise<void> {
+    try {
+      await this.prisma.pushToken.deleteMany({
+        where: { userId },
+      });
+      this.logger.log(`Unregistered all push tokens for user ${userId}`);
+    } catch (error) {
+      this.logger.error(`Failed to unregister user tokens: ${error.message}`);
     }
-
-    const prefs = user.notificationPreferences as NotificationPreferences | null;
-
-    return {
-      enabled: user.pushNotificationsEnabled,
-      quietHoursStart: prefs?.quietHoursStart || '22:00',
-      quietHoursEnd: prefs?.quietHoursEnd || '07:00',
-      types: {
-        messages: prefs?.types?.messages ?? true,
-        assignments: prefs?.types?.assignments ?? true,
-        grades: prefs?.types?.grades ?? true,
-        attendance: prefs?.types?.attendance ?? true,
-        announcements: prefs?.types?.announcements ?? true,
-        reminders: prefs?.types?.reminders ?? true,
-      },
-    };
   }
 
-  async updateNotificationPreferences(
-    userId: string,
-    preferences: Partial<NotificationPreferences> & { types?: Record<string, boolean> },
-  ) {
+  /**
+   * Get user's notification preferences
+   */
+  async getPreferences(userId: string): Promise<NotificationPreferences> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { notificationPreferences: true },
     });
 
-    const currentPrefs = (user?.notificationPreferences as unknown as NotificationPreferences) ||
-      this.getDefaultPreferences();
-
-    const updatedPrefs: NotificationPreferences = {
-      ...currentPrefs,
-      ...preferences,
-      types: {
-        ...currentPrefs.types,
-        ...(preferences.types || {}),
-      },
+    // Return defaults if not set
+    const defaults: NotificationPreferences = {
+      messages: true,
+      assignments: true,
+      grades: true,
+      attendance: true,
+      announcements: true,
+      quietHoursEnabled: false,
+      quietHoursStart: '22:00',
+      quietHoursEnd: '08:00',
     };
 
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        pushNotificationsEnabled: preferences.enabled ?? currentPrefs.enabled,
-        notificationPreferences: updatedPrefs as any,
-      },
-    });
-  }
-
-  async shouldSendNotification(
-    userId: string,
-    type: keyof NotificationPreferences['types'],
-  ): Promise<boolean> {
-    const prefs = await this.getNotificationPreferences(userId);
-
-    // Check if push notifications are enabled
-    if (!prefs.enabled) {
-      return false;
+    if (!user?.notificationPreferences) {
+      return defaults;
     }
 
-    // Check if this notification type is enabled
-    if (!prefs.types[type]) {
+    return { ...defaults, ...(user.notificationPreferences as any) };
+  }
+
+  /**
+   * Update user's notification preferences
+   */
+  async updatePreferences(
+    userId: string,
+    preferences: Partial<NotificationPreferences>,
+  ): Promise<NotificationPreferences> {
+    const current = await this.getPreferences(userId);
+    const updated = { ...current, ...preferences };
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { notificationPreferences: updated },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Check if user should receive notification based on preferences and quiet hours
+   */
+  async shouldSendNotification(
+    userId: string,
+    type: keyof Omit<NotificationPreferences, 'quietHoursEnabled' | 'quietHoursStart' | 'quietHoursEnd'>,
+  ): Promise<boolean> {
+    const prefs = await this.getPreferences(userId);
+
+    // Check if notification type is enabled
+    if (!prefs[type]) {
       return false;
     }
 
     // Check quiet hours
-    if (prefs.quietHoursStart && prefs.quietHoursEnd) {
+    if (prefs.quietHoursEnabled) {
       const now = new Date();
-      const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now
-        .getMinutes()
-        .toString()
-        .padStart(2, '0')}`;
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      
+      const inQuietHours = prefs.quietHoursStart > prefs.quietHoursEnd
+        ? currentTime >= prefs.quietHoursStart || currentTime < prefs.quietHoursEnd
+        : currentTime >= prefs.quietHoursStart && currentTime < prefs.quietHoursEnd;
 
-      if (this.isInQuietHours(currentTime, prefs.quietHoursStart, prefs.quietHoursEnd)) {
+      if (inQuietHours) {
         return false;
       }
     }
@@ -186,43 +172,33 @@ export class PushNotificationService {
     return true;
   }
 
-  private isInQuietHours(currentTime: string, start: string, end: string): boolean {
-    const current = this.timeToMinutes(currentTime);
-    const startMinutes = this.timeToMinutes(start);
-    const endMinutes = this.timeToMinutes(end);
-
-    if (startMinutes < endMinutes) {
-      // Same day range (e.g., 10:00 - 14:00)
-      return current >= startMinutes && current <= endMinutes;
-    } else {
-      // Overnight range (e.g., 22:00 - 07:00)
-      return current >= startMinutes || current <= endMinutes;
-    }
-  }
-
-  private timeToMinutes(time: string): number {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-  }
-
-  async sendNotification(
+  /**
+   * Send push notification to a user
+   */
+  async sendToUser(
     userId: string,
     title: string,
     body: string,
-    type: keyof NotificationPreferences['types'],
     data?: Record<string, any>,
-  ) {
-    // Check if we should send
-    const shouldSend = await this.shouldSendNotification(userId, type);
-    if (!shouldSend) {
-      this.logger.debug(`Notification skipped for user ${userId} (type: ${type})`);
+  ): Promise<PushNotificationPayload | null> {
+    // Check if user has push notifications enabled
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { pushNotificationsEnabled: true },
+    });
+
+    if (user?.pushNotificationsEnabled === false) {
+      this.logger.debug(`Push notifications disabled for user ${userId}`);
       return null;
     }
 
-    // Get user tokens
-    const tokens = await this.getUserTokens(userId);
+    // Get user's push tokens
+    const tokens = await this.prisma.pushToken.findMany({
+      where: { userId },
+    });
+
     if (tokens.length === 0) {
-      this.logger.debug(`No active tokens for user ${userId}`);
+      this.logger.debug(`No push tokens found for user ${userId}`);
       return null;
     }
 
@@ -233,72 +209,123 @@ export class PushNotificationService {
       body,
       data: {
         ...data,
-        type,
+        userId,
         timestamp: new Date().toISOString(),
       },
       sound: 'default',
       priority: 'high',
     };
 
-    // TODO: Send to Expo Push Service
-    // For now, just log the notification
     this.logger.log(`Sending notification to user ${userId}: ${title}`);
     this.logger.debug(JSON.stringify(payload));
 
-    // TODO: Implement actual Expo Push API call
-    // const response = await fetch('https://exp.host/--/api/v2/push/send', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(payload),
-    // });
+    // Send to Expo Push Service
+    try {
+      const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Accept-Encoding': 'gzip, deflate',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    return payload;
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.error(`Expo push API error: ${response.status} ${errorText}`);
+        return null;
+      }
+
+      const result = await response.json();
+      
+      // Handle errors in response (invalid tokens, etc.)
+      if (result.data && Array.isArray(result.data)) {
+        for (let i = 0; i < result.data.length; i++) {
+          const ticket = result.data[i];
+          if (ticket.status === 'error') {
+            this.logger.error(`Push error: ${ticket.message}`);
+            if (ticket.details?.error === 'DeviceNotRegistered') {
+              const invalidToken = tokens[i]?.token;
+              if (invalidToken) {
+                this.logger.log(`Unregistering invalid token: ${invalidToken}`);
+                await this.unregisterToken(invalidToken);
+              }
+            }
+          }
+        }
+      }
+
+      return payload;
+    } catch (error) {
+      this.logger.error(`Failed to send push notification: ${error.message}`);
+      return null;
+    }
   }
 
   async sendToMultipleUsers(
     userIds: string[],
     title: string,
     body: string,
-    type: keyof NotificationPreferences['types'],
     data?: Record<string, any>,
-  ) {
-    const results = await Promise.all(
-      userIds.map((userId) =>
-        this.sendNotification(userId, title, body, type, data).catch((err) => {
-          this.logger.error(`Failed to send notification to ${userId}:`, err);
-          return null;
-        }),
-      ),
-    );
-
-    return results.filter((r) => r !== null);
-  }
-
-  async sendTestNotification(userId: string) {
-    return this.sendNotification(
-      userId,
-      'Test Notification',
-      'This is a test notification from School Hub!',
-      'announcements',
-      { test: true },
+  ): Promise<void> {
+    await Promise.all(
+      userIds.map((userId) => this.sendToUser(userId, title, body, data)),
     );
   }
 
-  private getDefaultPreferences(): NotificationPreferences {
-    return {
-      enabled: true,
-      quietHoursStart: '22:00',
-      quietHoursEnd: '07:00',
-      types: {
-        messages: true,
-        assignments: true,
-        grades: true,
-        attendance: true,
-        announcements: true,
-        reminders: true,
+  /**
+   * Send notification to all users with a specific role
+   */
+  async sendToRole(
+    roleName: string,
+    title: string,
+    body: string,
+    data?: Record<string, any>,
+  ): Promise<void> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        userRoles: {
+          some: {
+            role: { name: roleName },
+          },
+        },
       },
-    };
+      select: { id: true },
+    });
+
+    await this.sendToMultipleUsers(
+      users.map((u) => u.id),
+      title,
+      body,
+      data,
+    );
+  }
+
+  /**
+   * Send notification to channel members
+   */
+  async sendToChannel(
+    channelId: string,
+    excludeUserId: string,
+    title: string,
+    body: string,
+    data?: Record<string, any>,
+  ): Promise<void> {
+    const members = await this.prisma.channelMember.findMany({
+      where: {
+        channelId,
+        userId: { not: excludeUserId },
+        muted: false,
+      },
+      select: { userId: true },
+    });
+
+    await this.sendToMultipleUsers(
+      members.map((m) => m.userId),
+      title,
+      body,
+      { ...data, channelId },
+    );
   }
 }
