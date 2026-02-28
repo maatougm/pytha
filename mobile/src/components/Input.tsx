@@ -19,6 +19,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   iconLeft?: LucideIcon;
   iconRight?: LucideIcon;
   onIconRightPress?: () => void;
+  iconRightAccessibilityLabel?: string;
   secure?: boolean;
   required?: boolean;
   containerStyle?: ViewStyle;
@@ -116,6 +117,8 @@ export function Input({
             onPress={toggleSecure}
             style={styles.iconRight}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole="button"
+            accessibilityLabel={isSecure ? 'Show password' : 'Hide password'}
           >
             {isSecure ? (
               <EyeOff size={20} color={theme.colors.textSecondary} />
@@ -129,6 +132,8 @@ export function Input({
             style={styles.iconRight}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             disabled={!onIconRightPress}
+            accessibilityRole={onIconRightPress ? 'button' : 'none'}
+            accessibilityLabel={props.iconRightAccessibilityLabel}
           >
             <IconRight
               size={20}
