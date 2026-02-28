@@ -125,9 +125,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
 
     async handleConnection(client: AuthenticatedSocket) {
         try {
-            const token =
-                client.handshake.auth?.token ||
-                client.handshake.query?.token as string;
+            const token = client.handshake.auth?.token as string;
 
             if (!token) {
                 this.logger.warn(`Connection rejected: No token provided (${client.id})`);
