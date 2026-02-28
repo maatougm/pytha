@@ -20,6 +20,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import * as fs from 'fs/promises';
+import * as crypto from 'crypto';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import {
@@ -87,7 +88,7 @@ export class FilesController {
             destination: UPLOAD_CONFIG.tempDir,
             filename: (req, file, cb) => {
                 // Generate secure temp filename
-                const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+                const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(16).toString('hex')}`;
                 const ext = extname(file.originalname).toLowerCase();
                 cb(null, `temp-${uniqueSuffix}${ext}`);
             }
