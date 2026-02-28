@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsDateString, IsUUID, IsInt, Min } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsUUID, IsInt, Min, Max, IsNotEmpty, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SearchMessagesDto {
@@ -10,7 +10,9 @@ export class SearchMessagesDto {
      *   - exam -midterm (exclude midterm)
      *   - "final exam" AND grade (combined)
      */
-    @IsString()
+    @IsString({ message: 'Search query must be a string' })
+    @IsNotEmpty({ message: 'Search query is required' })
+    @MaxLength(200, { message: 'Search query cannot exceed 200 characters' })
     q: string;
 
     /**
@@ -18,7 +20,7 @@ export class SearchMessagesDto {
      * @example "2026-01-01T00:00:00Z"
      */
     @IsOptional()
-    @IsDateString()
+    @IsDateString({}, { message: 'Invalid date format for from date' })
     from?: string;
 
     /**
@@ -26,13 +28,14 @@ export class SearchMessagesDto {
      * @example "2026-12-31T23:59:59Z"
      */
     @IsOptional()
-    @IsDateString()
+    @IsDateString({}, { message: 'Invalid date format for to date' })
     to?: string;
 
     /**
      * Filter by sender user ID (UUID format)
      */
     @IsOptional()
+    @IsString({ message: 'Sender must be a string' })
     @IsUUID('4', { message: 'Invalid sender user ID format' })
     sender?: string;
 
@@ -43,6 +46,7 @@ export class SearchMessagesDto {
     @IsOptional()
     @IsInt({ message: 'Page must be an integer' })
     @Min(1, { message: 'Page must be at least 1' })
+    @Max(10000, { message: 'Page cannot exceed 10000' })
     @Type(() => Number)
     page?: number = 1;
 
@@ -53,8 +57,17 @@ export class SearchMessagesDto {
     @IsOptional()
     @IsInt({ message: 'Limit must be an integer' })
     @Min(1, { message: 'Limit must be at least 1' })
+    @Max(100, { message: 'Limit cannot exceed 100' })
     @Type(() => Number)
     limit?: number = 20;
+
+    /**
+     * Filter by channel ID (UUID format)
+     */
+    @IsOptional()
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsUUID('4', { message: 'Invalid channel ID format' })
+    channelId?: string;
 }
 
 export interface SearchResultMessage {

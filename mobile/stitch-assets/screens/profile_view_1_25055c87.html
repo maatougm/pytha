@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile View - Pythagore</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1E3A8A", // Updated Primary Deep Blue
+                        secondary: "#F59E0B", // Updated Accent
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        display: ["Lexend", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        'custom': "12px", // Explicit 12px radius
+                        full: "9999px",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }.scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex min-h-screen flex-col overflow-hidden max-w-md mx-auto bg-white dark:bg-slate-900 shadow-2xl">
+<header class="bg-primary text-white pt-6 pb-20 rounded-b-[2rem] shadow-md relative z-10">
+<div class="flex items-center justify-between px-4 pb-4">
+<button class="flex items-center justify-center w-10 h-10 rounded-full text-white/80 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold text-white tracking-wide">My Profile</h1>
+<button class="flex items-center justify-center w-10 h-10 rounded-full text-white/80 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-2xl">settings</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto px-4 -mt-16 pb-24 scrollbar-hide relative z-20">
+<div class="flex flex-col items-center mb-6">
+<div class="relative mb-3">
+<div class="h-28 w-28 rounded-full bg-cover bg-center border-4 border-white dark:border-slate-800 shadow-lg" data-alt="Portrait of a female student smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAQERS9ImJoGOi0nUvsykUdcYr6cNtMH8OZrfSb3Ve-dm3IE9FqtU91oXNSsg3jMg6EvAvOP0qQYxTxmKsxbooMpnPX_ACzs5Ef_YnXlqrT_1yGeb8_rNjBAaKOvbNB6lfGSGhmxMB3BdlPLoGHaZ1XQ7MYnXBlcF56cqjthhlLZxVzCPjINh-tA1pz8gkFbSzI_MMG0Xv5gzjeevbN8gfgaxfj6_6Zyz_WDPo6tDLN2RZEA22buoGYeLMzBNVcZsTV_2Ri_oFcBCyV');"></div>
+<div class="absolute bottom-1 right-1 bg-secondary text-white rounded-full p-1.5 border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center cursor-pointer hover:bg-amber-600 transition-colors">
+<span class="material-symbols-outlined text-sm font-bold">edit</span>
+</div>
+</div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Alex Johnson</h2>
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary/10 text-primary dark:text-blue-300 dark:bg-blue-900/30 px-3 py-1 rounded-custom text-xs font-semibold uppercase tracking-wide">Student</span>
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Class 10-A</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-custom border border-slate-100 dark:border-slate-700">
+<span class="text-primary dark:text-blue-400 font-bold text-lg">94%</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs font-medium">Attendance</span>
+</div>
+<div class="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-custom border border-slate-100 dark:border-slate-700">
+<span class="text-primary dark:text-blue-400 font-bold text-lg">3.8</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs font-medium">GPA</span>
+</div>
+<div class="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-custom border border-slate-100 dark:border-slate-700">
+<span class="text-primary dark:text-blue-400 font-bold text-lg">12</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs font-medium">Activities</span>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<button class="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-custom shadow-sm hover:shadow-md transition-all group">
+<div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary dark:text-blue-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="ml-4 flex-1 text-left">
+<h3 class="text-base font-semibold text-slate-900 dark:text-white">Personal Information</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Contact details, address</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">chevron_right</span>
+</button>
+<button class="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-custom shadow-sm hover:shadow-md transition-all group">
+<div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary dark:text-blue-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div class="ml-4 flex-1 text-left">
+<h3 class="text-base font-semibold text-slate-900 dark:text-white">School Details</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Grade, subjects, transcripts</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">chevron_right</span>
+</button>
+<button class="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-custom shadow-sm hover:shadow-md transition-all group">
+<div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary dark:text-blue-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">shield</span>
+</div>
+<div class="ml-4 flex-1 text-left">
+<h3 class="text-base font-semibold text-slate-900 dark:text-white">Account Settings</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Privacy, password</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">chevron_right</span>
+</button>
+<button class="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-custom shadow-sm hover:shadow-md transition-all group">
+<div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary dark:text-blue-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">help</span>
+</div>
+<div class="ml-4 flex-1 text-left">
+<h3 class="text-base font-semibold text-slate-900 dark:text-white">Help &amp; Support</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">FAQ, contact support</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">chevron_right</span>
+</button>
+</div>
+<div class="mt-8 mb-4">
+<button class="w-full py-3 px-4 flex items-center justify-center gap-2 rounded-custom border border-red-100 bg-red-50 text-red-600 font-semibold hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/30 dark:text-red-400 transition-colors">
+<span class="material-symbols-outlined text-xl">logout</span>
+                    Log Out
+                </button>
+</div>
+<p class="text-center text-xs text-slate-400 mt-4 mb-8">Pythagore App v2.4.1</p>
+</main>
+<nav class="absolute bottom-0 left-0 w-full border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 pb-6 pt-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30">
+<div class="flex items-center justify-between">
+<a class="flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">calendar_month</span>
+<span class="text-[10px] font-medium">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">school</span>
+<span class="text-[10px] font-medium">Grades</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-primary group" href="#">
+<span class="material-symbols-outlined text-2xl fill-current group-hover:scale-110 transition-transform">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</div>
+</nav>
+</div>
+
+</body></html>

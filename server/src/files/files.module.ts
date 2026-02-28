@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
+import { StorageService } from './storage.service';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -20,12 +21,13 @@ import { APP_GUARD } from '@nestjs/core';
     controllers: [FilesController],
     providers: [
         FilesService,
+        StorageService,
         // Apply rate limiting to file upload endpoints
         {
             provide: APP_GUARD,
             useClass: ThrottlerGuard,
         },
     ],
-    exports: [FilesService],
+    exports: [FilesService, StorageService],
 })
 export class FilesModule { }

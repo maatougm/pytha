@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Full Calendar Schedule</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1152d4", // Deep blue
+                        secondary: "#D4AF37", // Gold accent for "Today"
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0f172a", // Slate-900 based deep blueish dark
+                        "surface-dark": "#1e293b", // Slate-800
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        display: ["Lexend", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        /* Hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative flex min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark">
+<!-- Top Bar -->
+<div class="sticky top-0 z-20 flex items-center justify-between px-4 pt-6 pb-2 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<button class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">arrow_back</span>
+</button>
+<h2 class="text-lg font-bold">Schedule</h2>
+<button class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">more_horiz</span>
+</button>
+</div>
+<!-- View Toggle -->
+<div class="px-4 py-3">
+<div class="flex h-10 items-center justify-center rounded-lg bg-slate-200 dark:bg-surface-dark p-1">
+<label class="flex-1 cursor-pointer h-full flex items-center justify-center rounded-md transition-all has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm has-[:checked]:text-primary font-medium text-sm text-slate-500 dark:text-slate-400">
+<span>Month</span>
+<input checked="" class="hidden" name="view" type="radio" value="month"/>
+</label>
+<label class="flex-1 cursor-pointer h-full flex items-center justify-center rounded-md transition-all has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm has-[:checked]:text-primary font-medium text-sm text-slate-500 dark:text-slate-400">
+<span>Week</span>
+<input class="hidden" name="view" type="radio" value="week"/>
+</label>
+<label class="flex-1 cursor-pointer h-full flex items-center justify-center rounded-md transition-all has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm has-[:checked]:text-primary font-medium text-sm text-slate-500 dark:text-slate-400">
+<span>Day</span>
+<input class="hidden" name="view" type="radio" value="day"/>
+</label>
+</div>
+</div>
+<!-- Calendar Component -->
+<div class="px-4 pb-2">
+<!-- Month Navigation -->
+<div class="flex items-center justify-between mb-4">
+<button class="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<h3 class="text-base font-bold text-slate-800 dark:text-slate-100">October 2023</h3>
+<button class="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<!-- Days of Week -->
+<div class="grid grid-cols-7 mb-2">
+<div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wide">S</div>
+<div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wide">M</div>
+<div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wide">T</div>
+<div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wide">W</div>
+<div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wide">T</div>
+<div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wide">F</div>
+<div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wide">S</div>
+</div>
+<!-- Calendar Grid -->
+<div class="grid grid-cols-7 gap-y-2">
+<!-- Previous month days (dimmed) -->
+<div class="h-9 w-full flex items-center justify-center text-sm text-slate-300 dark:text-slate-600">28</div>
+<div class="h-9 w-full flex items-center justify-center text-sm text-slate-300 dark:text-slate-600">29</div>
+<div class="h-9 w-full flex items-center justify-center text-sm text-slate-300 dark:text-slate-600">30</div>
+<!-- Current month -->
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">1</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">2</span>
+<div class="w-1 h-1 rounded-full bg-blue-400 mt-1"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">3</span>
+<div class="flex gap-0.5 mt-1">
+<div class="w-1 h-1 rounded-full bg-emerald-400"></div>
+<div class="w-1 h-1 rounded-full bg-rose-400"></div>
+</div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">4</span>
+</div>
+<!-- Selected Day (Today) -->
+<div class="h-9 w-full flex flex-col items-center justify-start relative group cursor-pointer">
+<div class="absolute top-0 w-8 h-8 rounded-full bg-secondary shadow-lg shadow-secondary/30"></div>
+<span class="text-sm font-bold text-white z-10 pt-1.5">5</span>
+<div class="w-1 h-1 rounded-full bg-white mt-0.5 z-10"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">6</span>
+<div class="w-1 h-1 rounded-full bg-purple-400 mt-1"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">7</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">8</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">9</span>
+<div class="w-1 h-1 rounded-full bg-blue-400 mt-1"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">10</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">11</span>
+<div class="flex gap-0.5 mt-1">
+<div class="w-1 h-1 rounded-full bg-orange-400"></div>
+</div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">12</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">13</span>
+<div class="w-1 h-1 rounded-full bg-rose-400 mt-1"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">14</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">15</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">16</span>
+<div class="w-1 h-1 rounded-full bg-blue-400 mt-1"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">17</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">18</span>
+<div class="flex gap-0.5 mt-1">
+<div class="w-1 h-1 rounded-full bg-purple-400"></div>
+<div class="w-1 h-1 rounded-full bg-emerald-400"></div>
+</div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">19</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">20</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">21</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">22</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">23</span>
+<div class="w-1 h-1 rounded-full bg-blue-400 mt-1"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">24</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">25</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">26</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">27</span>
+<div class="w-1 h-1 rounded-full bg-orange-400 mt-1"></div>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">28</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">29</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">30</span>
+</div>
+<div class="h-9 w-full flex flex-col items-center justify-start pt-1 relative group cursor-pointer">
+<span class="text-sm font-medium z-10">31</span>
+</div>
+</div>
+<!-- Drag Handle / Divider -->
+<div class="flex justify-center py-2">
+<div class="h-1 w-12 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+</div>
+</div>
+<!-- Agenda List -->
+<div class="flex-1 bg-white dark:bg-surface-dark rounded-t-3xl px-5 py-6 shadow-[-4px_-4px_20px_rgba(0,0,0,0.1)] overflow-y-auto no-scrollbar">
+<div class="flex items-center justify-between mb-6">
+<h4 class="text-lg font-bold text-slate-800 dark:text-slate-100">Today's Agenda</h4>
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Oct 5, 2023</span>
+</div>
+<div class="flex flex-col gap-4 pb-20">
+<!-- Event Item 1 -->
+<div class="flex group">
+<div class="flex flex-col items-center mr-4 pt-1">
+<span class="text-sm font-bold text-slate-800 dark:text-slate-200">08:00</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">AM</span>
+<div class="w-px h-full bg-slate-200 dark:bg-slate-700 mt-2 group-last:hidden"></div>
+</div>
+<div class="flex-1 bg-blue-50 dark:bg-slate-800/50 p-4 rounded-2xl border-l-4 border-blue-500 hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-md">Mathematics</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">more_vert</span>
+</div>
+<h5 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-1">Advanced Algebra</h5>
+<div class="flex items-center text-slate-500 dark:text-slate-400 text-xs">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span>
+                            Room 302 • Mr. Anderson
+                        </div>
+<div class="flex -space-x-2 mt-3">
+<img alt="Student avatar" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800" data-alt="Portrait of a young woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjQb6-gc6KUDROUNsGIkpW0A-Nii20RHpnOpkxjSPumKn13Sp_uFuod-K0ReOmS_HTzW6H4i-nU5ejF-zrCGREOSpjGzTQN651NjUVTdoPXhjB-aHeiR8QPhPAEJlvfYJDknbYNMzUza2C_QLiURCxm0ni2rHxGEC1vFHAUMwZ5ifSby5dPwUqkcbzc9byqBWy8NDPLaoK3tk-LbCbUQQM_XM7Je8f4Xh3cz1_6sYeiO02MuK4LpeatN8axnbij0WFebO_ZhtHpL6o"/>
+<img alt="Student avatar" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800" data-alt="Portrait of a young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPzCaSPcWlCirhvL9ARe6A_taL6Gm3ZxjtMc7NlgjcXBy8utKionWnW9_Gtxi6T7urj1EiYI4RhfomhOIoPnTp6ewKIREtRP17qVFpybNPyztycEDkYDzT2rn4nn-65ll7FtZtC_xUA31mls3fSDqG5eMzvcma5w9Xf9tMT8bO0fHpHAI3R9RmMIo-YvTFFFXU6cWfoyeEm9w9PmmyiQ0qhBEHMzftYR9BHsTeX4rnK2yRDP5N-3cm7V8jpqv5-xeKowJPlGvKFU_z"/>
+<img alt="Student avatar" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800" data-alt="Portrait of a man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_slxOHGnm_PBWapmc4LYmbd-o-JAzb-rDRXoqgeq4fnZbug4M3ND_uu8H6ZotKPW6oQ41uu6DN2mThBdONgQA9PeZYIkRxIvPjc4s8NgcWt1MfnpBO5GqktPUA8969ZZwu_Jq5dGu1BWarGhJacaPXrqac4aV1W9K6ImpwHod4eDpzIRFGP9tv1VCZNVsv0G0QO-YUR7q_oWPHv4C6Z5zjyrNUxQW39HzUG4Ngyf_f8PT9pmZdRFDXq7ZHNNNI470P2GGJ8z2wwYS"/>
+<div class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-600 dark:text-slate-300">+4</div>
+</div>
+</div>
+</div>
+<!-- Event Item 2 -->
+<div class="flex group">
+<div class="flex flex-col items-center mr-4 pt-1">
+<span class="text-sm font-bold text-slate-800 dark:text-slate-200">10:30</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">AM</span>
+<div class="w-px h-full bg-slate-200 dark:bg-slate-700 mt-2 group-last:hidden"></div>
+</div>
+<div class="flex-1 bg-emerald-50 dark:bg-slate-800/50 p-4 rounded-2xl border-l-4 border-emerald-500 hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md">Science</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">more_vert</span>
+</div>
+<h5 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-1">Physics Lab</h5>
+<div class="flex items-center text-slate-500 dark:text-slate-400 text-xs">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span>
+                            Lab 4 • Mrs. Curie
+                        </div>
+</div>
+</div>
+<!-- Event Item 3 -->
+<div class="flex group">
+<div class="flex flex-col items-center mr-4 pt-1">
+<span class="text-sm font-bold text-slate-800 dark:text-slate-200">01:15</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">PM</span>
+<div class="w-px h-full bg-slate-200 dark:bg-slate-700 mt-2 group-last:hidden"></div>
+</div>
+<div class="flex-1 bg-rose-50 dark:bg-slate-800/50 p-4 rounded-2xl border-l-4 border-rose-500 hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/30 px-2 py-0.5 rounded-md">Assignment Due</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">more_vert</span>
+</div>
+<h5 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-1">History Essay</h5>
+<div class="flex items-center text-slate-500 dark:text-slate-400 text-xs">
+<span class="material-symbols-outlined text-sm mr-1">schedule</span>
+                            Deadline: 2:00 PM
+                        </div>
+</div>
+</div>
+<!-- Event Item 4 -->
+<div class="flex group">
+<div class="flex flex-col items-center mr-4 pt-1">
+<span class="text-sm font-bold text-slate-800 dark:text-slate-200">03:00</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">PM</span>
+</div>
+<div class="flex-1 bg-purple-50 dark:bg-slate-800/50 p-4 rounded-2xl border-l-4 border-purple-500 hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded-md">Club</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">more_vert</span>
+</div>
+<h5 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-1">Robotics Club</h5>
+<div class="flex items-center text-slate-500 dark:text-slate-400 text-xs">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span>
+                            Tech Hub
+                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="absolute bottom-0 left-0 w-full border-t border-slate-200 dark:border-slate-800 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md px-4 pb-4 pt-3 z-30">
+<div class="flex justify-between items-end">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">home</span>
+<p class="text-[10px] font-medium leading-none">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-2xl fill-current">calendar_month</span>
+<p class="text-[10px] font-medium leading-none">Schedule</p>
+</a>
+<div class="flex flex-1 flex-col items-center justify-end -mt-8">
+<button class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+</div>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">school</span>
+<p class="text-[10px] font-medium leading-none">Grades</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">person</span>
+<p class="text-[10px] font-medium leading-none">Profile</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

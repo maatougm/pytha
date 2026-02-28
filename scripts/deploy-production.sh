@@ -7,7 +7,7 @@
 # This script handles the COMPLETE production deployment including:
 # - Environment validation
 # - SSL certificate setup (Let's Encrypt)
-# - Docker-based Flutter Web build (no local Flutter needed!)
+# - Docker-based Web build
 # - Database migrations
 # - Health checks
 #

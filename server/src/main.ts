@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
+import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
+import { MetricsService } from './metrics/metrics.service';
 import helmet from 'helmet';
 import compression from 'compression';
 import * as dotenv from 'dotenv';
@@ -52,21 +54,37 @@ async function bootstrap() {
     // Cookie parser — required for reading httpOnly refresh token cookie
     app.use(cookieParser());
 
-    // CORS with explicit origins
+    // CORS with explicit origins - SECURITY FIX: No localhost regex in production
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
         'http://localhost:5173',
         'http://localhost:4173',
     ];
 
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+
     app.enableCors({
         origin: (origin, callback) => {
             // Allow requests with no origin (mobile apps, curl, etc.)
-            if (!origin || allowedOrigins.includes(origin)) {
+            if (!origin) {
                 callback(null, true);
-            } else {
-                logger.warn(`Blocked CORS request from: ${origin}`);
-                callback(new Error('Not allowed by CORS'));
+                return;
             }
+
+            // Check if origin is in allowed list
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+                return;
+            }
+
+            // DEVELOPMENT: Allow all origins for testing (Expo tunnel, ngrok, etc.)
+            if (isDevelopment) {
+                // Allow localhost, ngrok, and any origin in development
+                callback(null, true);
+                return;
+            }
+
+            logger.warn(`Blocked CORS request from: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
         },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -77,6 +95,13 @@ async function bootstrap() {
     // SanitizePipe sanitizes all incoming data to prevent XSS attacks
     app.useGlobalPipes(
         new SanitizePipe({
+            transformOptions: { enableImplicitConversion: true },
+        }),
+        // SECURITY FIX: Add ValidationPipe with whitelist: true to strip unknown properties
+        new ValidationPipe({
+            whitelist: true, // Strip properties that don't have decorators
+            forbidNonWhitelisted: true, // Throw error if non-whitelisted properties are present
+            transform: true, // Transform payloads to be objects typed according to their DTO classes
             transformOptions: { enableImplicitConversion: true },
         }),
     );
@@ -94,6 +119,10 @@ async function bootstrap() {
         const document = SwaggerModule.createDocument(app, config);
         SwaggerModule.setup('api/docs', app, document);
     }
+
+    // Metrics interceptor - records HTTP request duration and counts
+    const metricsService = app.get(MetricsService);
+    app.useGlobalInterceptors(new MetricsInterceptor(metricsService));
 
     // Graceful shutdown
     app.enableShutdownHooks();

@@ -3,6 +3,7 @@ import {
     UseGuards, Request, Res, UseInterceptors, UploadedFile, ParseFilePipe,
     BadRequestException, Inject, LoggerService, Headers,
     HttpCode, HttpStatus, Patch, NotFoundException, ForbiddenException,
+    DefaultValuePipe, ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -11,6 +12,8 @@ import { Response } from 'express';
 import { createReadStream } from 'fs';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBearerAuth, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { FilesService } from './files.service';
+import { StorageService } from './storage.service';
+import { MetricsService } from '../metrics/metrics.service';
 import { UploadFileDto, SetFilePermissionDto } from './dto/files.dto';
 import { FileUploadDto, FileUploadResponseDto, UploadQuotaDto } from './dto/file-upload.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -58,6 +61,8 @@ const UPLOAD_CONFIG = {
 export class FilesController {
     constructor(
         private filesService: FilesService,
+        private storageService: StorageService,
+        private metricsService: MetricsService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER)
         private readonly logger: LoggerService,
     ) { }
@@ -121,7 +126,7 @@ export class FilesController {
         }
 
         // Check rate limiting at controller level (additional safety)
-        const rateLimit = this.filesService.getRateLimitStatus(req.user.sub);
+        const rateLimit = await this.filesService.getRateLimitStatus(req.user.sub);
         if (rateLimit.remaining <= 0) {
             const resetSeconds = Math.ceil((rateLimit.resetTime - Date.now()) / 1000);
             throw new BadRequestException(
@@ -151,6 +156,27 @@ export class FilesController {
                 dto,
                 userRoles,
             );
+
+            // Also upload to configured storage (S3 or local)
+            try {
+                const storageResult = await this.storageService.uploadFile(
+                    file,
+                    category,
+                    {
+                        uploaderId: req.user.sub,
+                        fileId: result.id,
+                        originalName: file.originalname,
+                    },
+                );
+                this.logger.log(`File stored to ${this.storageService.getProvider()}: ${storageResult.key}`);
+                
+                // Record file upload metrics
+                this.metricsService.recordFileUpload(category, file.size, true);
+            } catch (storageError) {
+                this.logger.error(`Storage upload failed: ${storageError.message}`);
+                this.metricsService.recordFileUploadError(category, storageError.message);
+                // Don't fail the upload if storage fails - file is already in DB
+            }
 
             // Clean up temp file (service should have moved it)
             await this.cleanupTempFile(file.path);
@@ -184,7 +210,7 @@ export class FilesController {
     async getQuota(@Request() req): Promise<UploadQuotaDto> {
         const userRoles = req.user.roles || [];
         const quota = await this.filesService.getUserQuota(req.user.sub, userRoles);
-        const rateLimit = this.filesService.getRateLimitStatus(req.user.sub);
+        const rateLimit = await this.filesService.getRateLimitStatus(req.user.sub);
 
         // Determine max file size based on role
         const maxFileSize = Math.max(
@@ -359,6 +385,8 @@ export class FilesController {
     }
 
     @Get(':id/preview')
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute per user
     @ApiOperation({
         summary: 'Get file preview (for images)',
         description: 'Returns a preview image for supported file types (JPEG, PNG, GIF, WebP, BMP)',
@@ -367,9 +395,18 @@ export class FilesController {
         @Param('id') id: string,
         @Request() req,
         @Res() res: Response,
-        @Query('width') width?: string,
-        @Query('height') height?: string,
+        @Query('width', new DefaultValuePipe(200), ParseIntPipe) width?: number,
+        @Query('height', new DefaultValuePipe(200), ParseIntPipe) height?: number,
     ) {
+        // Validate dimensions to prevent DoS via resource exhaustion
+        const MAX_DIMENSION = 2000;
+        if (width && (width < 1 || width > MAX_DIMENSION)) {
+            return res.status(400).json({ message: `Width must be between 1 and ${MAX_DIMENSION}px` });
+        }
+        if (height && (height < 1 || height > MAX_DIMENSION)) {
+            return res.status(400).json({ message: `Height must be between 1 and ${MAX_DIMENSION}px` });
+        }
+
         // CRIT-003 fix: check permissions FIRST before any file operations
         // This prevents probing file existence / mime type without authorization
         const file = await this.filesService.findById(id);
@@ -401,10 +438,7 @@ export class FilesController {
         const previewPath = await this.filesService.generatePreview(
             filePath,
             file.mimeType,
-            {
-                width: width ? parseInt(width, 10) : undefined,
-                height: height ? parseInt(height, 10) : undefined,
-            }
+            { width, height }
         );
 
         if (!previewPath) {

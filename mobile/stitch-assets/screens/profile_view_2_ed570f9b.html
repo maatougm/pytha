@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile View 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0b50da",
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+<div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden pb-20">
+<!-- Top Header Section with Deep Blue Background -->
+<div class="bg-primary pt-12 pb-8 px-6 rounded-b-3xl shadow-lg relative overflow-hidden">
+<!-- Abstract Pattern Background Overlay -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+<div class="relative z-10 flex justify-between items-center mb-6">
+<button class="text-white hover:bg-white/10 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined !text-[24px]">arrow_back</span>
+</button>
+<h2 class="text-white text-lg font-bold tracking-tight">Profile</h2>
+<button class="text-white hover:bg-white/10 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined !text-[24px]">edit_square</span>
+</button>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-4">
+<div class="relative">
+<div class="h-28 w-28 rounded-full border-4 border-white/20 bg-cover bg-center shadow-xl" data-alt="Portrait of Sarah Johnson smiling" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA5foagQyecvro3VMJy0hH-WNXvRClUpgO1lgb2YK5hj3tby_sCCyevadt_kBewOekHcv3BUHfQVL2f5yNq5c2nOcLgldVbJHp-003wYn0YSf6H_SXAi7CzKMsV93n9zCJjjvMYGrbnBle1pq5tqqg_eTFXjZBcBRwE44f4IHwJvN4M6SWKs8wVPKIGb8YLg0hugFKmogHmyO-St0_nxX9tVLsVW-vXuHTeTkd5Sij_gM-GGKg-BAc7rG_mvwiI6X82Bbu_pUwu0OF8");'></div>
+<div class="absolute bottom-0 right-0 bg-green-500 border-2 border-primary h-6 w-6 rounded-full"></div>
+</div>
+<div class="text-center">
+<h1 class="text-white text-2xl font-bold mb-1">Sarah Johnson</h1>
+<p class="text-blue-100 font-medium text-sm">Mathematics Teacher</p>
+<p class="text-blue-200 text-sm">Pythagore High School</p>
+</div>
+</div>
+</div>
+<!-- Main Content Container -->
+<div class="px-5 -mt-6 relative z-20 space-y-6">
+<!-- Profile Completion Card -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex justify-between items-center mb-3">
+<h3 class="font-bold text-slate-900 dark:text-slate-100">Profile Completion</h3>
+<span class="text-primary font-bold text-sm">75%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+<div class="bg-primary h-2.5 rounded-full" style="width: 75%"></div>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Complete your bio to reach 100%</p>
+</div>
+<!-- Settings Group -->
+<div class="space-y-4">
+<h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Settings</h3>
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+<!-- Dark Mode Toggle -->
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="bg-slate-100 dark:bg-slate-700 p-2 rounded-lg text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">dark_mode</span>
+</div>
+<span class="font-medium text-slate-900 dark:text-slate-100">Dark Mode</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Notifications Toggle -->
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="bg-slate-100 dark:bg-slate-700 p-2 rounded-lg text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</div>
+<span class="font-medium text-slate-900 dark:text-slate-100">Notifications</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Account Section -->
+<div class="space-y-4">
+<h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Account</h3>
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+<a class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="bg-slate-100 dark:bg-slate-700 p-2 rounded-lg text-slate-600 dark:text-slate-300 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">person</span>
+</div>
+<span class="font-medium text-slate-900 dark:text-slate-100">Personal Information</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="bg-slate-100 dark:bg-slate-700 p-2 rounded-lg text-slate-600 dark:text-slate-300 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<span class="font-medium text-slate-900 dark:text-slate-100">Security</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined">logout</span>
+</div>
+<span class="font-medium text-red-600 dark:text-red-400">Log Out</span>
+</div>
+</a>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 left-0 right-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pb-6 pt-3 z-50">
+<div class="flex justify-around items-center">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">home</span>
+<p class="text-xs font-medium">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">school</span>
+<p class="text-xs font-medium">Classes</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">chat_bubble</span>
+<p class="text-xs font-medium">Messages</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-current" style="font-variation-settings: 'FILL' 1; font-size: 24px;">person</span>
+<p class="text-xs font-medium">Profile</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

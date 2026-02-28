@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Student Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1E3A8A", // Deep blue
+                        "secondary": "#F59E0B", // Amber/Gold
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "0.75rem", // 12px
+                        "xl": "1rem", 
+                        "2xl": "1.5rem", 
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 2px 12px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .rounded-custom {
+        border-radius: 12px;
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-white dark:bg-slate-900 shadow-2xl overflow-hidden">
+<header class="bg-primary pt-12 pb-16 px-6 relative overflow-hidden rounded-b-[24px] shadow-lg z-10">
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary/10 rounded-full -ml-12 -mb-12 blur-xl"></div>
+<div class="flex items-center justify-between relative z-10 mb-6">
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors backdrop-blur-sm">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight text-white">Pythagore</h1>
+</div>
+<button class="relative flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors backdrop-blur-sm">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+<span class="absolute top-2.5 right-2.5 w-2 h-2 bg-secondary border border-primary rounded-full"></span>
+</button>
+</div>
+<div class="flex items-center gap-4 relative z-10">
+<div class="h-16 w-16 rounded-full border-2 border-white/30 p-0.5 shadow-md">
+<div class="h-full w-full rounded-full bg-cover bg-center border-2 border-primary" data-alt="Student profile portrait smiling" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBXwztJOvCHWi-mWcQ-ws1w2oPugcjgyKJiT_UDxhlrZSWRrA1iPZx6xqelqeNSCZ84S4mWDMR8a1ngNLs2pyqLfrvs0AvxMYYzs_FjhoZCnaft_Xu3HECTVyq7Y-dM8XWdDpX4cMRme-u9ccTrety2Sj6siVVsZASPsw6nyYwJB1k3yL2OvgdTvjE3PKkBm6Dd-4c0ro4kaf6d54HFvCLjX0Vzu6hXPbZ9yFHs_gr0I4ZQvCNIh9kX-Vj6u3vTIHax_KREYVQWzrH1");'></div>
+</div>
+<div class="flex flex-col justify-center text-white">
+<p class="text-blue-100 text-sm font-medium opacity-90">Good morning,</p>
+<h2 class="text-2xl font-bold leading-tight">Alex Morgan</h2>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-white/20 text-white border border-white/10">
+                            Grade 10
+                        </span>
+<span class="text-[10px] text-blue-200">•</span>
+<span class="text-xs text-blue-100 font-medium">Class B</span>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-24 -mt-8 px-5 relative z-10">
+<div class="grid grid-cols-3 gap-3 mb-6">
+<div class="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-800 rounded-custom shadow-card border border-slate-50 dark:border-slate-700">
+<div class="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-secondary text-xl">mail</span>
+</div>
+<span class="text-xl font-bold text-slate-900 dark:text-white">2</span>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 text-center uppercase tracking-wide">Unread</span>
+</div>
+<div class="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-800 rounded-custom shadow-card border border-secondary/20 dark:border-secondary/20 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-8 h-8 bg-secondary/10 rounded-bl-full"></div>
+<div class="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-secondary text-xl">assignment</span>
+</div>
+<span class="text-xl font-bold text-slate-900 dark:text-white">1</span>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 text-center uppercase tracking-wide">Due Today</span>
+</div>
+<div class="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-800 rounded-custom shadow-card border border-slate-50 dark:border-slate-700">
+<div class="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-secondary text-xl">check_circle</span>
+</div>
+<span class="text-xl font-bold text-slate-900 dark:text-white">95%</span>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 text-center uppercase tracking-wide">Attendance</span>
+</div>
+</div>
+<div class="mb-8">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 px-1">Quick Access</h3>
+<div class="grid grid-cols-2 gap-4">
+<button class="group relative flex flex-col p-5 h-36 rounded-custom bg-primary text-white shadow-lg shadow-primary/20 overflow-hidden hover:shadow-xl transition-all">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors"></div>
+<div class="absolute right-3 top-3 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-5xl">forum</span>
+</div>
+<div class="mt-auto relative z-10">
+<div class="bg-white/20 w-10 h-10 rounded-full flex items-center justify-center mb-3 backdrop-blur-sm">
+<span class="material-symbols-outlined text-xl">forum</span>
+</div>
+<p class="font-semibold text-lg leading-tight">Messages</p>
+<p class="text-xs text-blue-200 mt-1">Chat with teachers</p>
+</div>
+</button>
+<div class="flex flex-col gap-4 h-36">
+<button class="flex-1 flex items-center px-4 rounded-custom bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-card hover:border-primary/30 transition-colors group">
+<div class="h-9 w-9 rounded-lg bg-primary/5 dark:bg-primary/20 text-primary dark:text-blue-300 flex items-center justify-center mr-3 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">school</span>
+</div>
+<div class="text-left">
+<p class="font-semibold text-sm text-slate-900 dark:text-white">Courses</p>
+</div>
+</button>
+<button class="flex-1 flex items-center px-4 rounded-custom bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-card hover:border-primary/30 transition-colors group">
+<div class="h-9 w-9 rounded-lg bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-amber-400 flex items-center justify-center mr-3 group-hover:bg-secondary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">bar_chart</span>
+</div>
+<div class="text-left">
+<p class="font-semibold text-sm text-slate-900 dark:text-white">Grades</p>
+</div>
+</button>
+</div>
+</div>
+</div>
+<div class="pb-6">
+<div class="flex items-center justify-between mb-4 px-1">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Recent Updates</h3>
+<a class="text-sm font-medium text-primary dark:text-blue-400 hover:text-primary/80" href="#">View all</a>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex p-4 rounded-custom bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm items-start gap-3 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="h-10 w-10 shrink-0 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-primary dark:text-blue-300">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-slate-900 dark:text-white">Physics Lab Result</p>
+<span class="text-[10px] text-slate-400 font-medium whitespace-nowrap ml-2">2h ago</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">Your grade for "Newton's Laws Experiment" has been posted. Great job!</p>
+</div>
+</div>
+<div class="flex p-4 rounded-custom bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm items-start gap-3 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
+<div class="h-10 w-10 shrink-0 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-secondary dark:text-amber-500">
+<span class="material-symbols-outlined">calendar_clock</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-slate-900 dark:text-white">History Essay Due</p>
+<span class="text-[10px] text-slate-400 font-medium whitespace-nowrap ml-2">5h ago</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">Reminder: "The Industrial Revolution" essay is due tomorrow at 9:00 AM.</p>
+</div>
+</div>
+<div class="flex p-4 rounded-custom bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm items-start gap-3">
+<div class="h-10 w-10 shrink-0 rounded-full bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center text-teal-600 dark:text-teal-400">
+<span class="material-symbols-outlined">sports_basketball</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-slate-900 dark:text-white">Basketball Practice</p>
+<span class="text-[10px] text-slate-400 font-medium whitespace-nowrap ml-2">1d ago</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">Coach Carter updated the schedule for next week's practice.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<nav class="absolute bottom-0 w-full bg-white dark:bg-slate-900 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] px-2 pb-6 pt-2 z-20">
+<div class="flex justify-around items-center">
+<a class="flex flex-col items-center justify-center gap-1 w-16 group" href="#">
+<div class="h-10 px-4 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-primary dark:text-blue-400 text-[24px] filled">home</span>
+</div>
+<p class="text-[10px] font-semibold text-primary dark:text-blue-400">Home</p>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 w-16 group text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300" href="#">
+<div class="h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">calendar_month</span>
+</div>
+<p class="text-[10px] font-medium">Calendar</p>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 w-16 group text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300" href="#">
+<div class="h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">local_library</span>
+</div>
+<p class="text-[10px] font-medium">Courses</p>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 w-16 group text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300" href="#">
+<div class="h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">school</span>
+</div>
+<p class="text-[10px] font-medium">Grades</p>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 w-16 group text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300" href="#">
+<div class="h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<p class="text-[10px] font-medium">Profile</p>
+</a>
+</div>
+</nav>
+</div>
+
+</body></html>

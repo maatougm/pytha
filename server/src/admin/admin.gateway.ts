@@ -32,7 +32,8 @@ interface AuthenticatedSocket extends Socket {
                 'http://localhost:5173',
                 'http://localhost:4173',
             ];
-            if (!origin || allowedOrigins.includes(origin)) {
+            const isLocalhost = origin && /^http:\/\/localhost:\d+$/.test(origin);
+            if (!origin || allowedOrigins.includes(origin) || isLocalhost) {
                 callback(null, true);
             } else {
                 callback(new Error('Not allowed by CORS'), false);
@@ -81,8 +82,7 @@ export class AdminGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
             const pubClient = this.redisClient;
             const subClient = pubClient.duplicate();
 
-            await Promise.all([pubClient.connect(), subClient.connect()]);
-            server.adapter(createAdapter(pubClient, subClient));
+            (server.adapter as any) = createAdapter(pubClient, subClient);
 
             this.logger.log('✅ Redis adapter configured for admin broadcasts');
         } catch (error) {

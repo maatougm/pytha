@@ -1,0 +1,63 @@
+{
+  "app": {
+    "name": "School Hub",
+    "tagline": "ربط المدارس والمعلمين وأولياء الأمور والطلاب"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "continueWithBiometric": "المتابعة بالبصمة",
+    "or": "أو",
+    "loginSuccess": "مرحباً بعودتك!",
+    "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "logoutSuccess": "تم تسجيل الخروج بنجاح",
+    "welcomeTitle": "مرحباً بك في School Hub",
+    "welcomeSubtitle": "مجتمعك المدرسي في مكان واحد"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "courses": "الدورات",
+    "messages": "الرسائل",
+    "files": "الملفات",
+    "assignments": "الواجبات",
+    "grades": "الدرجات",
+    "attendance": "الحضور",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "accessibility": "إمكانية الوصول",
+    "language": "اللغة",
+    "notifications": "الإشعارات"
+  },
+  "home": {
+    "title": "لوحة التحكم",
+    "todaysClasses": "دروس اليوم",
+    "upcomingAssignments": "الواجبات القادمة",
+    "recentMessages": "الرسائل الأخيرة",
+    "noClasses": "لا توجد دروس مجدولة اليوم",
+    "noAssignments": "لا توجد واجبات قادمة",
+    "viewAll": "عرض الكل",
+    "announcements": "الإعلانات"
+  },
+  "accessibility": {
+    "title": "إمكانية الوصول",
+    "appearance": "المظهر",
+    "textDisplay": "النص والعرض",
+    "screenReader": "قارئ الشاشة",
+    "theme": "السمة",
+    "highContrast": "تباين عالي",
+    "textSize": "حجم النص",
+    "fontStyle": "نمط الخط",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "small": "صغير",
+    "normal": "عادي",
+    "large": "كبير",
+    "xlarge": "كبير جداً"
+  }
+}

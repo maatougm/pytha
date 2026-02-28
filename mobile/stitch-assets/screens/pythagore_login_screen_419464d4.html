@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore Login Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e1e8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom styles for iOS-like feel if needed, though Tailwind handles most */
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Floating label transition */
+        .peer:placeholder-shown ~ .peer-placeholder-shown\:top-1\/2 {
+            top: 50%;
+        }
+        .peer:focus ~ .floating-label,
+        .peer:not(:placeholder-shown) ~ .floating-label {
+            top: -0.5rem;
+            left: 0.75rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            background-color: white;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+            color: #1e1e8a;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased min-h-screen flex flex-col items-center justify-center">
+<!-- Mobile Container -->
+<div class="relative w-full max-w-md min-h-screen bg-white dark:bg-[#1a1a2e] flex flex-col overflow-hidden shadow-xl sm:rounded-xl sm:min-h-[800px] sm:h-auto sm:my-8">
+<!-- Header / Nav -->
+<div class="flex items-center justify-between px-4 py-2 mt-2">
+<button class="flex items-center justify-center w-10 h-10 rounded-full text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<div class="text-slate-900 dark:text-slate-100 font-semibold text-lg">Log In</div>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 flex flex-col px-6 pb-8 pt-4 overflow-y-auto">
+<!-- Logo Section -->
+<div class="flex flex-col items-center justify-center py-8">
+<div class="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+<!-- Geometric P Logo Representation -->
+<svg fill="none" height="48" viewbox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 4H12C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20H4V4Z" stroke="white" stroke-linejoin="round" stroke-width="2.5"></path>
+<path d="M4 12H12" stroke="white" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mb-1">Pythagore</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm text-center">School Management Simplified</p>
+</div>
+<!-- Role Selector -->
+<div class="mb-8">
+<div class="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl relative">
+<!-- Hidden Radios for functionality -->
+<div class="flex w-full">
+<label class="cursor-pointer flex-1 text-center relative z-10">
+<input class="peer sr-only" name="role" type="radio" value="teacher"/>
+<div class="py-2.5 px-3 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-700 peer-checked:text-primary dark:peer-checked:text-white peer-checked:shadow-sm transition-all duration-200">
+                                Teacher
+                            </div>
+</label>
+<label class="cursor-pointer flex-1 text-center relative z-10">
+<input checked="" class="peer sr-only" name="role" type="radio" value="parent"/>
+<div class="py-2.5 px-3 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-700 peer-checked:text-primary dark:peer-checked:text-white peer-checked:shadow-sm transition-all duration-200">
+                                Parent
+                            </div>
+</label>
+<label class="cursor-pointer flex-1 text-center relative z-10">
+<input class="peer sr-only" name="role" type="radio" value="student"/>
+<div class="py-2.5 px-3 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-700 peer-checked:text-primary dark:peer-checked:text-white peer-checked:shadow-sm transition-all duration-200">
+                                Student
+                            </div>
+</label>
+</div>
+</div>
+</div>
+<!-- Login Form -->
+<form class="space-y-6 flex-1 flex flex-col">
+<!-- Email Input with Floating Label -->
+<div class="relative group">
+<input class="peer block w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 pt-5 pb-2 text-base text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary placeholder-transparent" id="email" placeholder="Email Address" type="email"/>
+<label class="pointer-events-none absolute left-4 top-1 origin-[0] -translate-y-0.5 scale-75 transform text-sm text-slate-500 duration-200 peer-placeholder-shown:top-3.5 peer-placeholder-shown:scale-100 peer-focus:top-1 peer-focus:scale-75 peer-focus:text-primary dark:peer-focus:text-primary-light" for="email">
+                        Email Address
+                    </label>
+<div class="absolute right-4 top-3.5 text-slate-400 dark:text-slate-600 pointer-events-none">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</div>
+</div>
+<!-- Password Input with Floating Label -->
+<div class="relative group">
+<input class="peer block w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 pt-5 pb-2 text-base text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary placeholder-transparent pr-12" id="password" placeholder="Password" type="password"/>
+<label class="pointer-events-none absolute left-4 top-1 origin-[0] -translate-y-0.5 scale-75 transform text-sm text-slate-500 duration-200 peer-placeholder-shown:top-3.5 peer-placeholder-shown:scale-100 peer-focus:top-1 peer-focus:scale-75 peer-focus:text-primary dark:peer-focus:text-primary-light" for="password">
+                        Password
+                    </label>
+<button class="absolute right-4 top-3.5 text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+<!-- Forgot Password Link -->
+<div class="flex justify-end">
+<a class="text-sm font-medium text-primary hover:text-primary/80 transition-colors" href="#">
+                        Forgot Password?
+                    </a>
+</div>
+<div class="flex-1"></div> <!-- Spacer to push button down on tall screens -->
+<!-- Submit Button -->
+<button class="w-full bg-primary text-white font-semibold py-4 rounded-xl shadow-lg shadow-primary/25 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group" type="button">
+<span>Sign In</span>
+<span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<!-- Footer -->
+<div class="mt-8 text-center">
+<p class="text-xs text-slate-400 dark:text-slate-600">
+                    Need help? <a class="text-primary hover:underline" href="#">Contact Support</a>
+</p>
+</div>
+</div>
+<!-- Decorative Background Element (Bottom) -->
+<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -top-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+</div>
+</body></html>

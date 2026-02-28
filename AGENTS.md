@@ -1,10 +1,10 @@
-# School Hub (Minivirson) - School Messaging System
+# School Hub - School Management System
 
 A full-stack school management platform featuring real-time messaging, course management, assignments, attendance tracking, and file sharing with role-based access control.
 
 ## Project Overview
 
-School Hub is a **School Management System** designed to facilitate communication and collaboration between administrators, teachers, parents, and students. The system provides comprehensive role-based access control and real-time messaging via WebSockets. The mobile application is packaged under the name "Minivirson".
+School Hub is a **School Management System** designed to facilitate communication and collaboration between administrators, teachers, parents, and students. The system provides comprehensive role-based access control and real-time messaging via WebSockets.
 
 ### Key Features
 
@@ -12,12 +12,17 @@ School Hub is a **School Management System** designed to facilitate communicatio
 - **Course Management**: Course catalog, class scheduling with recurring sessions, enrollments, and teacher assignments
 - **Assignment & Grading**: Assignment creation, file submissions, grade tracking with feedback, and late submission tracking
 - **Attendance Tracking**: Session-based attendance marking with present/absent/late/excused statuses
-- **File Management**: Secure file uploads (max 10MB) with MIME type validation and permission-based access
+- **File Management**: Secure file uploads (max 10MB) with MIME type validation, permission-based access, and S3-compatible storage support
 - **Role-Based Access**: Four user roles (admin, teacher, parent, student) with different permissions
 - **Admin Dashboard**: Real-time analytics, user management, audit logs, system health monitoring, and content moderation
 - **Audit Logging**: Track important actions for compliance and moderation
-- **Mobile App**: Flutter-based cross-platform mobile application (named "Minivirson")
-- **Mobile App Updates**: Built-in update checking and APK download endpoints
+- **Mobile App**: React Native (Expo) cross-platform mobile application with offline support
+- **Prometheus Metrics**: Application metrics for monitoring and observability
+- **Parent-Teacher Conferences**: Schedule and manage parent-teacher meetings
+- **Report Cards**: Generate and track student report cards by academic year
+- **Payment Processing**: Fee invoices and payment tracking with Stripe integration
+- **Behavior Tracking**: Record and monitor student behavior incidents
+- **Calendar Events**: School-wide and personal calendar management
 
 ## Technology Stack
 
@@ -32,7 +37,7 @@ School Hub is a **School Management System** designed to facilitate communicatio
 | **Redis** | 7 | Caching, WebSocket adapter storage, pub/sub, and token denylist |
 | **Socket.IO** | 4.7.x | Real-time bidirectional event-based communication |
 | **JWT** | - | Authentication with access (15min) and refresh (7d) tokens |
-| **bcrypt** | 5.1.x | Password hashing (12 rounds) |
+| **bcrypt** | 6.0.x | Password hashing |
 | **class-validator** | 0.14.x | DTO validation |
 | **Helmet** | 8.1.x | Security headers |
 | **Swagger** | 7.4.x | API documentation |
@@ -41,129 +46,169 @@ School Hub is a **School Management System** designed to facilitate communicatio
 | **DOMPurify** | 3.3.x | XSS protection via jsdom |
 | **@nestjs/schedule** | 6.1.x | Cron jobs for soft-delete cleanup |
 | **@nestjs/throttler** | 6.5.x | Rate limiting |
+| **@willsoto/nestjs-prometheus** | 6.0.x | Prometheus metrics |
+| **@aws-sdk/client-s3** | 3.998.x | S3-compatible storage (AWS S3, MinIO, DigitalOcean Spaces) |
+| **ioredis** | 5.4.x | Redis client with cluster support |
+| **nodemailer** | 8.0.x | Email notifications |
 
 ### Mobile App (mobile/)
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| **Flutter** | 3.24.x | Cross-platform mobile framework |
-| **Dart** | 3.x+ | Programming language |
-| **Dio** | 5.7.x | HTTP client for API communication |
-| **Socket.IO Client** | 2.0.x | Real-time WebSocket client |
-| **Riverpod** | 2.6.x | State management |
-| **Go Router** | 14.6.x | Navigation |
-| **Hive** | 1.1.x | Local storage for web |
-| **flutter_secure_storage** | 9.2.x | Secure key storage for mobile |
-| **freezed** | 2.5.x | Immutable data classes |
-| **json_serializable** | 6.8.x | JSON serialization |
+| **React Native** | 0.76.0 | Cross-platform mobile framework |
+| **Expo** | 52.0.0 | React Native development platform |
+| **Expo Router** | 4.0.0 | File-based routing for navigation |
+| **React** | 18.3.x | UI library |
+| **TypeScript** | 5.3.x | Type-safe JavaScript development |
+| **TanStack Query** | 5.60.x | Server state management and data fetching |
+| **React Navigation** | 7.x | Navigation library |
+| **Lucide React Native** | 0.460.x | Icon library |
+| **Socket.IO Client** | 4.8.x | Real-time messaging client |
+| **date-fns** | 4.1.x | Date manipulation library |
+| **i18next** | 25.0.x | Internationalization framework |
 
 ### Infrastructure
 
 | Technology | Purpose |
 |------------|---------|
 | **Docker** | Containerization for all services |
-| **Docker Compose** | Local development and production orchestration |
+| **Docker Compose** | Development and production orchestration |
 | **Nginx** | Reverse proxy and static file serving (production) |
-| **Prometheus** | Metrics collection (production optional) |
-| **Grafana** | Metrics visualization (production optional) |
-| **Loki** | Log aggregation (production optional) |
+| **Prometheus** | Metrics collection |
+| **Grafana** | Metrics visualization |
 
 ## Project Structure
 
 ```
 minivirson/
-├── .env                      # Shared environment configuration
-├── .env.example              # Environment template
-├── .env.production           # Production environment template
-├── docker-compose.yml        # Development infrastructure
-├── docker-compose.prod.yml   # Full production stack
-├── README.md                # Human-readable documentation
-├── PRODUCTION.md            # Production deployment guide
-├── PRODUCTION_DEPLOYMENT.md # Detailed deployment procedures
-├── PRODUCTION_FIX_QUICKSTART.md # Production troubleshooting
-├── PRODUCTION_FIXES_SUMMARY.md # Known issues and fixes
-├── PRODUCTION_ROADMAP.md    # Production roadmap
-├── AGENTS.md                # This file - AI agent documentation
-├── backups/                 # Database backup storage
-├── mobile/                  # Flutter mobile application
-│   ├── pubspec.yaml         # Flutter dependencies
-│   ├── analysis_options.yaml # Dart analyzer configuration
-│   ├── lib/
-│   │   ├── main.dart        # Application entry point
-│   │   ├── app.dart         # Root application widget
-│   │   ├── core/            # Core utilities
-│   │   │   ├── api/         # API client (dio with auth interceptor)
-│   │   │   ├── config/      # App configuration
-│   │   │   ├── socket/      # WebSocket management
-│   │   │   └── theme/       # App theming (light/dark)
-│   │   ├── models/          # Data models (user, course, file, etc.)
-│   │   ├── providers/       # Riverpod state providers (auth, messaging)
-│   │   ├── repositories/    # Data access layer (auth_repository)
-│   │   ├── screens/         # UI screens
-│   │   │   ├── admin/       # Admin dashboard screens
-│   │   │   ├── assignments/ # Assignment screens
-│   │   │   ├── attendance/  # Attendance screens
-│   │   │   ├── auth/        # Login/register screens
-│   │   │   ├── courses/     # Course screens
-│   │   │   ├── files/       # File management screens
-│   │   │   ├── grades/      # Grade viewing screens
-│   │   │   ├── home/        # Home dashboard
-│   │   │   ├── messaging/   # Chat/messaging screens
-│   │   │   └── profile/     # User profile screens
-│   │   └── services/        # Business logic services
-│   ├── assets/              # Images and icons
-│   ├── android/             # Android platform files
-│   ├── web/                 # Web-specific files
-│   └── Dockerfile.web       # Flutter web build Dockerfile
-├── nginx/                   # Nginx configuration for production
-├── monitoring/              # Monitoring configuration (Grafana, Prometheus, Loki)
-├── scripts/                 # Utility scripts
-│   ├── backup.sh            # Database backup script
-│   ├── deploy-production.sh # Production deployment
-│   ├── setup-kvm.sh         # KVM server setup
-│   ├── setup-ssl.sh         # SSL certificate setup
-│   ├── status.sh            # Service status check
-│   └── validate-env.sh      # Environment validation
-└── server/                  # Backend application
-    ├── Dockerfile           # Multi-stage production build
-    ├── package.json         # Backend dependencies
-    ├── tsconfig.json        # TypeScript configuration
-    ├── nest-cli.json        # NestJS CLI configuration
-    ├── jest.config.js       # Unit test configuration
-    ├── jest-e2e.config.js   # E2E test configuration
+├── .env                        # Local development environment
+├── .env.example                # Environment template for development
+├── .env.production             # Production environment template
+├── .gitattributes              # Git configuration
+├── .gitignore                  # Git ignore patterns
+├── docker-compose.yml          # Main Docker Compose configuration
+├── docker-compose.backend.yml  # Backend-only configuration
+├── docker-compose.backend-only.yml  # Minimal backend setup
+├── docker-compose.monitoring.yml    # Monitoring stack
+├── docker-compose.nginx.yml    # Nginx-specific configuration
+├── AGENTS.md                   # This file - AI agent documentation
+├── mobile/                     # React Native mobile application
+│   ├── package.json           # npm dependencies
+│   ├── app.json               # Expo configuration
+│   ├── tsconfig.json          # TypeScript configuration
+│   ├── index.ts               # Application entry point
+│   ├── jest.config.js         # Jest test configuration
+│   ├── app/                   # Expo Router file-based routes
+│   │   ├── _layout.tsx        # Root layout with providers
+│   │   ├── +not-found.tsx     # 404 error page
+│   │   ├── modal.tsx          # Modal component
+│   │   ├── (auth)/            # Authentication routes group (login, forgot-password, role-select)
+│   │   ├── (tabs)/            # Tab navigation routes (index, messages, courses, assignments, profile, admin)
+│   │   └── (app)/             # Main app routes
+│   │       ├── admin/         # Admin screens (analytics, users, courses, classes, etc.)
+│   │       ├── teacher/       # Teacher screens (grading, attendance, roster, etc.)
+│   │       ├── parent/        # Parent screens (children, conferences, payments, etc.)
+│   │       ├── student/       # Student screens (grades, attendance, resources)
+│   │       ├── channel/       # Chat channel screens
+│   │       ├── course/        # Course detail screens
+│   │       ├── assignment/    # Assignment detail screens
+│   │       └── settings/      # Settings screens
+│   ├── src/
+│   │   ├── assets/            # Images and icons
+│   │   ├── components/        # Reusable UI components
+│   │   ├── providers/         # Context providers (SocketProvider)
+│   │   ├── services/          # API services
+│   │   ├── constants/         # App constants
+│   │   └── types/             # TypeScript type definitions
+│   ├── providers/             # Context providers (Auth, Theme, Query)
+│   ├── hooks/                 # Custom React hooks
+│   ├── services/              # API service layer (api.ts)
+│   ├── stores/                # State management stores
+│   ├── types/                 # Type definitions
+│   ├── utils/                 # Utility functions
+│   └── __tests__/             # Test files
+├── nginx/                     # Nginx configuration for production
+│   ├── nginx.conf             # Main nginx configuration
+│   ├── nginx-simple.conf      # Simplified nginx config
+│   ├── nginx-ssl.conf         # SSL-enabled nginx config
+│   ├── Dockerfile             # Nginx container build
+│   └── docker-entrypoint.sh   # Entrypoint script
+├── monitoring/                # Monitoring configuration
+│   ├── prometheus.yml         # Prometheus configuration
+│   └── grafana/               # Grafana dashboards
+├── scripts/                   # Utility scripts
+│   ├── backup.sh              # Database backup script
+│   ├── deploy-production.sh   # Production deployment
+│   ├── hostinger-setup.sh     # Hostinger VPS setup
+│   ├── setup-logrotate.sh     # Log rotation setup
+│   ├── setup-server-env.sh    # Server environment setup
+│   ├── setup-ssl.sh           # SSL certificate setup
+│   ├── status.sh              # Service status check
+│   ├── test-deployment.sh     # Deployment testing
+│   └── validate-env.sh        # Environment validation
+└── server/                    # Backend application
+    ├── Dockerfile             # Multi-stage production build
+    ├── docker-entrypoint.sh   # Container entrypoint script
+    ├── package.json           # Backend dependencies
+    ├── tsconfig.json          # TypeScript configuration
+    ├── nest-cli.json          # NestJS CLI configuration (webpack builder)
+    ├── jest.config.js         # Unit test configuration
+    ├── jest-e2e.config.js     # E2E test configuration
     ├── prisma/
-    │   ├── schema.prisma    # Database schema definition (731 lines)
-    │   ├── seed.ts          # Database seeding script
-    │   └── migrations/      # Database migrations
-    ├── uploads/             # File upload storage directory
-    ├── downloads/           # APK download directory
-    ├── coverage/            # Test coverage reports
-    ├── test/                # Test files
-    │   ├── setup.ts         # Unit test setup with Redis mock
-    │   ├── setup.e2e.ts     # E2E test setup with migrations
-    │   ├── auth.e2e-spec.ts # Auth E2E tests
-    │   └── __mocks__/       # Jest mocks
+    │   ├── schema.prisma      # Database schema definition
+    │   ├── seed.ts            # Database seeding script
+    │   └── migrations/        # Database migrations
+    ├── uploads/               # File upload storage directory
+    ├── downloads/             # APK download directory
+    ├── test/                  # Test files
+    │   ├── setup.ts           # Unit test setup with Redis mock
+    │   ├── setup.e2e.ts       # E2E test setup with migrations
+    │   └── __mocks__/         # Jest mocks (jsdom.mock.ts)
     └── src/
-        ├── main.ts          # NestJS application entry
-        ├── app.module.ts    # Root application module
-        ├── config/          # Configuration
-        ├── prisma/          # Prisma service module
-        ├── auth/            # Authentication module
-        ├── users/           # User management module
-        ├── messaging/       # Messaging & WebSocket gateway
-        ├── admin/           # Admin dashboard module
-        ├── analytics/       # Analytics module
-        ├── courses/         # Course and class management
-        ├── grading/         # Assignments and grades
-        ├── attendance/      # Attendance tracking
-        ├── files/           # File upload and management
-        ├── health/          # Health checks
-        ├── notifications/   # Email notifications
-        ├── mentions/        # User mentions in messages
-        ├── moderation/      # Audit logging
-        ├── redis/           # Redis client module
-        ├── update/          # Mobile app update endpoints
-        └── common/          # Shared utilities
+        ├── main.ts            # NestJS application entry
+        ├── app.module.ts      # Root application module
+        ├── config/            # Configuration (env.validation.ts)
+        ├── prisma/            # Prisma service module
+        ├── auth/              # Authentication module (JWT, guards, strategies)
+        ├── users/             # User management module
+        ├── messaging/         # Messaging & WebSocket gateway
+        │   ├── messaging.gateway.ts        # Socket.IO gateway
+        │   ├── messaging.service.ts        # Core messaging logic
+        │   ├── messaging-enhanced.service.ts  # Enhanced messaging features
+        │   ├── typing.service.ts           # Typing indicators
+        │   ├── handlers/                   # Message handlers
+        │   │   ├── message.handler.ts
+        │   │   ├── reaction.handler.ts
+        │   │   ├── typing.handler.ts
+        │   │   └── channel.handler.ts
+        │   ├── dto/                        # WebSocket DTOs
+        │   └── guards/                     # Channel membership guards
+        ├── admin/             # Admin dashboard module
+        ├── analytics/         # Analytics module
+        ├── courses/           # Course and class management
+        ├── grading/           # Assignments and grades
+        ├── attendance/        # Attendance tracking
+        ├── files/             # File upload and management
+        ├── health/            # Health checks
+        ├── metrics/           # Prometheus metrics
+        ├── notifications/     # Email notifications and push
+        ├── mentions/          # User mentions in messages
+        ├── moderation/        # Audit logging
+        ├── payments/          # Payment processing (Stripe)
+        ├── parent/            # Parent-specific features
+        ├── conferences/       # Parent-teacher conferences
+        ├── report-cards/      # Student report cards
+        ├── redis/             # Redis client module
+        ├── update/            # Mobile app update endpoints
+        └── common/            # Shared utilities
+            ├── decorators/    # Custom decorators (sanitize)
+            ├── guards/        # Guards (ws-rate-limit.guard)
+            ├── interceptors/  # Logging interceptors
+            ├── logger/        # Winston logger configuration
+            ├── pipes/         # Sanitize pipe for XSS protection
+            ├── redis/         # Redis module and service
+            ├── soft-delete/   # Soft delete functionality
+            └── utils/         # Utility functions
 ```
 
 ## Module Architecture
@@ -178,119 +223,121 @@ Each module follows NestJS conventions with controllers, services, and DTOs:
 | **UsersModule** | User CRUD and profile management | `users.controller.ts`, `users.service.ts` |
 | **MessagingModule** | Real-time messaging via Socket.IO gateway + REST API, Redis adapter for scaling | `messaging.gateway.ts`, `messaging.service.ts`, `typing.service.ts` |
 | **AdminModule** | Admin dashboard, user management, system stats | `admin.controller.ts`, `admin.gateway.ts` |
-| **AnalyticsModule** | System analytics and reporting | `analytics.service.ts` |
+| **AnalyticsModule** | System analytics and reporting | `analytics.service.ts`, `analytics.controller.ts` |
 | **CoursesModule** | Course catalog, classes, enrollments, schedules | `courses.controller.ts`, `courses.service.ts` |
 | **GradingModule** | Assignments, submissions, and gradebook | `grading.controller.ts`, `grading.service.ts` |
 | **AttendanceModule** | Attendance sessions and records | `attendance.controller.ts`, `attendance.service.ts` |
-| **FilesModule** | File uploads with permission-based access | `files.controller.ts`, `files.service.ts` |
+| **FilesModule** | File uploads with permission-based access, supports local and S3 storage | `files.controller.ts`, `files.service.ts` |
 | **ModerationModule** | Audit logging for compliance | `moderation.controller.ts`, `moderation.service.ts` |
-| **NotificationsModule** | Email notifications and queue | `notifications.service.ts`, `email.processor.ts` |
-| **MentionsModule** | User mentions in messages | `mentions.service.ts` |
+| **NotificationsModule** | Email notifications, push notifications, and queue | `notifications.service.ts`, `email.service.ts`, `push.service.ts` |
+| **MentionsModule** | User mentions in messages | `mentions.service.ts`, `mentions.controller.ts` |
+| **PaymentsModule** | Fee invoices and Stripe payment processing | `payments.controller.ts`, `payments.service.ts` |
+| **ParentModule** | Parent-specific features and dashboard | `parent.controller.ts`, `parent.service.ts` |
+| **ConferencesModule** | Parent-teacher conference scheduling | `conferences.controller.ts`, `conferences.service.ts` |
+| **ReportCardsModule** | Student report card generation and tracking | `report-cards.controller.ts`, `report-cards.service.ts` |
 | **SoftDeleteModule** | Soft delete functionality with cleanup jobs | `soft-delete.service.ts`, `soft-delete-cleanup.service.ts` |
 | **HealthModule** | System health checks | `health.controller.ts` |
-| **PrismaModule** | Database connection | `prisma.service.ts` |
-| **RedisModule** | Redis client management | `redis.service.ts` |
-| **UpdateModule** | Mobile app version checking and APK updates | `update.controller.ts` |
+| **MetricsModule** | Prometheus metrics for monitoring | `metrics.controller.ts`, `metrics.service.ts` |
+| **UpdateModule** | Mobile app version checking | `update.controller.ts` |
 
 ## Environment Configuration
 
-The project uses environment files at multiple levels:
+### Root `.env.example` (Template)
 
-### Root `.env` (Shared)
+Copy this file to `.env` and configure for development:
 
 ```env
+# Application Settings
+NODE_ENV=development
+PORT=3000
+DOMAIN_NAME=localhost
+
 # Database
-DATABASE_URL="postgresql://sms_user:sms_password_2026@127.0.0.1:5434/school_messaging?schema=public&connect_timeout=10"
+DATABASE_URL="postgresql://sms_user:sms_password_2026@localhost:5434/school_messaging?schema=public&connect_timeout=10"
+DB_USER=sms_user
+DB_PASSWORD=sms_password_2026
+DB_NAME=school_messaging
 
 # Redis
 REDIS_URL="redis://localhost:6379"
+REDIS_PASSWORD=
 
-# JWT
-JWT_SECRET="school-msg-jwt-secret-change-in-production-2026"
-JWT_REFRESH_SECRET="school-msg-refresh-secret-change-in-production-2026"
-JWT_EXPIRATION="15m"
-JWT_REFRESH_EXPIRATION="7d"
+# JWT Configuration
+JWT_SECRET="school-msg-jwt-secret-change-in-production-2026-min-32-chars"
+JWT_REFRESH_SECRET="school-msg-refresh-secret-change-in-production-2026-min-32-chars"
+JWT_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
 
-# Server
-PORT=3000
-NODE_ENV=development
+# Storage Configuration
+STORAGE_PROVIDER=local
+LOCAL_STORAGE_PATH=./uploads
 
-# CORS
-ALLOWED_ORIGINS="http://localhost:5173,http://localhost:4173,http://localhost:8085"
-CLIENT_URL=http://localhost:5173
-```
+# S3 Configuration (optional)
+# S3_ENDPOINT=https://s3.amazonaws.com
+# S3_REGION=us-east-1
+# S3_BUCKET=school-hub-uploads
+# S3_ACCESS_KEY_ID=your-access-key
+# S3_SECRET_ACCESS_KEY=your-secret-key
 
-### Production `.env`
-
-See `.env.production` for the complete production environment template. Key required variables:
-
-```env
-# Domain & API Configuration
-DOMAIN_NAME=yourdomain.com
-API_BASE_URL=https://yourdomain.com
-WS_BASE_URL=${API_BASE_URL}
-ALLOWED_ORIGINS=https://yourdomain.com
-
-# Database
-DB_USER=sms_user_prod
-DB_PASSWORD=<strong-password>
-
-# Redis
-REDIS_PASSWORD=<strong-password>
-
-# JWT (64+ characters)
-JWT_SECRET=<64-char-secret>
-JWT_REFRESH_SECRET=<different-64-char-secret>
-
-# Email (optional)
+# Email Configuration (Optional)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
 
-# S3/Object Storage (optional)
-S3_ENDPOINT=
-S3_BUCKET=
-S3_ACCESS_KEY=
-S3_SECRET_KEY=
+# Client URLs
+CLIENT_URL=http://localhost:5173
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4173
+
+# Monitoring
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=admin
+
+# Security
+ADMIN_EMAILS=admin@school.com
 ```
+
+### Production `.env.production`
+
+See `.env.production` file for production configuration template. Key requirements:
+- JWT_SECRET >= 64 characters
+- JWT_REFRESH_SECRET different from JWT_SECRET
+- Strong passwords for DB and Redis (minimum 32 characters)
+- HTTPS for API_BASE_URL
+- Valid SSL certificates in `nginx/ssl/`
 
 ## Build and Development Commands
 
 ### Prerequisites
 
-- Node.js 20+ (see `engines` in `package.json`)
+- Node.js 18+ (see `engines` in `package.json`)
 - npm 8+
 - Docker & Docker Compose
-- Flutter SDK 3.x+ (for mobile)
+- Expo CLI (for mobile development): `npm install -g @expo/cli`
 
-### Quick Start (One Command)
-
-**Windows:**
-```powershell
-start-local.bat
-```
-
-**Linux/Mac:**
-```bash
-./start-local.sh
-```
-
-This will start Docker containers, run migrations, and build the Flutter web app.
-
-### Infrastructure Setup (Manual)
+### Full Docker Development
 
 ```bash
-# Start PostgreSQL and Redis containers
+# Start all services (PostgreSQL, Redis, Backend, Frontend)
 docker-compose up -d
 
-# Verify containers are running
-docker-compose ps
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f postgres
+docker-compose logs -f redis
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (WARNING: deletes data)
+docker-compose down -v
 ```
 
 ### Backend (server/)
 
 ```bash
+cd server
+
 # Install dependencies
 npm install
 
@@ -321,34 +368,34 @@ npm run lint               # Run ESLint with auto-fix
 ### Mobile App (mobile/)
 
 ```bash
+cd mobile
+
 # Install dependencies
-flutter pub get
+npm install
 
 # Development
-flutter run                # Run on connected device/emulator
-flutter run --debug        # Debug mode
-flutter run --profile      # Profile mode
-
-# Build
-flutter build apk          # Build Android APK
-flutter build appbundle    # Build Android App Bundle
-flutter build ios          # Build iOS (macOS only)
-flutter build web          # Build web app
+npx expo start             # Start Expo development server
+npx expo start --android   # Start with Android emulator
+npx expo start --ios       # Start with iOS simulator (macOS only)
+npx expo start --web       # Start web version
 
 # Testing
-flutter test               # Run unit tests
-flutter test --coverage    # Run tests with coverage
+npm test                   # Run tests
+npm run test:watch         # Run tests in watch mode
+npm run test:coverage      # Run tests with coverage report
+npm run lint               # Run ESLint
+npm run type-check         # Run TypeScript type checking
 
-# Code generation
-flutter pub run build_runner build    # Generate code (freezed, json_serializable)
-flutter pub run build_runner build --delete-conflicting-outputs
+# Build
+npx expo build:android     # Build Android APK/AAB
+npx expo build:ios         # Build iOS app (macOS only)
 ```
 
 ### Full Development Startup
 
 ```bash
-# 1. Start infrastructure
-docker-compose up -d
+# 1. Start infrastructure (Docker)
+docker-compose -f docker-compose.backend-only.yml up -d
 
 # 2. Setup database (in server/ directory)
 cd server
@@ -362,31 +409,9 @@ npm run dev
 
 # 4. Start mobile app (in mobile/ directory, new terminal)
 cd ../mobile
-flutter pub get
-flutter run
+npm install
+npx expo start
 ```
-
-### Production Deployment
-
-```bash
-# 1. Copy and configure production environment
-cp .env.production .env
-# Edit .env with your actual values
-
-# 2. Validate environment
-./scripts/validate-env.sh
-
-# 3. Build and run production stack
-docker-compose -f docker-compose.prod.yml up -d --build
-```
-
-Production stack includes:
-- PostgreSQL (internal network only)
-- Redis (internal network only, password-protected)
-- NestJS API server (port 3000)
-- Flutter Web frontend (port 80)
-- Nginx reverse proxy/load balancer (ports 80/443)
-- Optional: Backup service, Grafana, Prometheus, Loki
 
 ## Testing Strategy
 
@@ -417,16 +442,25 @@ cd server
 npm run test:e2e           # Run E2E tests
 ```
 
+### Mobile Tests
+
+- **Framework**: Jest with jest-expo preset
+- **Location**: `__tests__/**/*.test.ts(x)`
+- **Configuration**: `jest.config.js`
+- **Coverage Thresholds**: 30% minimum for branches, functions, lines, statements
+
+```bash
+cd mobile
+npm test                   # Run mobile tests
+npm run test:coverage      # Generate coverage report
+```
+
 ### Test Setup Files
 
 - `test/setup.ts`: Unit test environment variables, Redis mock, JSDOM mock for DOMPurify
 - `test/setup.e2e.ts`: E2E test database setup and migrations
 - `test/__mocks__/jsdom.mock.ts`: JSDOM mock for DOMPurify
-
-### Load Testing
-
-- Configuration: `test/load/artillery.config.yml`
-- Uses Artillery for load testing
+- `mobile/__tests__/setup.ts`: Mobile test setup
 
 ## Code Style Guidelines
 
@@ -455,32 +489,35 @@ export class AuthController {
 }
 ```
 
-### Mobile (Dart/Flutter)
+### Mobile (TypeScript/React Native)
 
-- **Class Names**: PascalCase (e.g., `AuthProvider`, `MessagingScreen`)
+- **Component Names**: PascalCase (e.g., `LoginScreen`, `MessageCard`)
 - **Variables/Functions**: camelCase (e.g., `fetchUserById`, `isAuthenticated`)
-- **File Names**: snake_case (e.g., `auth_provider.dart`, `messaging_screen.dart`)
-- **Constants**: camelCase with `k` prefix for constants (e.g., `kBaseUrl`)
-- **State Management**: Riverpod with StateNotifier/AsyncNotifier
-- **API Calls**: Abstracted in `repositories/` directory
-- **Models**: Freezed for immutable data classes
+- **File Names**: kebab-case or camelCase (e.g., `auth-provider.tsx`, `api.ts`)
+- **Hooks**: Prefix with `use` (e.g., `useAuth`, `useTheme`)
+- **State Management**: TanStack Query for server state, React Context for global UI state
+- **API Calls**: Abstracted in `services/` directory
+- **Navigation**: Expo Router file-based routing
 
 Example:
-```dart
-@riverpod
-class AuthNotifier extends _$AuthNotifier {
-  @override
-  AuthState build() => const AuthState.loading();
-  
-  Future<void> login(String email, String password) async {
-    // Implementation
-  }
+```typescript
+// Component
+export function LoginScreen() {
+  const { login } = useAuth();
+  // ...
+}
+
+// Hook
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
 }
 ```
 
 ## Database Schema
 
-The Prisma schema defines these main entities (731 lines):
+The Prisma schema defines these main entities:
 
 ### Users & Roles
 - `User`: Core user accounts with profile information, soft delete via `deletedAt`
@@ -504,7 +541,6 @@ The Prisma schema defines these main entities (731 lines):
 - `AuditLog`: Action audit trail
 
 ### Academic
-- `AcademicYear`: School year management
 - `Course`: Course catalog entries with departments
 - `Class`: Scheduled course instances with teachers
 - `ClassTeacher`: Many-to-many teacher-class assignments
@@ -515,11 +551,29 @@ The Prisma schema defines these main entities (731 lines):
 - `Grade`: Graded scores, feedback, and letter grades
 - `AttendanceSession`: Daily attendance records with period
 - `AttendanceRecord`: Individual student attendance status
+- `AcademicYear`: School year management with current year tracking
 
 ### Files & Notifications
 - `File`: Uploaded file metadata with soft delete
 - `FilePermission`: Role/user-based file access control
 - `EmailQueue`: Pending email notifications with retry logic
+- `PushToken`: Mobile push notification tokens
+
+### Payments & Fees
+- `FeeInvoice`: Student fee invoices with items and payment status
+- `Payment`: Payment records with Stripe integration
+
+### Conferences & Reports
+- `Conference`: Parent-teacher conference scheduling
+- `ReportCard`: Student report cards by academic year and term
+
+### Behavior & Calendar
+- `BehaviorRecord`: Student behavior tracking (positive/negative)
+- `CalendarEvent`: School and personal calendar events
+
+### Encryption & Sync
+- `UserPublicKey`: E2E encryption public keys
+- `SyncQueue`: Offline sync queue for mobile app
 
 ### Soft Delete
 All major entities support soft delete functionality:
@@ -529,8 +583,6 @@ All major entities support soft delete functionality:
 - `Channel`: Archived channels hidden from normal queries
 - `Course`: Deactivated courses hidden from catalog
 - `Class`: Deactivated classes hidden from listings
-
-**Entities with `isDeleted` + `deletedAt`:**
 - `Message`: Soft deleted messages preserve content for moderation
 - `File`: Soft deleted files preserve metadata
 
@@ -580,66 +632,6 @@ Production validation requires:
 - SSL for database connections
 - Strong passwords for DB and Redis
 
-## Scalability & Performance
-
-### Current Capabilities
-| Component | Capacity |
-|-----------|----------|
-| HTTP API | 100 req/min per IP |
-| WebSocket Connections | ~500/server |
-| File Uploads | ~50/min |
-| Admin Analytics | 1M+ records |
-
-### Scalability Features
-- **Redis Adapter**: WebSocket horizontal scaling across multiple instances via `@socket.io/redis-adapter`
-- **Database Indexes**: Optimized compound indexes for common queries (see schema.prisma)
-- **Streaming Uploads**: Files written directly to disk, not buffered in memory
-- **Raw SQL Analytics**: PostgreSQL native date grouping for large datasets
-- **Pagination**: All list endpoints with configurable limits (default 20, max 200)
-- **Docker Swarm**: Production compose supports replicas via `API_REPLICAS`
-
-### Scaling Architecture
-```
-                    ┌─────────────┐
-                    │ Load Balancer│
-                    │  (Nginx/ALB) │
-                    └──────┬──────┘
-           ┌───────────────┼───────────────┐
-           │               │               │
-    ┌──────▼─────┐  ┌──────▼─────┐  ┌──────▼─────┐
-    │  Server 1  │  │  Server 2  │  │  Server 3  │
-    │  (Node.js) │  │  (Node.js) │  │  (Node.js) │
-    └──────┬─────┘  └──────┬─────┘  └──────┬─────┘
-           │               │               │
-           └───────────────┼───────────────┘
-                    ┌──────┴──────┐
-                    │    Redis    │
-                    │ (Pub/Sub)   │
-                    └──────┬──────┘
-                    ┌──────┴──────┐
-                    │  PostgreSQL │
-                    └─────────────┘
-```
-
-## Testing Credentials
-
-After seeding the database, use these demo accounts:
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@school.com | Password123! |
-| Teacher | teacher1@school.com | Password123! |
-| Teacher | teacher2@school.com | Password123! |
-| Teacher | teacher3@school.com | Password123! |
-| Parent | parent1@school.com | Password123! |
-| Parent | parent2@school.com | Password123! |
-| Parent | parent3@school.com | Password123! |
-| Student | student1@school.com | Password123! |
-| Student | student2@school.com | Password123! |
-| Student | student3@school.com | Password123! |
-| Student | student4@school.com | Password123! |
-| Student | student5@school.com | Password123! |
-
 ## WebSocket Events
 
 ### Client → Server
@@ -669,15 +661,10 @@ After seeding the database, use these demo accounts:
 ## Key Implementation Details
 
 ### Authentication Flow
-1. **Login**: POST `/api/auth/login` returns `accessToken` (15min) + `refreshToken`
-2. **Token Storage**: Mobile uses `flutter_secure_storage`, web uses Hive
-3. **Auto Refresh**: Dio interceptor automatically refreshes expired tokens
-4. **Logout**: POST `/api/auth/logout` with refresh token; access token added to Redis denylist
-
-### Mobile API Client
-- Uses Dio with `_AuthInterceptor` for automatic token refresh
-- Platform-aware storage: `flutter_secure_storage` for mobile, Hive for web
-- Handles 401 responses by attempting token refresh before failing
+1. **Login**: POST `/api/auth/login` returns `accessToken` (15min) + `refreshToken` in httpOnly cookie
+2. **Token Storage**: Mobile uses secure storage, web uses httpOnly cookies
+3. **Auto Refresh**: Token refresh happens via POST `/api/auth/refresh` with cookie
+4. **Logout**: POST `/api/auth/logout` clears cookie and adds token to Redis denylist
 
 ### WebSocket Gateway (messaging.gateway.ts)
 - Uses Socket.IO with Redis adapter for horizontal scaling
@@ -690,18 +677,27 @@ After seeding the database, use these demo accounts:
 - Permanently deletes records where `deletedAt` is older than 30 days
 - Admin API allows restore before grace period ends
 
-### Mobile App Updates
-The `UpdateModule` provides endpoints for mobile app version management:
+### File Storage
+The system supports both local and S3-compatible storage:
 
-- **GET `/api/updates/version`** - Get latest app version info
-- **POST `/api/updates/check`** - Check if update is required (send `versionCode` and `platform`)
-- **GET `/api/updates/download/latest`** - Get download URL for latest APK
+**Local Storage:**
+- Files stored in `server/uploads/` directory
+- Served via static file middleware
 
-To release a new version:
-1. Update `versionCode` and `versionName` in `update.controller.ts`
-2. Build new APK: `flutter build apk`
-3. Copy APK to `server/downloads/minivirson-latest.apk`
-4. Restart server
+**S3 Storage (AWS S3, MinIO, DigitalOcean Spaces):**
+- Configure via `STORAGE_PROVIDER=s3` environment variable
+- Supports presigned URLs for secure direct uploads
+- Required env vars: `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`
+
+### Metrics and Monitoring
+- **Prometheus Metrics**: Available at `/api/metrics`
+- **Health Check**: Available at `/api/health`
+- **Grafana**: Pre-configured dashboards for visualization
+
+### Push Notifications
+- Expo Notifications for mobile push
+- Push tokens stored per user device
+- Support for iOS, Android, and web push
 
 ## Common Development Tasks
 
@@ -732,12 +728,15 @@ To release a new version:
    @Roles('admin', 'teacher')
    ```
 
+5. Register the module in `app.module.ts` if it's a new module
+
 ### Adding a Mobile Screen
 
-1. Create screen widget in `mobile/lib/screens/`
-2. Update routing in the appropriate provider (likely in `auth_provider.dart`)
-3. Add provider if state management needed in `mobile/lib/providers/`
-4. Implement API calls in the appropriate repository
+1. Create screen component in `mobile/app/(app)/` or appropriate group
+2. Add route using Expo Router file-based routing
+3. Update navigation if needed
+4. Add API calls in the appropriate service in `mobile/services/`
+5. Update TypeScript types in `mobile/types/` if needed
 
 ### Database Changes
 
@@ -747,25 +746,62 @@ To release a new version:
 4. Update seed script if needed for new tables
 5. Run `npm run prisma:seed` to test
 
+### Production Deployment
+
+1. Validate environment:
+   ```bash
+   ./scripts/validate-env.sh
+   ```
+
+2. Deploy with Docker Compose:
+   ```bash
+   docker-compose -f docker-compose.yml up -d --build
+   ```
+
+3. Monitor deployment:
+   ```bash
+   ./scripts/status.sh
+   docker-compose logs -f backend
+   ```
+
+## Testing Credentials
+
+After seeding the database (`npm run prisma:seed`), use these demo accounts:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@school.com | Password123! |
+| Teacher | teacher1@school.com | Password123! |
+| Teacher | teacher2@school.com | Password123! |
+| Teacher | teacher3@school.com | Password123! |
+| Parent | parent1@school.com | Password123! |
+| Parent | parent2@school.com | Password123! |
+| Parent | parent3@school.com | Password123! |
+| Student | student1@school.com | Password123! |
+| Student | student2@school.com | Password123! |
+| Student | student3@school.com | Password123! |
+
 ## Troubleshooting
 
 ### Port Conflicts
 Ensure these ports are available:
 - 3000 (backend API)
-- 5434 (PostgreSQL - mapped from 5432 in development)
+- 5434 (PostgreSQL - mapped from container 5432)
 - 6379 (Redis)
-- 8085 (Flutter web - development)
+- 8085 (Expo development server)
 - 80/443 (Nginx - production)
 
 ### Database Connection Errors
-- Verify Docker containers: `docker-compose ps`
-- Check PostgreSQL logs: `docker-compose logs postgres`
-- Ensure correct DATABASE_URL format (note port 5434 for dev)
+- Verify PostgreSQL container is running: `docker-compose ps`
+- Check DATABASE_URL format in `.env`
+- Ensure database user has proper permissions
+- View logs: `docker-compose logs postgres`
 
 ### WebSocket Connection Issues
-- Verify Redis is running: `docker-compose logs redis`
+- Verify Redis is running
 - Check `ALLOWED_ORIGINS` includes frontend URL
 - Check browser console for CORS errors
+- Verify WebSocket URL matches API base URL
 
 ### Prisma Client Errors
 Regenerate client:
@@ -774,34 +810,25 @@ cd server
 npm run prisma:generate
 ```
 
-### Flutter Build Issues
-Clean and rebuild:
+### Mobile App Issues
+Clear and restart:
 ```bash
 cd mobile
-flutter clean
-flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
+rm -rf node_modules
+npm install
+npx expo start --clear
 ```
 
-### Reset Everything
+### Docker Issues
 ```bash
-docker-compose down -v  # Remove volumes (DELETES ALL DATA!)
+# Rebuild all containers
+docker-compose down
+docker-compose up -d --build
+
+# Reset everything (WARNING: loses all data)
+docker-compose down -v
 docker-compose up -d
-cd server
-npm run prisma:migrate
-npm run prisma:seed
 ```
-
-## Additional Documentation
-
-- **README.md**: Human-readable project overview and quick start
-- **PRODUCTION.md**: Production deployment overview
-- **PRODUCTION_DEPLOYMENT.md**: Detailed deployment procedures
-- **PRODUCTION_FIX_QUICKSTART.md**: Quick troubleshooting guide
-- **PRODUCTION_FIXES_SUMMARY.md**: Known issues and fixes
-- **PRODUCTION_ROADMAP.md**: Production roadmap and TODOs
-- **API Docs**: Available at `http://localhost:3000/api/docs` when server is running
-- **Prisma Studio**: Run `npm run prisma:studio` in server directory
 
 ## License
 

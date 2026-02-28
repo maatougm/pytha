@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { MessagingService } from './messaging.service';
-import { CreateChannelDto, SendMessageDto, AddMemberDto } from './dto/messaging.dto';
+import { CreateChannelDto, SendMessageDto, AddMemberDto } from './dto/create-message.dto';
 import { AddReactionDto } from './dto/reaction.dto';
 import { SearchMessagesDto } from './dto/search-messages.dto';
 import { ReportChannelDto, UpdateReportStatusDto } from './dto/report-channel.dto';

@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Channel, ChannelMember, ChannelMute, Prisma } from '@prisma/client';
 
 export interface CreateChannelDto {
-    type: 'podcast' | 'classroom' | 'direct_message' | 'teacher_parent' | 'teacher_student' | 'group';
+    type: 'podcast' | 'classroom' | 'class_broadcast' | 'direct_message' | 'teacher_parent' | 'teacher_student' | 'admin_broadcast' | 'group';
     name: string;
     description?: string;
     memberIds?: string[]; // For DMs or groups

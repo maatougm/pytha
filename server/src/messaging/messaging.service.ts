@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateChannelDto, SendMessageDto } from './dto/messaging.dto';
+import { Prisma } from '@prisma/client';
+import { CreateChannelDto, SendMessageDto } from './dto/create-message.dto';
 import { MarkMessageReadDto, ReadReceiptResponseDto, ChannelReadStatusDto } from './dto/read-receipt.dto';
 import { AddReactionDto } from './dto/reaction.dto';
 import { SearchMessagesDto, SearchMessagesResponse } from './dto/search-messages.dto';
@@ -404,6 +405,98 @@ export class MessagingService {
         return channelsWithUnread;
     }
 
+    /**
+     * Optimized version using single query with CTE to avoid N+1 problem
+     */
+    async getUserChannelsWithUnreadOptimized(userId: string) {
+        // Single query using CTE to get all channels with unread counts
+        const result = await this.prisma.$queryRaw`
+            WITH user_memberships AS (
+                SELECT 
+                    cm.channel_id,
+                    cm.role,
+                    cm.joined_at as "joinedAt",
+                    cm.last_read_at as "lastReadAt",
+                    c.id as cid,
+                    c.name,
+                    c.type,
+                    c.description,
+                    c.is_archived as "isArchived",
+                    c.created_by as "createdBy",
+                    c.created_at as "createdAt",
+                    c.updated_at as "updatedAt"
+                FROM channel_members cm
+                JOIN channels c ON cm.channel_id = c.id
+                WHERE cm.user_id = ${userId} 
+                  AND cm.is_banned = false
+                  AND c.is_archived = false 
+                  AND c.deleted_at IS NULL
+            ),
+            last_messages AS (
+                SELECT DISTINCT ON (m.channel_id)
+                    m.channel_id,
+                    m.id,
+                    m.content,
+                    m.content_type as "contentType",
+                    m.created_at as "createdAt",
+                    m.sender_id as "senderId",
+                    u.first_name as "senderFirstName",
+                    u.last_name as "senderLastName"
+                FROM messages m
+                JOIN users u ON m.sender_id = u.id
+                WHERE m.channel_id IN (SELECT channel_id FROM user_memberships)
+                  AND m.is_deleted = false
+                ORDER BY m.channel_id, m.created_at DESC
+            ),
+            unread_counts AS (
+                SELECT 
+                    um.channel_id,
+                    COALESCE(COUNT(m.id)::int, 0) as "unreadCount"
+                FROM user_memberships um
+                LEFT JOIN messages m ON 
+                    m.channel_id = um.channel_id
+                    AND m.is_deleted = false
+                    AND (um.last_read_at IS NULL OR m.created_at > um.last_read_at)
+                    AND m.sender_id != ${userId}
+                GROUP BY um.channel_id
+            )
+            SELECT 
+                um.cid as "id",
+                um.name,
+                um.type,
+                um.description,
+                um."isArchived",
+                um."createdBy",
+                um."createdAt",
+                um."updatedAt",
+                um.role,
+                um."joinedAt",
+                um."lastReadAt",
+                COALESCE(uc."unreadCount", 0) as "unreadCount",
+                CASE 
+                    WHEN lm.id IS NOT NULL THEN jsonb_build_object(
+                        'id', lm.id,
+                        'content', lm.content,
+                        'contentType', lm."contentType",
+                        'createdAt', lm."createdAt",
+                        'sender', jsonb_build_object(
+                            'id', lm."senderId",
+                            'firstName', lm."senderFirstName",
+                            'lastName', lm."senderLastName"
+                        )
+                    )
+                    ELSE null
+                END as "lastMessage"
+            FROM user_memberships um
+            LEFT JOIN unread_counts uc ON uc.channel_id = um.channel_id
+            LEFT JOIN last_messages lm ON lm.channel_id = um.channel_id
+            ORDER BY um."updatedAt" DESC
+            LIMIT 100
+        `;
+
+        return result;
+    }
+
     async markChannelAsRead(channelId: string, userId: string) {
         // Verify membership
         const member = await this.prisma.channelMember.findUnique({
@@ -533,15 +626,16 @@ export class MessagingService {
     }
 
     async sendMessage(channelId: string, userId: string, dto: SendMessageDto) {
-        // Verify membership and not muted
-        const member = await this.prisma.channelMember.findUnique({
-            where: { channelId_userId: { channelId, userId } },
-        });
-        if (!member) throw new ForbiddenException('Not a member of this channel');
-        if (member.isBanned) throw new ForbiddenException('You are banned from this channel');
-        if (member.isMuted) throw new ForbiddenException('You are muted in this channel');
-
+        // Use transaction with membership check inside to prevent TOCTOU race condition
         const message = await this.prisma.$transaction(async (tx) => {
+            // Verify membership and not muted/banned INSIDE transaction
+            const member = await tx.channelMember.findUnique({
+                where: { channelId_userId: { channelId, userId } },
+            });
+            if (!member) throw new ForbiddenException('Not a member of this channel');
+            if (member.isBanned) throw new ForbiddenException('You are banned from this channel');
+            if (member.isMuted) throw new ForbiddenException('You are muted in this channel');
+
             const msg = await tx.message.create({
                 data: {
                     channelId,
@@ -577,6 +671,8 @@ export class MessagingService {
             });
 
             return msg;
+        }, {
+            isolationLevel: 'Serializable', // Prevent race conditions
         });
 
         // Fire-and-forget audit log
@@ -634,8 +730,9 @@ export class MessagingService {
                 },
             });
 
-            const senderName = `${message.sender.firstName} ${message.sender.lastName}`;
-            const channelName = channel.name || 'Unnamed Channel';
+            const senderName = this.sanitizeForEmail(`${message.sender.firstName} ${message.sender.lastName}`);
+            const channelName = this.sanitizeForEmail(channel.name || 'Unnamed Channel');
+            const sanitizedContent = this.sanitizeForEmail(message.content);
 
             for (const member of members) {
                 if (!member.user.emailNotificationsEnabled) continue;
@@ -659,7 +756,7 @@ export class MessagingService {
                                 messageId: message.id,
                                 senderName,
                                 channelName,
-                                messageContent: message.content,
+                                messageContent: sanitizedContent,
                             },
                         });
                     }
@@ -669,6 +766,17 @@ export class MessagingService {
         } catch (error) {
             this.logger.error('Error queueing message notifications:', error);
         }
+    }
+
+    /**
+     * Sanitize content for email to prevent header injection
+     */
+    private sanitizeForEmail(content: string): string {
+        if (!content) return '';
+        return content
+            .replace(/[\r\n]/g, ' ')     // Remove newlines
+            .replace(/[<>]/g, '')         // Remove angle brackets
+            .substring(0, 500);           // Limit length
     }
 
     async editMessage(messageId: string, userId: string, content: string) {
@@ -766,95 +874,22 @@ export class MessagingService {
         const limit = Math.min(100, Math.max(1, dto.limit || 20));
         const skip = (page - 1) * limit;
 
-        // Build date filters
-        const dateConditions: string[] = [];
-        const queryParams: (string | Date)[] = [channelId];
-        let paramIndex = 2;
-
-        if (dto.from) {
-            dateConditions.push(`m.created_at >= $${paramIndex}::timestamp`);
-            queryParams.push(new Date(dto.from));
-            paramIndex++;
-        }
-        if (dto.to) {
-            dateConditions.push(`m.created_at <= $${paramIndex}::timestamp`);
-            queryParams.push(new Date(dto.to));
-            paramIndex++;
+        // Sanitize and validate search query
+        const searchQuery = dto.q.trim().substring(0, 200); // Limit length
+        
+        // Validate UUID format for sender if provided
+        if (dto.sender && !this.isValidUUID(dto.sender)) {
+            throw new BadRequestException('Invalid sender ID format');
         }
 
-        // Build sender filter
-        if (dto.sender) {
-            dateConditions.push(`m.sender_id = $${paramIndex}`);
-            queryParams.push(dto.sender);
-            paramIndex++;
-        }
+        // Build safe count query using Prisma.sql
+        const countQuery = this.buildSearchCountQuery(channelId, searchQuery, dto);
+        const searchSqlQuery = this.buildSearchQuery(channelId, searchQuery, dto, limit, skip);
 
-        const whereClause = dateConditions.length > 0
-            ? `AND ${dateConditions.join(' AND ')}`
-            : '';
-
-        // Convert search query to PostgreSQL websearch_to_tsquery format
-        // This supports: "exact phrases", OR, -exclude, (grouping)
-        const searchQuery = dto.q.trim();
-
-        // Get total count for pagination
-        const countQuery = `
-            SELECT COUNT(*)::int as total
-            FROM messages m
-            WHERE m.channel_id = $1
-                AND m.is_deleted = false
-                AND m.search_vector @@ websearch_to_tsquery('english', $${paramIndex})
-                ${whereClause}
-        `;
-        const countParams = [...queryParams, searchQuery];
-
-        // Main search query with ranking and highlighting
-        const searchParamIndex = paramIndex;
-        paramIndex++;
-        const limitParamIndex = paramIndex++;
-        const offsetParamIndex = paramIndex++;
-
-        const searchQuery_sql = `
-            SELECT 
-                m.id,
-                m.channel_id as "channelId",
-                m.sender_id as "senderId",
-                m.content,
-                m.content_type as "contentType",
-                m.reply_to as "replyTo",
-                m.is_deleted as "isDeleted",
-                m.edited_at as "editedAt",
-                m.created_at as "createdAt",
-                u.id as "senderId",
-                u.first_name as "senderFirstName",
-                u.last_name as "senderLastName",
-                u.avatar_url as "senderAvatarUrl",
-                ts_rank_cd(m.search_vector, websearch_to_tsquery('english', $${searchParamIndex}), 32) as rank,
-                ts_headline(
-                    'english',
-                    m.content,
-                    websearch_to_tsquery('english', $${searchParamIndex}),
-                    'StartSel=<mark>, StopSel=</mark>, MaxWords=50, MinWords=10, MaxFragments=3, FragmentDelimiter=...'
-                ) as headline
-            FROM messages m
-            JOIN users u ON m.sender_id = u.id
-            WHERE m.channel_id = $1
-                AND m.is_deleted = false
-                AND m.search_vector @@ websearch_to_tsquery('english', $${searchParamIndex})
-                ${whereClause}
-            ORDER BY 
-                ts_rank_cd(m.search_vector, websearch_to_tsquery('english', $${searchParamIndex}), 32) DESC,
-                m.created_at DESC
-            LIMIT $${limitParamIndex}
-            OFFSET $${offsetParamIndex}
-        `;
-
-        const searchParams = [...queryParams, searchQuery, limit, skip];
-
-        // Execute queries
+        // Execute queries using $queryRaw (safe) instead of $queryRawUnsafe
         const [countResult, messagesResult] = await Promise.all([
-            this.prisma.$queryRawUnsafe<{ total: number }[]>(countQuery, ...countParams),
-            this.prisma.$queryRawUnsafe<
+            this.prisma.$queryRaw<{ total: number }[]>(countQuery),
+            this.prisma.$queryRaw<
                 {
                     id: string;
                     channelId: string;
@@ -871,7 +906,7 @@ export class MessagingService {
                     rank: number;
                     headline: string;
                 }[]
-            >(searchQuery_sql, ...searchParams),
+            >(searchSqlQuery),
         ]);
 
         const total = countResult[0]?.total || 0;
@@ -1636,5 +1671,106 @@ export class MessagingService {
             firstName: t.user.firstName,
             lastName: t.user.lastName,
         }));
+    }
+
+    // ─── SEARCH QUERY BUILDERS (SQL Injection Safe) ────────────
+
+    /**
+     * Build safe count query for search using Prisma.sql
+     * All user inputs are parameterized
+     */
+    private buildSearchCountQuery(
+        channelId: string,
+        searchQuery: string,
+        dto: SearchMessagesDto,
+    ): Prisma.Sql {
+        const conditions: Prisma.Sql[] = [
+            Prisma.sql`m.channel_id = ${channelId}`,
+            Prisma.sql`m.is_deleted = false`,
+            Prisma.sql`m.search_vector @@ websearch_to_tsquery('english', ${searchQuery})`,
+        ];
+
+        if (dto.from) {
+            conditions.push(Prisma.sql`m.created_at >= ${new Date(dto.from)}::timestamp`);
+        }
+        if (dto.to) {
+            conditions.push(Prisma.sql`m.created_at <= ${new Date(dto.to)}::timestamp`);
+        }
+        if (dto.sender) {
+            conditions.push(Prisma.sql`m.sender_id = ${dto.sender}`);
+        }
+
+        return Prisma.sql`
+            SELECT COUNT(*)::int as total
+            FROM messages m
+            WHERE ${Prisma.join(conditions, ' AND ')}
+        `;
+    }
+
+    /**
+     * Build safe search query using Prisma.sql
+     * All user inputs are parameterized
+     */
+    private buildSearchQuery(
+        channelId: string,
+        searchQuery: string,
+        dto: SearchMessagesDto,
+        limit: number,
+        skip: number,
+    ): Prisma.Sql {
+        const conditions: Prisma.Sql[] = [
+            Prisma.sql`m.channel_id = ${channelId}`,
+            Prisma.sql`m.is_deleted = false`,
+            Prisma.sql`m.search_vector @@ websearch_to_tsquery('english', ${searchQuery})`,
+        ];
+
+        if (dto.from) {
+            conditions.push(Prisma.sql`m.created_at >= ${new Date(dto.from)}::timestamp`);
+        }
+        if (dto.to) {
+            conditions.push(Prisma.sql`m.created_at <= ${new Date(dto.to)}::timestamp`);
+        }
+        if (dto.sender) {
+            conditions.push(Prisma.sql`m.sender_id = ${dto.sender}`);
+        }
+
+        return Prisma.sql`
+            SELECT 
+                m.id,
+                m.channel_id as "channelId",
+                m.sender_id as "senderId",
+                m.content,
+                m.content_type as "contentType",
+                m.reply_to as "replyTo",
+                m.is_deleted as "isDeleted",
+                m.edited_at as "editedAt",
+                m.created_at as "createdAt",
+                u.first_name as "senderFirstName",
+                u.last_name as "senderLastName",
+                u.avatar_url as "senderAvatarUrl",
+                ts_rank_cd(m.search_vector, websearch_to_tsquery('english', ${searchQuery}), 32) as rank,
+                ts_headline(
+                    'english',
+                    m.content,
+                    websearch_to_tsquery('english', ${searchQuery}),
+                    'StartSel=<mark>, StopSel=</mark>, MaxWords=50, MinWords=10, MaxFragments=3, FragmentDelimiter=...'
+                ) as headline
+            FROM messages m
+            JOIN users u ON m.sender_id = u.id
+            WHERE ${Prisma.join(conditions, ' AND ')}
+            ORDER BY 
+                ts_rank_cd(m.search_vector, websearch_to_tsquery('english', ${searchQuery}), 32) DESC,
+                m.created_at DESC
+            LIMIT ${limit}
+            OFFSET ${skip}
+        `;
+    }
+
+    /**
+     * Validate UUID v4 format
+     */
+    private isValidUUID(str: string): boolean {
+        const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        return uuidV4Regex.test(str);
     }
 }

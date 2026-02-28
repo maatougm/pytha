@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - New Conversation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f59f0a",
+                        "primary-content": "#ffffff",
+                        "primary-dark": "#d97706",
+                        "primary-light": "#fcd34d",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221c10",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d261a",
+                        "text-main": "#181511",
+                        "text-main-dark": "#f3f2f1",
+                        "text-sub": "#8a7b60",
+                        "text-sub-dark": "#a89c8a",
+                        "role-teacher": "#0d9488", /* Teal for Teachers */
+                        "role-student": "#2563eb", /* Blue for Students */
+                        "role-parent": "#7c3aed", /* Purple for Parents */
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main dark:text-text-main-dark min-h-screen flex flex-col items-center justify-center p-0 sm:p-4">
+<!-- Mobile Container -->
+<div class="relative flex h-full w-full max-w-md flex-col bg-surface-light dark:bg-surface-dark shadow-xl overflow-hidden sm:rounded-xl sm:h-[800px] border border-gray-200 dark:border-gray-800">
+<!-- Header -->
+<div class="flex items-center justify-between p-4 bg-surface-light dark:bg-surface-dark border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20">
+<button class="text-text-main dark:text-text-main-dark flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<h2 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center">New Conversation</h2>
+<button class="flex items-center justify-center px-3 py-1.5 rounded-full bg-primary text-primary-content hover:bg-primary-dark transition-colors">
+<span class="text-sm font-bold">Create</span>
+</button>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 overflow-y-auto scrollbar-hide">
+<!-- Tabs -->
+<div class="px-4 pt-2">
+<div class="flex border-b border-gray-200 dark:border-gray-700">
+<button class="flex flex-col items-center justify-center border-b-[3px] border-primary pb-3 pt-4 flex-1 transition-all">
+<p class="text-primary text-sm font-bold">Direct Message</p>
+</button>
+<button class="flex flex-col items-center justify-center border-b-[3px] border-transparent pb-3 pt-4 flex-1 transition-all hover:text-primary/70">
+<p class="text-text-sub dark:text-text-sub-dark text-sm font-medium">Group/Channel</p>
+</button>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="px-4 py-4 sticky top-0 z-10 bg-surface-light dark:bg-surface-dark">
+<label class="flex flex-col w-full">
+<div class="flex w-full items-center rounded-xl bg-background-light dark:bg-background-dark border border-transparent focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<div class="flex items-center justify-center pl-4 text-text-sub dark:text-text-sub-dark">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="w-full bg-transparent border-none text-text-main dark:text-text-main-dark placeholder:text-text-sub dark:placeholder:text-text-sub-dark px-3 py-3 text-base focus:ring-0" placeholder="Search teachers, parents, students..." type="text"/>
+</div>
+</label>
+</div>
+<!-- Selected Members Chips -->
+<div class="px-4 pb-2">
+<div class="flex flex-wrap gap-2">
+<!-- Chip 1 -->
+<div class="flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 pl-1 pr-3 py-1 border border-primary/20">
+<div class="h-6 w-6 rounded-full overflow-hidden bg-gray-200">
+<img alt="User Avatar" class="h-full w-full object-cover" data-alt="Portrait of a woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJwt-YznkpaXeKIlvGf5206vO6HeuIdkE8aYj6wCLhrhcfwNinsGJj6o0vUi60ebZckGjDpO-bvf1kEbSDg4Gubm_yfwMBJs2C5Ni_5rLUlo_7z5TjP_mhNaTEpJZash5IZ5dUuQ1K2oljOE5XOQ8Lns0MJ62AKb-Bx28uK8UQNrJWoGnEU60KhlSeIrsAF50J9SQBW4WdmkO_r9UG20dzpF86IsVE_9-D1QTPjRd9_JGha4G2PoUZPqEArihzuUNykPiMeDbaNqQn"/>
+</div>
+<span class="text-xs font-medium text-text-main dark:text-text-main-dark">Sarah J.</span>
+<button class="flex items-center text-text-sub hover:text-red-500 dark:text-text-sub-dark dark:hover:text-red-400">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Chip 2 -->
+<div class="flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 pl-1 pr-3 py-1 border border-primary/20">
+<div class="h-6 w-6 rounded-full overflow-hidden bg-gray-200">
+<img alt="User Avatar" class="h-full w-full object-cover" data-alt="Portrait of a man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQgryykyokzxg4_mdGm5rzEe1hhbauks3B34iM2UUX5LxyyGKesip-B-AI24mmEyJMpFQkcprN5RN67umbnfd7RmWJJ9WabjDOBEYk4iNE2hGeHZifA3wXdQovQNB26MSF-exFieRCMm8Q_yRwzSyp2k8goGeSPn6m9hhpb9ssf9cOw6eeCL6MPe0y7cjiQUy0nRZvAnPwRC1b1mMRkNNMZeojJ2A_bY4i9QVCQg-EC3CxOt0ns6iErqle8Dzkd5p_fSCG_om4mBcP"/>
+</div>
+<span class="text-xs font-medium text-text-main dark:text-text-main-dark">Mr. Anderson</span>
+<button class="flex items-center text-text-sub hover:text-red-500 dark:text-text-sub-dark dark:hover:text-red-400">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-800 mt-4 mb-2"></div>
+</div>
+<!-- List Section -->
+<div class="px-4 pb-20">
+<h3 class="text-text-sub dark:text-text-sub-dark text-xs font-bold uppercase tracking-wider mb-3">Suggested Contacts</h3>
+<!-- Contact Item 1 (Selected) -->
+<div class="flex items-center justify-between py-3 group cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="h-12 w-12 rounded-full overflow-hidden bg-gray-200">
+<img alt="User Avatar" class="h-full w-full object-cover" data-alt="Portrait of a man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNQs2Bw_V3NWMLWAilX-WcLLGdWXyF6GYeR65ci54H2G0cIqQNjBaRoyVDgsIBrlm2Ppp3TgG8MFIpUL-iDzKF2wZFrgtEWn7O8tIwJh7bQxHsBo86QC-NqxV_4R9D6Oke2cjHLKSJjELDjUVeG5gR9iXp4eV3LaQ1wc6bYCc_2bLdU8s0OuAa_qTt3rejZaCILbdpwNaG00bLs16xZw9lbzcaNwRWsUYjnPPYWANPsfY1I6moO-7BBca7GuAY7OHWBDYtAh-y8k3A"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-surface-light dark:bg-surface-dark rounded-full p-0.5">
+<span class="material-symbols-outlined filled text-green-500 text-[14px]">circle</span>
+</div>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-text-main dark:text-text-main-dark font-semibold text-sm">David Miller</span>
+<span class="bg-role-student/10 text-role-student text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border border-role-student/20">Student</span>
+</div>
+<span class="text-text-sub dark:text-text-sub-dark text-xs line-clamp-1">Grade 10 - Mathematics B</span>
+</div>
+</div>
+<div class="h-6 w-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<!-- Contact Item 2 -->
+<div class="flex items-center justify-between py-3 group cursor-pointer border-t border-gray-50 dark:border-gray-800/50">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="h-12 w-12 rounded-full overflow-hidden bg-gray-200">
+<img alt="User Avatar" class="h-full w-full object-cover" data-alt="Portrait of a woman smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyH7xWE9MscGSPuuB0nqIDgHntBfZK6Y6IPCSHkVOUKmPUWTVv-XYq0xj7hbGe5sc-U3t5e9c7Xoumww6tZ-U5gTyUaEUXZlmsNzjUllrPwSv85h1AH_KFuv1VUR7QBfqLUHcSF54eSzp0owbiOQRFmONj0RNcTCV1bO0rqV6RP7cgDsvT5UZ2-tdRGMti78bIb3Z0EI8_L5PJf-xBDjppbnbvj13PvVgT7on9nZ4AEgII4KwvsARaXKAjG2GKdx5NM3yvhf9FfxYD"/>
+</div>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-text-main dark:text-text-main-dark font-semibold text-sm">Emily Wilson</span>
+<span class="bg-role-teacher/10 text-role-teacher text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border border-role-teacher/20">Teacher</span>
+</div>
+<span class="text-text-sub dark:text-text-sub-dark text-xs line-clamp-1">Head of Science Dept.</span>
+</div>
+</div>
+<div class="h-6 w-6 rounded-full border-2 border-gray-300 dark:border-gray-600 group-hover:border-primary transition-colors"></div>
+</div>
+<!-- Contact Item 3 -->
+<div class="flex items-center justify-between py-3 group cursor-pointer border-t border-gray-50 dark:border-gray-800/50">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="h-12 w-12 rounded-full overflow-hidden bg-role-teacher/20 flex items-center justify-center text-role-teacher">
+<span class="font-bold text-lg">JW</span>
+</div>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-text-main dark:text-text-main-dark font-semibold text-sm">James Watson</span>
+<span class="bg-role-parent/10 text-role-parent text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border border-role-parent/20">Parent</span>
+</div>
+<span class="text-text-sub dark:text-text-sub-dark text-xs line-clamp-1">Parent of Sophia Watson (Grade 8)</span>
+</div>
+</div>
+<div class="h-6 w-6 rounded-full border-2 border-gray-300 dark:border-gray-600 group-hover:border-primary transition-colors"></div>
+</div>
+<!-- Contact Item 4 -->
+<div class="flex items-center justify-between py-3 group cursor-pointer border-t border-gray-50 dark:border-gray-800/50">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="h-12 w-12 rounded-full overflow-hidden bg-gray-200">
+<img alt="User Avatar" class="h-full w-full object-cover" data-alt="Portrait of a young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZj_2T5E9h9f8i-Fn2sTX_R70dcwrHZYVr2bV90K9HZrgHfMCHt5OPCwH-ijiC3vmgC4K7xT9lGp6diC3DiHq1u5zyK07HCm8QFtY6DVpscz4v-K-xN_uxauJXfEhkKpB7M5MUfJJvjk5pMBVsp0Y0POO-MIMTWeqi37QDYBlk8H0P2NWloxC1HwYcBG-3hiNa95OTEatF-TJY8gRH0uRNTkjmd8qnSlxOQTXYJzsVocFqWuktpMz2hs1akuPwXesDVF3ljyQQUkO5"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-surface-light dark:bg-surface-dark rounded-full p-0.5">
+<span class="material-symbols-outlined filled text-gray-400 text-[14px]">circle</span>
+</div>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-text-main dark:text-text-main-dark font-semibold text-sm">Lucas Chen</span>
+<span class="bg-role-student/10 text-role-student text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border border-role-student/20">Student</span>
+</div>
+<span class="text-text-sub dark:text-text-sub-dark text-xs line-clamp-1">Grade 11 - Physics A</span>
+</div>
+</div>
+<div class="h-6 w-6 rounded-full border-2 border-gray-300 dark:border-gray-600 group-hover:border-primary transition-colors"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="flex border-t border-gray-100 dark:border-gray-800 bg-surface-light dark:bg-surface-dark px-4 pb-5 pt-3 z-30">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<div class="group-hover:text-primary transition-colors flex h-7 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">home</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary dark:text-primary" href="#">
+<div class="flex h-7 items-center justify-center relative">
+<span class="material-symbols-outlined filled text-2xl">chat_bubble</span>
+<span class="absolute -top-0.5 -right-1 flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Messages</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<div class="group-hover:text-primary transition-colors flex h-7 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">school</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Classes</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<div class="group-hover:text-primary transition-colors flex h-7 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">person</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Profile</p>
+</a>
+</div>
+</div>
+</body></html>

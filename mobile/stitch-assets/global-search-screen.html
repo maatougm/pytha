@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Global Search</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f59f0a", // Amber/Orange
+                        "background-light": "#f8f7f5", // Warm off-white
+                        "background-dark": "#221c10", // Deep warm brown/black
+                        "neutral-light": "#e8e6e1",
+                        "neutral-dark": "#3a342a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar hiding for horizontal scroll areas */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display antialiased">
+<!-- Header & Search -->
+<div class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md pt-safe-top">
+<div class="flex items-center px-4 py-3 justify-between gap-3">
+<button class="text-slate-900 dark:text-slate-100 flex items-center justify-center p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<label class="flex flex-1 items-center h-12 bg-white dark:bg-neutral-dark rounded-xl shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden group focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+<div class="pl-3 flex items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full bg-transparent border-none focus:ring-0 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-base h-full py-0 px-2" placeholder="Search courses, people..." type="text" value="Mathem"/>
+<button class="pr-3 flex items-center justify-center text-primary hover:text-primary/80 transition-colors">
+<span class="material-symbols-outlined text-[20px] fill-1">mic</span>
+</button>
+</label>
+<button class="text-primary font-semibold text-base shrink-0">
+                Cancel
+            </button>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 px-4 pb-4 overflow-x-auto hide-scrollbar snap-x">
+<button class="snap-start shrink-0 h-9 px-4 rounded-full bg-primary text-white text-sm font-medium flex items-center shadow-sm shadow-primary/30">
+                All
+            </button>
+<button class="snap-start shrink-0 h-9 px-4 rounded-full bg-white dark:bg-neutral-dark text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-neutral-dark hover:bg-slate-50 dark:hover:bg-neutral-dark/80 text-sm font-medium flex items-center transition-colors">
+                Courses
+            </button>
+<button class="snap-start shrink-0 h-9 px-4 rounded-full bg-white dark:bg-neutral-dark text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-neutral-dark hover:bg-slate-50 dark:hover:bg-neutral-dark/80 text-sm font-medium flex items-center transition-colors">
+                People
+            </button>
+<button class="snap-start shrink-0 h-9 px-4 rounded-full bg-white dark:bg-neutral-dark text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-neutral-dark hover:bg-slate-50 dark:hover:bg-neutral-dark/80 text-sm font-medium flex items-center transition-colors">
+                Files
+            </button>
+<button class="snap-start shrink-0 h-9 px-4 rounded-full bg-white dark:bg-neutral-dark text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-neutral-dark hover:bg-slate-50 dark:hover:bg-neutral-dark/80 text-sm font-medium flex items-center transition-colors">
+                Events
+            </button>
+</div>
+<div class="h-px w-full bg-slate-200 dark:bg-neutral-dark"></div>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 overflow-y-auto pb-24">
+<!-- Courses Section -->
+<section class="mt-6 px-4">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Courses</h3>
+<a class="text-primary text-sm font-medium hover:underline" href="#">See all</a>
+</div>
+<div class="space-y-3">
+<!-- Course Item 1 -->
+<div class="group flex items-center gap-3 bg-white dark:bg-neutral-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-white/5 active:scale-[0.98] transition-transform">
+<div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-slate-200">
+<img alt="Abstract math geometric shapes" class="w-full h-full object-cover" data-alt="Abstract colorful geometric shapes for mathematics" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfD9P-r5RDzl4LSzK7alueM1rwk-l-hyCnX_LVubq6B-hD8F0igSeqkZj9BhaEhS4sh5CVFj2PqbhQ7c4yfWc-pFQAMyxJWm-HBWcTJ8hFbNOaSj1dx_l9C3h4Jo_MdH_efLoGbw1UBklhD3aeA5jOMWLHEOH_MHqS9GJ--oXYGDOjmu-4LqMN8GBYFtFMHTwSIVtlBIY84xS0oVaQQDR9T12UmNFewqlXZ3irD5VxNBX3tlo8_cUHWsdSXRm3jeqXxXlau8s8TTO0"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-slate-900 dark:text-slate-100 font-semibold truncate">Advanced <span class="text-primary">Mathem</span>atics</h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs truncate">Grade 12 • Room 302</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary">Required</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600">chevron_right</span>
+</div>
+<!-- Course Item 2 -->
+<div class="group flex items-center gap-3 bg-white dark:bg-neutral-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-white/5 active:scale-[0.98] transition-transform">
+<div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-slate-200">
+<img alt="Mathematics calculator and notes" class="w-full h-full object-cover" data-alt="Calculator and math notes on desk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeViJMtrpCPfcmPlevRH0rS7dfNrvL9JZKwxC2N_arC3PE49zKspu7ugwDWp8dfmo8Kp_B7fQTN-wD9AtLbyJdKXr5-JdqrikZarLCnKpnKXRn9gIQCGBLeuPoQClaah_nUV676AKQde7ARQfNYSuodfv0UxiA0xJgMFvfuFqIIu2Xkq_Het3rPbJdVIM90p4aeqXGXN_fsdqBfACjVns8pz5mVoeC3l3mhb12sNxfd6BHijEAkohAYbzc3ipRpZEBnUGGBojvdWil"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-slate-900 dark:text-slate-100 font-semibold truncate">Basic <span class="text-primary">Mathem</span>atics</h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs truncate">Grade 9 • Room 104</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Elective</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- People Section -->
+<section class="mt-8 px-4">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">People</h3>
+<a class="text-primary text-sm font-medium hover:underline" href="#">See all</a>
+</div>
+<div class="space-y-3">
+<!-- Person Item 1 -->
+<div class="flex items-center gap-3 bg-white dark:bg-neutral-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-white/5">
+<div class="relative">
+<img alt="Professional teacher portrait smiling woman" class="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-neutral-dark shadow-sm" data-alt="Portrait of smiling female teacher" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw-olBPTaZinDfuX7TS_g9VnH6T9oSUCOyfMHLwNA0FgBJCjHrKRMx9fW-c1FQZrS2o0TQxLHkK-BcpJoAtsAuwUdksOqEXpLVfHa6ynN0gYjypfthfk2jBMSjah97tx3SjXVVWsLychp2HOODLFjdfG8zeF9paG6CZkGuJgfdhA4LmgDHMDQFO7GZvlLm16Gz2x076A1CR1mP5dB1odSe88TuHVgQNp-CMPbGJ-xOxuvAB_WXdn-2PN2Cz4TOZTEx7C1ZMDsGm27T"/>
+<div class="absolute -bottom-1 -right-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white dark:border-neutral-dark">
+                            Teacher
+                        </div>
+</div>
+<div class="flex-1">
+<h4 class="text-slate-900 dark:text-slate-100 font-semibold text-sm">Sarah <span class="text-primary">Mathem</span>son</h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Head of Science Dept.</p>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+</button>
+</div>
+<!-- Person Item 2 -->
+<div class="flex items-center gap-3 bg-white dark:bg-neutral-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-white/5">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg border-2 border-white dark:border-neutral-dark">
+                            JM
+                        </div>
+<div class="absolute -bottom-1 -right-1 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white dark:border-neutral-dark">
+                            Student
+                        </div>
+</div>
+<div class="flex-1">
+<h4 class="text-slate-900 dark:text-slate-100 font-semibold text-sm">John <span class="text-primary">Mathem</span></h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Grade 11B</p>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Files Section -->
+<section class="mt-8 px-4 mb-4">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Files</h3>
+<a class="text-primary text-sm font-medium hover:underline" href="#">See all</a>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- File Item 1 -->
+<div class="bg-white dark:bg-neutral-dark p-4 rounded-xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-start gap-3">
+<div class="p-2.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined text-[24px]">picture_as_pdf</span>
+</div>
+<div>
+<h4 class="text-slate-900 dark:text-slate-100 font-semibold text-sm line-clamp-2"><span class="text-primary">Mathem</span>atics_Syllabus_2024.pdf</h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1">2.4 MB • Oct 12</p>
+</div>
+</div>
+<!-- File Item 2 -->
+<div class="bg-white dark:bg-neutral-dark p-4 rounded-xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-start gap-3">
+<div class="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-[24px]">description</span>
+</div>
+<div>
+<h4 class="text-slate-900 dark:text-slate-100 font-semibold text-sm line-clamp-2">Project_<span class="text-primary">Mathem</span>_Proposal.docx</h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1">145 KB • Just now</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Bottom Nav Bar -->
+<div class="fixed bottom-0 left-0 w-full border-t border-slate-200 dark:border-white/10 bg-white dark:bg-neutral-dark pb-safe-bottom z-50">
+<div class="flex justify-around items-end pt-3 pb-4">
+<!-- Home -->
+<a class="group flex flex-col items-center gap-1 w-16" href="#">
+<span class="material-symbols-outlined text-[26px] text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">home</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">Home</span>
+</a>
+<!-- Courses -->
+<a class="group flex flex-col items-center gap-1 w-16" href="#">
+<span class="material-symbols-outlined text-[26px] text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">menu_book</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">Courses</span>
+</a>
+<!-- Search (Active) -->
+<a class="group flex flex-col items-center gap-1 w-16" href="#">
+<div class="w-12 h-8 rounded-full bg-primary/10 flex items-center justify-center mb-0.5">
+<span class="material-symbols-outlined text-[26px] text-primary fill-1">search</span>
+</div>
+<span class="text-[10px] font-bold text-primary">Search</span>
+</a>
+<!-- Messages -->
+<a class="group flex flex-col items-center gap-1 w-16" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-[26px] text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">chat_bubble</span>
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-neutral-dark"></span>
+</div>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">Messages</span>
+</a>
+<!-- Profile -->
+<a class="group flex flex-col items-center gap-1 w-16" href="#">
+<span class="material-symbols-outlined text-[26px] text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">person</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary dark:text-slate-500 transition-colors">Profile</span>
+</a>
+</div>
+</div>
+</body></html>

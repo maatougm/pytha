@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Attendance Calendar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1e1e8a",
+                        "primary-foreground": "#ffffff",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a1a2e",
+                        "text-main": "#1e293b",
+                        "text-main-dark": "#e2e8f0",
+                        "text-sub": "#64748b",
+                        "text-sub-dark": "#94a3b8",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#2d2d42",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-text-main-dark font-display antialiased min-h-screen flex flex-col">
+<!-- Header -->
+<header class="sticky top-0 z-10 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-sm border-b border-border-light dark:border-border-dark px-4 py-3 flex items-center justify-between">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-background-light dark:hover:bg-background-dark text-text-main dark:text-text-main-dark transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold">Attendance</h1>
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-background-light dark:hover:bg-background-dark text-text-main dark:text-text-main-dark transition-colors">
+<span class="material-symbols-outlined">calendar_month</span>
+</button>
+</header>
+<!-- Weekly Horizontal Scroller -->
+<section class="bg-surface-light dark:bg-surface-dark pt-4 pb-6 px-4 shadow-sm relative z-0">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold text-text-main dark:text-text-main-dark">October 2023</h2>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-full bg-background-light dark:bg-background-dark text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-full bg-background-light dark:bg-background-dark text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Week Days -->
+<div class="flex justify-between items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<!-- Day Item: Active -->
+<div class="flex flex-col items-center gap-2 min-w-[3.5rem]">
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Mon</span>
+<button class="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 transition-transform hover:scale-105">
+<span class="text-base font-bold">16</span>
+</button>
+<div class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></div>
+</div>
+<!-- Day Item: Inactive -->
+<div class="flex flex-col items-center gap-2 min-w-[3.5rem]">
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Tue</span>
+<button class="w-12 h-12 rounded-2xl bg-background-light dark:bg-background-dark text-text-main dark:text-text-main-dark flex items-center justify-center border border-transparent hover:border-primary/30 transition-colors">
+<span class="text-base font-semibold">17</span>
+</button>
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1"></div>
+</div>
+<!-- Day Item: Inactive -->
+<div class="flex flex-col items-center gap-2 min-w-[3.5rem]">
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Wed</span>
+<button class="w-12 h-12 rounded-2xl bg-background-light dark:bg-background-dark text-text-main dark:text-text-main-dark flex items-center justify-center border border-transparent hover:border-primary/30 transition-colors">
+<span class="text-base font-semibold">18</span>
+</button>
+<!-- Absent indicator example -->
+<div class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1"></div>
+</div>
+<!-- Day Item: Inactive -->
+<div class="flex flex-col items-center gap-2 min-w-[3.5rem]">
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Thu</span>
+<button class="w-12 h-12 rounded-2xl bg-background-light dark:bg-background-dark text-text-main dark:text-text-main-dark flex items-center justify-center border border-transparent hover:border-primary/30 transition-colors">
+<span class="text-base font-semibold">19</span>
+</button>
+<div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 mt-1"></div>
+</div>
+<!-- Day Item: Inactive -->
+<div class="flex flex-col items-center gap-2 min-w-[3.5rem]">
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Fri</span>
+<button class="w-12 h-12 rounded-2xl bg-background-light dark:bg-background-dark text-text-main dark:text-text-main-dark flex items-center justify-center border border-transparent hover:border-primary/30 transition-colors">
+<span class="text-base font-semibold">20</span>
+</button>
+<div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 mt-1"></div>
+</div>
+<!-- Day Item: Inactive -->
+<div class="flex flex-col items-center gap-2 min-w-[3.5rem]">
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Sat</span>
+<button class="w-12 h-12 rounded-2xl bg-background-light dark:bg-background-dark text-text-sub/50 dark:text-text-sub-dark/50 flex items-center justify-center border border-transparent">
+<span class="text-base font-semibold">21</span>
+</button>
+<div class="w-1.5 h-1.5 rounded-full bg-transparent mt-1"></div>
+</div>
+</div>
+</section>
+<!-- Content Area -->
+<main class="flex-1 overflow-y-auto pb-24">
+<!-- Summary Stats -->
+<div class="px-4 py-6 grid grid-cols-2 gap-4">
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-2xl border border-border-light dark:border-border-dark flex flex-col gap-1">
+<div class="flex items-center gap-2 text-text-sub dark:text-text-sub-dark mb-1">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+<span class="text-xs font-medium uppercase tracking-wider">Present</span>
+</div>
+<span class="text-2xl font-bold text-text-main dark:text-text-main-dark">92%</span>
+<span class="text-xs text-text-sub dark:text-text-sub-dark">Last 30 days</span>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-2xl border border-border-light dark:border-border-dark flex flex-col gap-1">
+<div class="flex items-center gap-2 text-text-sub dark:text-text-sub-dark mb-1">
+<span class="material-symbols-outlined text-xl">cancel</span>
+<span class="text-xs font-medium uppercase tracking-wider">Absent</span>
+</div>
+<span class="text-2xl font-bold text-text-main dark:text-text-main-dark">2</span>
+<span class="text-xs text-text-sub dark:text-text-sub-dark">Sessions missed</span>
+</div>
+</div>
+<div class="px-4 mb-4 flex items-center justify-between">
+<h3 class="text-lg font-bold text-text-main dark:text-text-main-dark">Session Log</h3>
+<span class="text-sm font-medium text-text-sub dark:text-text-sub-dark">Today, Oct 16</span>
+</div>
+<!-- Session List -->
+<div class="flex flex-col gap-4 px-4">
+<!-- Session Item: Present -->
+<div class="group relative flex gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-2xl border border-border-light dark:border-border-dark shadow-sm transition-all active:scale-[0.98]">
+<!-- Time Column -->
+<div class="flex flex-col items-center justify-start pt-1 gap-1 min-w-[3.5rem] border-r border-border-light dark:border-border-dark pr-4">
+<span class="text-sm font-bold text-text-main dark:text-text-main-dark">09:00</span>
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">AM</span>
+</div>
+<!-- Details Column -->
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-base font-bold text-text-main dark:text-text-main-dark">Mathematics</h4>
+<p class="text-xs text-text-sub dark:text-text-sub-dark mt-0.5">Topic: Pythagorean Theorem</p>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                            Present
+                        </span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-6 h-6 rounded-full bg-cover bg-center border border-border-light dark:border-border-dark" data-alt="Portrait of math teacher" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB7Qolo5H8dGBHLC4_BQmI307876wZR022zbkt07ZZc31dFTWR7xmUzY5D0AVzr7Dw4GZXQCvw7vbOA-3SId7auXpr5JGuRx6lnB2abKdG_DKMZLooPZVbdZsG-Uks1qV3z-ZNIP-3mkhO9NLXDgIwHt4JLUFUZ2tc-WQBfV6w7GbNBpKvN_mfuu_aVB9Z3auK3EybLER2m2NALO0-7sFIgb9fbs0Is6s_YO4hpq8liQUHM8Aa5Kfr4mhI0n-VSdll0b5YWpCb6t1zw')"></div>
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Prof. Sarah Jenkins</span>
+</div>
+</div>
+</div>
+<!-- Session Item: Late -->
+<div class="group relative flex gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-2xl border border-border-light dark:border-border-dark shadow-sm transition-all active:scale-[0.98]">
+<div class="flex flex-col items-center justify-start pt-1 gap-1 min-w-[3.5rem] border-r border-border-light dark:border-border-dark pr-4">
+<span class="text-sm font-bold text-text-main dark:text-text-main-dark">11:30</span>
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">AM</span>
+</div>
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-base font-bold text-text-main dark:text-text-main-dark">Physics</h4>
+<p class="text-xs text-text-sub dark:text-text-sub-dark mt-0.5">Lab: Pendulum Motion</p>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                            Late (10m)
+                        </span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-6 h-6 rounded-full bg-cover bg-center border border-border-light dark:border-border-dark" data-alt="Portrait of physics teacher" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBj6qZ2352OHWYvG-513b6x3yO-LMn4s8h2lBYLg0OGSbqlqNchBOUxrmCyqUN_VILtS-sObkQa1xD31tfVD-As080Yhy60xxjYTaHMPZQPg5V8h5KJFiT4gKTvtwExWhIPnIrxgX6akAv-T9EK2Lmh6IVPJc_8Hrf95_9CxBYv75KMNw-pStC-B0yjFas5w0WNtoJe5VtoA_7PhOxvaVjdXR4OeLwqdqlV3eH0klCL76bhCtZeBPOg8tkn-YCQN9YA00lQ41G3H74l')"></div>
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Dr. Alan Grant</span>
+</div>
+<!-- Note -->
+<div class="mt-2 bg-background-light dark:bg-background-dark p-2.5 rounded-lg">
+<p class="text-xs text-text-sub dark:text-text-sub-dark italic">
+<span class="font-semibold not-italic text-text-main dark:text-text-main-dark">Note:</span> 
+                            Student arrived after roll call due to medical appointment. Excused.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Session Item: Upcoming -->
+<div class="group relative flex gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-2xl border border-border-light dark:border-border-dark shadow-sm opacity-80">
+<div class="flex flex-col items-center justify-start pt-1 gap-1 min-w-[3.5rem] border-r border-border-light dark:border-border-dark pr-4">
+<span class="text-sm font-bold text-text-main dark:text-text-main-dark">02:00</span>
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">PM</span>
+</div>
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-base font-bold text-text-main dark:text-text-main-dark">History</h4>
+<p class="text-xs text-text-sub dark:text-text-sub-dark mt-0.5">World War II: The Aftermath</p>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            Upcoming
+                        </span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-6 h-6 rounded-full bg-cover bg-center border border-border-light dark:border-border-dark" data-alt="Portrait of history teacher" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDw7A4FY1iDViWArorMOYvYemCjiUnefcO8FRCQXvQ7DGhj8J4vQwWfzSlGyTkT6-OKsIRpSV2sBahbHt5mPmj91X8vb4pjTsqasy30BVfwGLQKjrako0dP6MoH-teE3QGn0Yp4F3TpyoSj0y8nsQ4239LRui8VoeN9UjaS7GxVNqaZPzSIv-F0kEKCY3Epo2t8L7_eOfky8ytGF9kP3DmWtmoUiS80wyYpZVZ481NMjeirEk0Vnxd3HOmPrYehlid8zWUiNWaXKNHE')"></div>
+<span class="text-xs font-medium text-text-sub dark:text-text-sub-dark">Ms. Eleanor Rigby</span>
+</div>
+</div>
+</div>
+</div>
+<div class="h-6"></div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 border-t border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-6 pb-6 pt-3 shadow-lg z-50">
+<div class="flex justify-between items-end">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">school</span>
+<span class="text-[10px] font-medium tracking-wide">Classes</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary dark:text-primary" href="#">
+<span class="material-symbols-outlined text-2xl font-variation-settings-fill">calendar_today</span>
+<span class="text-[10px] font-medium tracking-wide">Attendance</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub dark:text-text-sub-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">account_circle</span>
+<span class="text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</div>
+</nav>
+<style>
+        .font-variation-settings-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</body></html>

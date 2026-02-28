@@ -14,9 +14,10 @@ export class UpdateController {
         forceUpdate: false,    // Set to true to force users to update immediately
         updateUrl: '',         // Will be constructed dynamically
         changelog: [
-            'Bug fixes and performance improvements',
-            'New messaging features',
-            'Improved UI/UX',
+            'Fixed login timeout issues - better error handling',
+            'Improved connection stability',
+            'Added SSL connection error handling',
+            'UI/UX improvements',
         ],
         minVersionCode: 1,     // Minimum supported version - users below this must update
     };
@@ -74,7 +75,7 @@ export class UpdateController {
     @ApiOperation({ summary: 'Download the latest APK file' })
     async downloadApk(@Res({ passthrough: true }) res: Response) {
         const downloadsDir = join(process.cwd(), 'downloads');
-        const filePath = join(downloadsDir, 'minivirson-latest.apk');
+        const filePath = join(downloadsDir, 'pythagore-latest.apk');
 
         // Check if file exists
         if (!existsSync(filePath)) {
@@ -86,7 +87,7 @@ export class UpdateController {
         
         res.set({
             'Content-Type': 'application/vnd.android.package-archive',
-            'Content-Disposition': `attachment; filename="minivirson-${this.currentVersion.versionName}.apk"`,
+            'Content-Disposition': `attachment; filename="pythagore-${this.currentVersion.versionName}.apk"`,
         });
 
         return new StreamableFile(file);

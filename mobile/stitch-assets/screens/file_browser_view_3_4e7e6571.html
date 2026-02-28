@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - File Browser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f59f0a",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221c10",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d261a",
+                        "neutral-light": "#e5e2db",
+                        "neutral-dark": "#3a3225",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hide for cleaner UI */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-200 antialiased selection:bg-primary/30">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-surface-light dark:bg-surface-dark shadow-2xl overflow-hidden">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between p-4 sticky top-0 z-20 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md">
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-neutral-light dark:hover:bg-neutral-dark transition-colors text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">Documents</h1>
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-neutral-light dark:hover:bg-neutral-dark transition-colors text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined text-[24px]">more_vert</span>
+</button>
+</header>
+<!-- Search Bar -->
+<div class="px-4 py-2">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[22px]">search</span>
+</div>
+<input class="block w-full p-3.5 pl-10 text-sm text-slate-900 dark:text-slate-100 bg-neutral-light/50 dark:bg-neutral-dark/50 border-0 rounded-2xl focus:ring-2 focus:ring-primary focus:bg-surface-light dark:focus:bg-surface-dark transition-all placeholder:text-slate-400" placeholder="Search files and folders..." type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3">
+<button class="p-1 rounded-full text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px] filled">mic</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 px-4 py-4 overflow-x-auto scrollbar-hide">
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-medium text-sm shadow-md transition-transform active:scale-95">
+                All
+            </button>
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-surface-light dark:bg-surface-dark border border-neutral-light dark:border-neutral-dark text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-neutral-light dark:hover:bg-neutral-dark transition-colors active:scale-95">
+                Homework
+            </button>
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-surface-light dark:bg-surface-dark border border-neutral-light dark:border-neutral-dark text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-neutral-light dark:hover:bg-neutral-dark transition-colors active:scale-95">
+                Circulars
+            </button>
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-surface-light dark:bg-surface-dark border border-neutral-light dark:border-neutral-dark text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-neutral-light dark:hover:bg-neutral-dark transition-colors active:scale-95">
+                Admin
+            </button>
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-surface-light dark:bg-surface-dark border border-neutral-light dark:border-neutral-dark text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-neutral-light dark:hover:bg-neutral-dark transition-colors active:scale-95">
+                Exams
+            </button>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 overflow-y-auto px-4 pb-24 scrollbar-hide">
+<!-- Recent Access Section -->
+<div class="mb-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Recent Folders</h2>
+<button class="text-primary text-sm font-semibold hover:text-primary/80">View All</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Folder Card 1 (Active/Highlighted Style) -->
+<div class="group relative flex flex-col justify-between p-4 h-44 rounded-3xl bg-primary text-white shadow-lg transition-transform hover:-translate-y-1">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+<span class="material-symbols-outlined text-[28px] text-white">folder_open</span>
+</div>
+<button class="text-white/70 hover:text-white">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div>
+<p class="text-sm font-medium text-white/80 mb-1">Last edited 2m ago</p>
+<h3 class="text-lg font-bold leading-tight">Class 10-A Math</h3>
+<div class="flex -space-x-2 mt-3">
+<img alt="" class="w-6 h-6 rounded-full border-2 border-primary object-cover" data-alt="Female teacher portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHpxrA9Hvn1vhG4q0-TBcHtw9eaIo7qA0MY3CcgRVDmMl5rr0HGRMAZtYszSOUofYxEBU3_iwhBWi-O2n_7xOKz2J2fpVhPyB-MlqjGxdSw1gB_ZYpcchCXAlsWjgoguuzFDvaESAZ7RyG9YlmF8keo4Pgl9cV4Mei2e0XpJlduSDbqyB4uzeDV4r7Amy3KhpeNqThVT4UBIqhPoXADkisqN4G_KkQjzWZijk3MjkVNLWbeWPytNfAwj5CgzSpGpD9ECQhOge8Z_z1"/>
+<img alt="" class="w-6 h-6 rounded-full border-2 border-primary object-cover" data-alt="Male student portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtnvXC5cZV_ElXYNY6SM0_MvDZjPDqpuG5rM9zcS2o8zAcVL8gjP0VQO9VH8sHFLdagF45vOaIAykL08O9K6y9BXQ9Sw_0lOm6p5yJMOD12CQEQJGUwk444lxiIOTEI--aDf_x6Mzko0kB0AX3fyXnI71SUKDj3YS4Aca7Nx4dC5ksSt2Zznax3YvBMKEbkApLUArBMfJSiMstQUrQNXj6xpQ6nYcMrMXHusYT4X6Fz2Icunp8K1lBCsuVAzF6XqaSpc4AsSSp0ZYg"/>
+<div class="w-6 h-6 rounded-full border-2 border-primary bg-white/20 flex items-center justify-center text-[8px] font-bold text-white">+3</div>
+</div>
+</div>
+</div>
+<!-- Folder Card 2 -->
+<div class="group relative flex flex-col justify-between p-4 h-44 rounded-3xl bg-neutral-light dark:bg-neutral-dark/40 border border-transparent hover:border-primary/30 transition-all hover:shadow-soft">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-white dark:bg-neutral-dark rounded-xl shadow-sm">
+<span class="material-symbols-outlined text-[28px] text-primary">science</span>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div>
+<p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">8 files</p>
+<h3 class="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">Science Projects</h3>
+<div class="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full mt-3 overflow-hidden">
+<div class="h-full bg-green-500 w-3/4 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Folder Card 3 -->
+<div class="group relative flex flex-col justify-between p-4 h-44 rounded-3xl bg-neutral-light dark:bg-neutral-dark/40 border border-transparent hover:border-primary/30 transition-all hover:shadow-soft">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-white dark:bg-neutral-dark rounded-xl shadow-sm">
+<span class="material-symbols-outlined text-[28px] text-blue-500">assignment</span>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div>
+<p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">24 files</p>
+<h3 class="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">Attendance Records</h3>
+</div>
+</div>
+<!-- Folder Card 4 -->
+<div class="group relative flex flex-col justify-between p-4 h-44 rounded-3xl bg-neutral-light dark:bg-neutral-dark/40 border border-transparent hover:border-primary/30 transition-all hover:shadow-soft">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-white dark:bg-neutral-dark rounded-xl shadow-sm">
+<span class="material-symbols-outlined text-[28px] text-red-500">quiz</span>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div>
+<p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">3 files</p>
+<h3 class="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">Exam Papers</h3>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Files List -->
+<div class="mb-4">
+<h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Files</h2>
+<div class="flex flex-col gap-3">
+<!-- File Item 1 -->
+<div class="flex items-center p-3 rounded-2xl bg-white dark:bg-surface-dark border border-neutral-light dark:border-neutral-dark hover:border-primary/50 transition-colors">
+<div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 mr-4">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold text-slate-900 dark:text-slate-100 truncate">Algebra_Homework_WK4.pdf</p>
+<div class="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+<span>2.4 MB</span>
+<span class="mx-1.5">•</span>
+<span>Today, 10:23 AM</span>
+</div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<!-- File Item 2 -->
+<div class="flex items-center p-3 rounded-2xl bg-white dark:bg-surface-dark border border-neutral-light dark:border-neutral-dark hover:border-primary/50 transition-colors">
+<div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mr-4">
+<span class="material-symbols-outlined">article</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold text-slate-900 dark:text-slate-100 truncate">Science_Project_Guide.docx</p>
+<div class="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+<span>1.1 MB</span>
+<span class="mx-1.5">•</span>
+<span>Yesterday</span>
+</div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<!-- File Item 3 -->
+<div class="flex items-center p-3 rounded-2xl bg-white dark:bg-surface-dark border border-neutral-light dark:border-neutral-dark hover:border-primary/50 transition-colors">
+<div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 mr-4">
+<span class="material-symbols-outlined">image</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold text-slate-900 dark:text-slate-100 truncate">Field_Trip_Photo.jpg</p>
+<div class="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+<span>4.8 MB</span>
+<span class="mx-1.5">•</span>
+<span>2 days ago</span>
+</div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- FAB / Bottom Sheet Trigger Area -->
+<div class="absolute bottom-6 right-6 z-30">
+<button class="flex items-center justify-center size-14 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-2xl shadow-elevated hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[28px]">add</span>
+</button>
+</div>
+<!-- Bottom Sheet (Simulated Active State for File Actions) -->
+<div class="absolute inset-0 z-40 bg-black/40 backdrop-blur-sm flex items-end">
+<div class="w-full bg-surface-light dark:bg-surface-dark rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+<!-- Drag Handle -->
+<div class="flex justify-center pt-3 pb-1">
+<div class="w-12 h-1.5 rounded-full bg-neutral-light dark:bg-neutral-dark/60"></div>
+</div>
+<div class="p-6 pt-2">
+<!-- Selected Item Preview -->
+<div class="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-light dark:border-neutral-dark/30">
+<div class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined text-[32px]">picture_as_pdf</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 line-clamp-1">Algebra_Homework_WK4.pdf</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">2.4 MB • PDF Document</p>
+</div>
+</div>
+<!-- Actions Grid -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+<div class="flex flex-col items-center gap-2">
+<button class="flex items-center justify-center size-14 rounded-2xl bg-neutral-light/50 dark:bg-neutral-dark/50 hover:bg-primary/20 text-slate-700 dark:text-slate-200 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400">Save</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<button class="flex items-center justify-center size-14 rounded-2xl bg-neutral-light/50 dark:bg-neutral-dark/50 hover:bg-primary/20 text-slate-700 dark:text-slate-200 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400">Share</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<button class="flex items-center justify-center size-14 rounded-2xl bg-neutral-light/50 dark:bg-neutral-dark/50 hover:bg-primary/20 text-slate-700 dark:text-slate-200 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">drive_file_move</span>
+</button>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400">Move</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<button class="flex items-center justify-center size-14 rounded-2xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+<span class="text-xs font-medium text-red-600 dark:text-red-400">Delete</span>
+</div>
+</div>
+<button class="w-full py-4 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold text-base hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
+                        Done
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

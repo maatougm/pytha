@@ -28,6 +28,7 @@ model User {
 
   // Notifications
   emailNotificationsEnabled Boolean @default(true) @map("email_notifications_enabled")
+  pushNotificationsEnabled  Boolean @default(true) @map("push_notifications_enabled")
   notificationPreferences   Json?   @map("notification_preferences")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -76,6 +77,38 @@ model User {
   // Files
   uploadedFiles   File[]
   filePermissions FilePermission[]
+
+  // Payments
+  studentInvoices FeeInvoice[] @relation("StudentInvoices")
+  studentPayments Payment[]    @relation("StudentPayments")
+  payerPayments   Payment[]    @relation("PayerPayments")
+
+  // Push Notifications
+  pushTokens PushToken[]
+
+  // Conferences
+  studentConferences  Conference[] @relation("StudentConferences")
+  parentConferences   Conference[] @relation("ParentConferences")
+  teacherConferences  Conference[] @relation("TeacherConferences")
+  conferenceCancellations Conference[] @relation("ConferenceCancellations")
+
+  // Report Cards
+  studentReportCards    ReportCard[] @relation("StudentReportCards")
+  reportCardAcknowledgments ReportCard[] @relation("ReportCardAcknowledgments")
+
+  // Behavior Records
+  studentBehavior BehaviorRecord[] @relation("StudentBehavior")
+  teacherBehavior BehaviorRecord[] @relation("TeacherBehavior")
+
+  // Calendar Events
+  userEvents   CalendarEvent[] @relation("UserEvents")
+  createdEvents CalendarEvent[] @relation("EventCreator")
+
+  // Encryption Keys
+  publicKeys UserPublicKey[] @relation("UserPublicKeys")
+
+  // Sync Queue
+  syncQueueItems SyncQueue[] @relation("UserSyncQueue")
 
   @@index([email])
   @@index([status])
@@ -127,6 +160,8 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([token])      // For token lookup during refresh
+  @@index([expiresAt])  // For cleanup jobs
   @@map("refresh_tokens")
 }
 
@@ -371,6 +406,7 @@ model Class {
   schedules   Schedule[]
   assignments Assignment[]
   attendance  AttendanceSession[]
+  calendarEvents CalendarEvent[]
 
   @@index([courseId])
   @@index([teacherId])
@@ -726,6 +762,263 @@ model AcademicYear {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  reportCards ReportCard[]
+
   @@index([isCurrent])
   @@map("academic_years")
+}
+
+// ============================================================
+// PAYMENTS & FEES
+// ============================================================
+
+model FeeInvoice {
+  id          String   @id @default(uuid())
+  studentId   String   @map("student_id")
+  title       String
+  description String?
+  items       Json     @default("[]")
+  totalAmount Decimal  @map("total_amount") @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  dueDate     DateTime @map("due_date") @db.Date
+  paidAmount  Decimal  @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  status      String   @default("pending") // pending, partial, paid, overdue
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  student  User      @relation("StudentInvoices", fields: [studentId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@index([studentId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("fee_invoices")
+}
+
+model Payment {
+  id                    String    @id @default(uuid())
+  invoiceId             String?   @map("invoice_id")
+  studentId             String    @map("student_id")
+  payerId               String    @map("payer_id")
+  amount                Decimal   @db.Decimal(10, 2)
+  currency              String    @default("USD")
+  status                String    @default("pending") // pending, completed, failed, refunded
+  paymentMethod         String?   @map("payment_method")
+  stripePaymentIntentId String?   @map("stripe_payment_intent_id")
+  stripeChargeId        String?   @map("stripe_charge_id")
+  receiptUrl            String?   @map("receipt_url")
+  paidAt                DateTime? @map("paid_at")
+  metadata              Json      @default("{}")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  invoice FeeInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  student User        @relation("StudentPayments", fields: [studentId], references: [id], onDelete: Cascade)
+  payer   User        @relation("PayerPayments", fields: [payerId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([payerId])
+  @@index([status])
+  @@index([stripePaymentIntentId])
+  @@map("payments")
+}
+
+// ============================================================
+// PUSH NOTIFICATIONS
+// ============================================================
+
+model PushToken {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  token      String    @unique
+  deviceType String    @map("device_type") // ios, android, web
+  deviceName String?   @map("device_name")
+  isActive   Boolean   @default(true) @map("is_active")
+  lastUsedAt DateTime? @map("last_used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("push_tokens")
+}
+
+// ============================================================
+// PARENT-TEACHER CONFERENCES
+// ============================================================
+
+model Conference {
+  id               String    @id @default(uuid())
+  studentId        String    @map("student_id")
+  parentId         String    @map("parent_id")
+  teacherId        String    @map("teacher_id")
+  proposedDates    Json      @map("proposed_dates") // Array of ISO date strings
+  confirmedDate    DateTime? @map("confirmed_date")
+  durationMinutes  Int       @default(30) @map("duration_minutes")
+  status           String    @default("requested") // requested, confirmed, cancelled, completed, no_show
+  notes            String?
+  meetingLink      String?   @map("meeting_link")
+  cancelledBy      String?   @map("cancelled_by")
+  cancelledReason  String?   @map("cancelled_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  student       User  @relation("StudentConferences", fields: [studentId], references: [id], onDelete: Cascade)
+  parent        User  @relation("ParentConferences", fields: [parentId], references: [id], onDelete: Cascade)
+  teacher       User  @relation("TeacherConferences", fields: [teacherId], references: [id], onDelete: Cascade)
+  cancelledByUser User? @relation("ConferenceCancellations", fields: [cancelledBy], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([parentId])
+  @@index([teacherId])
+  @@index([status])
+  @@index([confirmedDate])
+  @@map("conferences")
+}
+
+// ============================================================
+// REPORT CARDS
+// ============================================================
+
+model ReportCard {
+  id                   String    @id @default(uuid())
+  studentId            String    @map("student_id")
+  academicYearId       String    @map("academic_year_id")
+  term                 String // Fall, Spring, Summer, Q1, Q2, Q3, Q4
+  courseGrades         Json      @map("course_grades") // Array of grades per course
+  gpa                  Decimal?  @db.Decimal(3, 2)
+  behaviorSummary      Json?     @map("behavior_summary")
+  teacherComments      String?   @map("teacher_comments")
+  attendanceSummary    Json?     @map("attendance_summary")
+  parentAcknowledgedAt DateTime? @map("parent_acknowledged_at")
+  acknowledgedBy       String?   @map("acknowledged_by")
+  generatedAt          DateTime  @default(now()) @map("generated_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  student          User         @relation("StudentReportCards", fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear     AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  acknowledgedUser User?        @relation("ReportCardAcknowledgments", fields: [acknowledgedBy], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, academicYearId, term])
+  @@index([studentId])
+  @@index([academicYearId])
+  @@index([term])
+  @@map("report_cards")
+}
+
+// ============================================================
+// BEHAVIOR RECORDS
+// ============================================================
+
+model BehaviorRecord {
+  id            String   @id @default(uuid())
+  studentId     String   @map("student_id")
+  teacherId     String   @map("teacher_id")
+  type          String // positive, negative
+  category      String // academic, behavior, attendance, participation, conduct
+  points        Int
+  title         String
+  description   String?
+  incidentDate  DateTime @map("incident_date") @db.Date
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  student User @relation("StudentBehavior", fields: [studentId], references: [id], onDelete: Cascade)
+  teacher User @relation("TeacherBehavior", fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([type])
+  @@index([category])
+  @@index([incidentDate])
+  @@map("behavior_records")
+}
+
+// ============================================================
+// CALENDAR EVENTS
+// ============================================================
+
+model CalendarEvent {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  isAllDay    Boolean   @default(false) @map("is_all_day")
+  type        String // assignment, class, meeting, event, exam, holiday
+  relatedId   String?   @map("related_id")
+  relatedType String?   @map("related_type")
+  userId      String?   @map("user_id")
+  classId     String?   @map("class_id")
+  isPublic    Boolean   @default(true) @map("is_public")
+  location    String?
+  metadata    Json      @default("{}")
+  createdBy   String    @map("created_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User?  @relation("UserEvents", fields: [userId], references: [id], onDelete: Cascade)
+  class     Class? @relation(fields: [classId], references: [id], onDelete: Cascade)
+  creator   User   @relation("EventCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([classId])
+  @@index([startDate, endDate])
+  @@index([type])
+  @@index([relatedId, relatedType])
+  @@map("calendar_events")
+}
+
+// ============================================================
+// ENCRYPTION KEYS (for E2E encryption)
+// ============================================================
+
+model UserPublicKey {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  publicKey   String   @map("public_key")
+  keyVersion  Int      @default(1) @map("key_version")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation("UserPublicKeys", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, keyVersion])
+  @@index([userId])
+  @@index([isActive])
+  @@map("user_public_keys")
+}
+
+// ============================================================
+// SYNC QUEUE (for offline support)
+// ============================================================
+
+model SyncQueue {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  deviceId      String    @map("device_id")
+  operation     String // create, update, delete
+  entityType    String    @map("entity_type")
+  entityId      String?   @map("entity_id")
+  payload       Json
+  status        String    @default("pending") // pending, processing, completed, failed
+  retryCount    Int       @default(0) @map("retry_count")
+  errorMessage  String?   @map("error_message")
+  processedAt   DateTime? @map("processed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user User @relation("UserSyncQueue", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@map("sync_queue")
 }

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Profile View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f59f0a",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221c10",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d261a",
+                        "text-primary-light": "#181511",
+                        "text-primary-dark": "#f5f3f0",
+                        "text-secondary-light": "#8a7b60",
+                        "text-secondary-dark": "#afa690",
+                    },
+                    fontFamily: {
+                        display: ["Lexend", "sans-serif"],
+                        sans: ["Lexend", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-primary-light dark:text-text-primary-dark antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-xl">
+<!-- Header -->
+<header class="flex items-center justify-between px-6 pt-12 pb-4 bg-background-light dark:bg-background-dark sticky top-0 z-10">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-text-primary-light dark:text-text-primary-dark">
+<span class="material-symbols-outlined text-[28px]">arrow_back</span>
+</button>
+<div class="flex gap-2">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-text-primary-light dark:text-text-primary-dark">
+<span class="material-symbols-outlined text-[28px]">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col px-6">
+<!-- Profile Section: Side-aligned avatar & Large Typography -->
+<div class="flex flex-col gap-6 py-4">
+<div class="flex items-start gap-6">
+<div class="relative shrink-0">
+<div class="h-28 w-28 rounded-3xl bg-gray-200 dark:bg-gray-800 overflow-hidden shadow-sm">
+<img alt="Sarah Jenkins Profile" class="h-full w-full object-cover" data-alt="Portrait of a female teacher smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkiXS84mPbbLOsYuZZay0ShVhgC1i56R0BTHkBM2da31aniQ6CDtLdHpOww0yIxe6groLUvboQa5WvBjwd0roY4Z5AmSRszCb17xp7L8g0fh7clMzFNvo8VaH4HeKYBY_U_sigG9twgoBL8pFO88Y92jQIpJTJBjOmfhQRswdegPvc0UtypkbDMOXC5fnp8BZKF-NRsEXKN_w_cD404Jl1wXKsNsPGb_l_cakgCCpvx6MdTlG_hlJpGZd-T1SaWkIplm2p9M9TFI4S"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-primary text-white rounded-full p-1.5 border-4 border-background-light dark:border-background-dark flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] filled">edit</span>
+</div>
+</div>
+<div class="flex flex-col pt-1">
+<h1 class="text-3xl font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark">Sarah<br/>Jenkins</h1>
+<p class="text-primary font-medium mt-1">Mathematics Teacher</p>
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-1">ID: 987654</p>
+</div>
+</div>
+<!-- Stats / Quick Info Cards -->
+<div class="grid grid-cols-2 gap-3 mt-2">
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5">
+<span class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark block">5</span>
+<span class="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">Classes</span>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5">
+<span class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark block">128</span>
+<span class="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">Students</span>
+</div>
+</div>
+</div>
+<!-- Settings List -->
+<div class="flex flex-col gap-4 mt-6 mb-10">
+<h2 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark mb-2">Preferences</h2>
+<!-- Edit Profile Button -->
+<button class="group flex items-center justify-between w-full p-4 bg-surface-light dark:bg-surface-dark rounded-2xl border border-black/5 dark:border-white/5 active:scale-[0.98] transition-all">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-[24px]">person_edit</span>
+</div>
+<div class="text-left">
+<p class="text-base font-semibold text-text-primary-light dark:text-text-primary-dark group-hover:text-primary transition-colors">Edit Personal Info</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Name, title, and contact</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">chevron_right</span>
+</button>
+<!-- Language Selection -->
+<button class="group flex items-center justify-between w-full p-4 bg-surface-light dark:bg-surface-dark rounded-2xl border border-black/5 dark:border-white/5 active:scale-[0.98] transition-all">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-[24px]">language</span>
+</div>
+<div class="text-left">
+<p class="text-base font-semibold text-text-primary-light dark:text-text-primary-dark group-hover:text-primary transition-colors">Language</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">English (US)</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">chevron_right</span>
+</button>
+<!-- Notifications -->
+<button class="group flex items-center justify-between w-full p-4 bg-surface-light dark:bg-surface-dark rounded-2xl border border-black/5 dark:border-white/5 active:scale-[0.98] transition-all">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+</div>
+<div class="text-left">
+<p class="text-base font-semibold text-text-primary-light dark:text-text-primary-dark group-hover:text-primary transition-colors">Notifications</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Manage alerts</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">chevron_right</span>
+</button>
+<!-- Security -->
+<button class="group flex items-center justify-between w-full p-4 bg-surface-light dark:bg-surface-dark rounded-2xl border border-black/5 dark:border-white/5 active:scale-[0.98] transition-all">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined text-[24px]">lock</span>
+</div>
+<div class="text-left">
+<p class="text-base font-semibold text-text-primary-light dark:text-text-primary-dark group-hover:text-primary transition-colors">Security</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Password &amp; 2FA</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">chevron_right</span>
+</button>
+</div>
+<button class="mt-auto mb-8 w-full py-4 text-red-500 dark:text-red-400 font-bold text-center hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors">
+                Sign Out
+            </button>
+</main>
+<!-- Bottom Navigation -->
+<nav class="sticky bottom-0 w-full bg-surface-light dark:bg-surface-dark border-t border-black/5 dark:border-white/5 pb-8 pt-2 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<div class="flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 w-16 group" href="#">
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark group-hover:text-primary transition-colors">home</span>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark group-hover:text-primary transition-colors">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 w-16 group" href="#">
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark group-hover:text-primary transition-colors">school</span>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark group-hover:text-primary transition-colors">Classes</span>
+</a>
+<a class="flex flex-col items-center gap-1 w-16 group" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark group-hover:text-primary transition-colors">chat_bubble</span>
+<span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-surface-light dark:border-surface-dark"></span>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark group-hover:text-primary transition-colors">Chat</span>
+</a>
+<a class="flex flex-col items-center gap-1 w-16 group" href="#">
+<span class="material-symbols-outlined filled text-primary">person</span>
+<span class="text-[10px] font-medium text-primary">Profile</span>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

@@ -22,8 +22,14 @@ export class WsRateLimitGuard implements CanActivate {
     'message:send': { interval: 60000, maxRequests: 30 },        // 30 messages per minute
     'message:edit': { interval: 60000, maxRequests: 20 },        // 20 edits per minute
     'message:delete': { interval: 60000, maxRequests: 10 },      // 10 deletes per minute
+    'message:read': { interval: 60000, maxRequests: 120 },       // 120 read events per minute
+    'message:read_bulk': { interval: 60000, maxRequests: 30 },   // 30 bulk reads per minute
     'typing:start': { interval: 60000, maxRequests: 60 },        // 60 typing events per minute
+    'typing:stop': { interval: 60000, maxRequests: 60 },         // 60 typing events per minute
+    'typing:get': { interval: 60000, maxRequests: 60 },          // 60 get typing per minute
     'channel:join': { interval: 60000, maxRequests: 20 },        // 20 channel joins per minute
+    'reaction:add': { interval: 60000, maxRequests: 50 },        // 50 reactions per minute
+    'reaction:remove': { interval: 60000, maxRequests: 50 },     // 50 reaction removals per minute
     'default': { interval: 60000, maxRequests: 100 },            // 100 generic events per minute
   };
 

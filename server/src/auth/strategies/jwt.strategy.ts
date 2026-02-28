@@ -4,6 +4,15 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
 
+interface JwtPayload {
+    sub: string;
+    email: string;
+    roles: string[];
+    jti?: string;
+    iat?: number;
+    exp?: number;
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly redis: Redis;
@@ -32,7 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: any) {
+    async validate(payload: JwtPayload) {
         // C6: Check if this token's jti has been revoked (e.g., user logged out)
         if (payload.jti) {
             try {

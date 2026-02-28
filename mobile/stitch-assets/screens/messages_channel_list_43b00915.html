@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Messages</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1E3A8A", // Updated Primary
+              "primary-light": "#3b3b9f",
+              "background-light": "#f6f6f8",
+              "background-dark": "#121220",
+              secondary: "#F59E0B", // Accent: Amber/Gold
+              "badge-blue": "#1E3A8A", // Deep Blue for unread badges
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              lg: "1rem",
+              xl: "1.5rem",
+              '2xl': '12px', // Custom 12px radius if needed explicitly, though usually close to lg/md. Let's use rounded-[12px] or rounded-xl (12px is 0.75rem, xl is 0.75rem? no xl is 1.5rem usually. md is 0.375. lg is 0.5. Let's stick to explicit or standard classes but ensure consistent look).
+              // User asked for Radius: 12px. 12px is 0.75rem. Tailwind 'xl' is 0.75rem in some configs, but default is 0.75rem = rounded-xl? No, default rounded-xl is 0.75rem (12px). Wait, standard tailwind rounded-xl is 12px? Let's check.
+              // rounded-sm = 2px, rounded = 4px, rounded-md = 6px, rounded-lg = 8px, rounded-xl = 12px, rounded-2xl = 16px.
+              // So standard 'rounded-xl' is exactly 12px. Perfect.
+            },
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased min-h-screen relative pb-24">
+<header class="sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+<h1 class="text-xl font-bold text-slate-900 dark:text-white">Messages</h1>
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">filter_list</span>
+</button>
+</header>
+<div class="px-4 py-4 bg-background-light dark:bg-background-dark">
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border-none rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" placeholder="Search messages or channels" type="text"/>
+</div>
+</div>
+<div class="px-4 pb-2">
+<h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 ml-1">Pinned</h3>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<div class="flex flex-col items-center gap-2 min-w-[72px]">
+<div class="relative">
+<div class="w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center overflow-hidden border-2 border-primary">
+<img alt="Head of Math Department portrait" class="w-full h-full object-cover" data-alt="Head of Math Department portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCnQbnmoqRLBb79KjLxPagKp04u4k8IFlvJwpiDQJzONwHUZtoiMa614x5KPbf3vWEgOagk0rciWqnby-zjEbu2Q4R1IV7Gbj6Bkf68Z17giAhN1QoQTlWkD_tnQb1T-v31MDkGZHxMydRX7_Jf66suBq85SPqlV-rX01sYTiO0io1790K_WBnC76mPXdPvft7-0HGSKp4i1ejlAedCE-M4goFQ5Sif0y_IsB2HgEs6Je_aLH0Xgr2j7rggzsKm6SLEmXR2jM22mc4"/>
+</div>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-background-dark rounded-full"></div>
+</div>
+<span class="text-xs font-medium text-center truncate w-full">Mr. Smith</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[72px]">
+<div class="relative">
+<div class="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center overflow-hidden border-2 border-transparent">
+<span class="text-amber-700 dark:text-amber-300 font-bold text-lg">PTA</span>
+</div>
+</div>
+<span class="text-xs font-medium text-center truncate w-full">PTA Board</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[72px]">
+<div class="relative">
+<div class="w-14 h-14 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center overflow-hidden border-2 border-transparent">
+<img alt="Ms. Johnson portrait" class="w-full h-full object-cover" data-alt="Ms. Johnson portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzFvpBX1wusqctNedrdK0juVMBDNoXwhLDNNoRjsV0yopXMewSobsOB__rZzq6pK6m7-cINn4T7TmzRKlKQw85cH-FspNrhUE4EHE9Go23AVNY9AxIkj2-jcCtf0bhpAmaFbjpfp-orkOuTJx_k7g5dXxJDnJLIHCzNGGpfTGA4rrfk00Go8jn3is6R41acBnhYdwu3dhBKWa9ehO961ahm5UJKqk__WIxZZvad9QRUuPLt2itu-r3kT7X-L_Xtz_Tc0yAbEpWRGzL"/>
+</div>
+</div>
+<span class="text-xs font-medium text-center truncate w-full">Ms. Johnson</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col px-4 gap-3">
+<h3 class="px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-0 mt-2">Recent Messages</h3>
+<div class="group flex items-center gap-4 px-4 py-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all border border-slate-100 dark:border-slate-800">
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center text-primary dark:text-blue-300 font-bold text-lg">
+                    MG
+                </div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="text-base font-semibold text-slate-900 dark:text-white truncate">Math Grade 10</h4>
+<span class="text-xs font-medium text-primary">10:30 AM</span>
+</div>
+<p class="text-sm text-slate-900 dark:text-slate-200 font-medium truncate">Mr. Smith: Don't forget the assignment...</p>
+</div>
+<div class="flex flex-col items-end justify-center gap-1">
+<div class="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-badge-blue text-[10px] font-bold text-white shadow-sm">
+                    3
+                </div>
+</div>
+</div>
+<div class="group flex items-center gap-4 px-4 py-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all border border-slate-100 dark:border-slate-800">
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-900/50 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-orange-600 dark:text-orange-300 text-xl">groups</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="text-base font-semibold text-slate-900 dark:text-white truncate">Parent-Teacher Assoc</h4>
+<span class="text-xs font-medium text-slate-500">Yesterday</span>
+</div>
+<p class="text-sm text-slate-900 dark:text-slate-200 font-medium truncate">Alice: The fundraising meeting is rescheduled.</p>
+</div>
+<div class="flex flex-col items-end justify-center gap-1">
+<div class="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-badge-blue text-[10px] font-bold text-white shadow-sm">
+                    1
+                </div>
+</div>
+</div>
+<div class="group flex items-center gap-4 px-4 py-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all border border-slate-100 dark:border-slate-800">
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/50 flex items-center justify-center overflow-hidden">
+<img alt="Coach David portrait" class="w-full h-full object-cover" data-alt="Coach David portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEDN7ibRBSv_lCmUTCHJ01gl2s1dq9tsiVHric_DZ7jLbaJIxPU_yWjCzpJy4l1hXhE42WbxeXz304cEllCSH18ywgCdhEuN-VN6hRIsKW-AakAtvC6jovbFTMmjmpVoOO8u4XHOK7QZ0HdjtS8-vcqjqAaHiHLooeo1Z-4jpgyBYeFZeTVaAu-5hEUfhhFP4HDm8_xbyPFnKoRAL5hVS72N8ILiZZE80UKnOJy074cz9qZz69VU_SpWqCRV85i63AYWV5XE_khEx7"/>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="text-base font-semibold text-slate-900 dark:text-white truncate">Soccer Team</h4>
+<span class="text-xs text-slate-400">Tue</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 truncate">Coach: Great game everyone! Rest up.</p>
+</div>
+</div>
+<div class="group flex items-center gap-4 px-4 py-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all border border-slate-100 dark:border-slate-800">
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/50 flex items-center justify-center overflow-hidden">
+<span class="text-purple-600 dark:text-purple-300 font-bold text-lg">S</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="text-base font-semibold text-slate-900 dark:text-white truncate">Science Club</h4>
+<span class="text-xs text-slate-400">Mon</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 truncate">Project outlines are due next week.</p>
+</div>
+</div>
+<div class="group flex items-center gap-4 px-4 py-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all border border-slate-100 dark:border-slate-800">
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-300 text-xl">campaign</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="text-base font-semibold text-slate-900 dark:text-white truncate">School Announcements</h4>
+<span class="text-xs text-slate-400">Last Week</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 truncate">School will be closed on Friday for...</p>
+</div>
+</div>
+<div class="group flex items-center gap-4 px-4 py-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all border border-slate-100 dark:border-slate-800">
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-900/50 flex items-center justify-center overflow-hidden">
+<img alt="Mrs. Davis portrait" class="w-full h-full object-cover" data-alt="Mrs. Davis portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd2HVmUEWxmz099abffqaYNI-S7A4N8h62zkDNhJYnokzsOiPkEAJ5JHK3QZvlDFyYjqKEo3vF4vy6ingfrOTK0I34ltnPtEP4hV3ykfCmvu1ExQqjEha6fnMWkTAPv-ZobbNGa1kRWmvYGncMbE4Yb-cLQtKhSJKRn6s0dBF0ed1LkRMjkgHROhhs95AZZ8tdLDSw8h0VFYfb7U9lc98owfdLkhvO-QWiyB_6q_hTIt9ou9LkfKzBIZfvHTwCHLZJOfNXVuQrB3I2"/>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="text-base font-semibold text-slate-900 dark:text-white truncate">History 101</h4>
+<span class="text-xs text-slate-400">Last Week</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 truncate">Mrs. Davis: Please review Chapter 4.</p>
+</div>
+</div>
+</div>
+<button class="fixed right-4 bottom-24 z-30 flex items-center justify-center w-14 h-14 rounded-full bg-secondary shadow-lg hover:bg-amber-600 transition-colors focus:outline-none focus:ring-4 focus:ring-amber-200">
+<span class="material-symbols-outlined text-white text-3xl">edit_square</span>
+</button>
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pb-safe">
+<div class="flex justify-around items-center h-16 px-2">
+<a class="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light gap-1 group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light gap-1 group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">calendar_month</span>
+<span class="text-[10px] font-medium">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-primary dark:text-primary-light gap-1 relative" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-2xl fill-current">chat_bubble</span>
+<span class="absolute -top-1 -right-1 flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-badge-blue opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-badge-blue"></span>
+</span>
+</div>
+<span class="text-[10px] font-bold">Messages</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light gap-1 group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">school</span>
+<span class="text-[10px] font-medium">Grades</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light gap-1 group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</div>
+</nav>
+
+</body></html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Assignment List View 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b2bee",
+                        "primary-light": "#6b6bff", 
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex justify-center">
+<div class="w-full max-w-md bg-white dark:bg-slate-900 min-h-screen relative shadow-2xl overflow-hidden flex flex-col">
+<!-- Header -->
+<header class="px-6 pt-12 pb-4 bg-white dark:bg-slate-900 z-10 sticky top-0">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Assignments</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Keep up the good work!</p>
+</div>
+<button class="p-2 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+<button class="shrink-0 px-5 py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium shadow-md transition-transform active:scale-95">
+                    All
+                </button>
+<button class="shrink-0 px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+                    Pending
+                </button>
+<button class="shrink-0 px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+                    Completed
+                </button>
+<button class="shrink-0 px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+                    Late
+                </button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto px-4 pb-24 space-y-2">
+<!-- Date Group: Today -->
+<div class="mt-4 mb-2 px-2">
+<h3 class="text-primary dark:text-primary-light font-semibold text-sm uppercase tracking-wider">Today, Oct 24</h3>
+</div>
+<!-- Card 1 -->
+<div class="group relative flex items-start p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-white hover:shadow-lg dark:hover:bg-slate-800 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+<div class="shrink-0 mr-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+<span class="material-symbols-outlined text-2xl">calculate</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pt-1">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<h4 class="text-base font-bold text-slate-900 dark:text-white truncate">Algebra Equations</h4>
+<div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">Due 4 PM</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Chapter 4, Exercises 1-10</p>
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500">Math • Mr. Smith</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative flex items-start p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-white hover:shadow-lg dark:hover:bg-slate-800 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+<div class="shrink-0 mr-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+<span class="material-symbols-outlined text-2xl">menu_book</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pt-1">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<h4 class="text-base font-bold text-slate-900 dark:text-white truncate">Read 'To Kill a Mockingbird'</h4>
+<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">Due 11 PM</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Finish chapters 12-15 and summary</p>
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500">English • Ms. Davis</span>
+</div>
+</div>
+</div>
+<!-- Date Group: Tomorrow -->
+<div class="mt-8 mb-2 px-2">
+<h3 class="text-primary dark:text-primary-light font-semibold text-sm uppercase tracking-wider">Tomorrow, Oct 25</h3>
+</div>
+<!-- Card 3 -->
+<div class="group relative flex items-start p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-white hover:shadow-lg dark:hover:bg-slate-800 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+<div class="shrink-0 mr-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+<span class="material-symbols-outlined text-2xl">science</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pt-1">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<h4 class="text-base font-bold text-slate-900 dark:text-white truncate">Lab Report: Photosynthesis</h4>
+<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Complete the post-lab questions</p>
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500">Biology • Dr. Foster</span>
+<span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Submitted</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group relative flex items-start p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-white hover:shadow-lg dark:hover:bg-slate-800 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+<div class="shrink-0 mr-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+<span class="material-symbols-outlined text-2xl">history_edu</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pt-1">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<h4 class="text-base font-bold text-slate-900 dark:text-white truncate">French Revolution Essay</h4>
+<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300">Due Fri</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Draft submission</p>
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500">History • Mr. Clark</span>
+</div>
+</div>
+</div>
+<!-- Date Group: Next Week -->
+<div class="mt-8 mb-2 px-2">
+<h3 class="text-primary dark:text-primary-light font-semibold text-sm uppercase tracking-wider">Next Week</h3>
+</div>
+<!-- Card 5 -->
+<div class="group relative flex items-start p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-white hover:shadow-lg dark:hover:bg-slate-800 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 opacity-60">
+<div class="shrink-0 mr-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400">
+<span class="material-symbols-outlined text-2xl">palette</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pt-1">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<h4 class="text-base font-bold text-slate-900 dark:text-white truncate">Portrait Study</h4>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">Oct 30</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Bring sketchpad and charcoal</p>
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500">Art • Mrs. Greene</span>
+</div>
+</div>
+</div>
+<!-- Bottom Padding for nav -->
+<div class="h-8"></div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="absolute bottom-0 w-full border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg px-6 pb-6 pt-3 z-50">
+<div class="flex justify-between items-end">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary-light transition-colors group" href="#">
+<div class="group-hover:-translate-y-1 transition-transform duration-200">
+<span class="material-symbols-outlined text-[28px]">home</span>
+</div>
+<p class="text-[10px] font-medium tracking-wide">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary dark:text-white" href="#">
+<div class="bg-primary/10 dark:bg-primary/20 p-1.5 rounded-xl -translate-y-1">
+<span class="material-symbols-outlined text-[28px] text-primary dark:text-primary-light filled">assignment</span>
+</div>
+<p class="text-[10px] font-semibold tracking-wide">Assignments</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary-light transition-colors group" href="#">
+<div class="group-hover:-translate-y-1 transition-transform duration-200">
+<span class="material-symbols-outlined text-[28px]">bar_chart</span>
+</div>
+<p class="text-[10px] font-medium tracking-wide">Grades</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary-light transition-colors group" href="#">
+<div class="group-hover:-translate-y-1 transition-transform duration-200">
+<span class="material-symbols-outlined text-[28px]">person</span>
+</div>
+<p class="text-[10px] font-medium tracking-wide">Profile</p>
+</a>
+</div>
+</nav>
+<!-- Floating Action Button (Optional for Teachers/Adding but good for complete UI feel) -->
+<!-- <button class="absolute bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 transition-transform z-40">
+            <span class="material-symbols-outlined text-3xl">add</span>
+        </button> -->
+</div>
+<style>
+        /* Custom scrollbar hiding */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Filled icon variation for active state */
+        .material-symbols-outlined.filled {
+          font-variation-settings:
+          'FILL' 1,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+    </style>
+</body></html>

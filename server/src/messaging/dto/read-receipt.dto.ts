@@ -1,15 +1,15 @@
-import { IsString, IsUUID, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsUUID, IsOptional, IsArray, ArrayMaxSize } from 'class-validator';
 
 /**
  * DTO for marking a message as read
  */
 export class MarkMessageReadDto {
-    @IsString()
+    @IsString({ message: 'Message ID must be a string' })
     @IsUUID('4', { message: 'Invalid message ID' })
     messageId: string;
 
     @IsOptional()
-    @IsString()
+    @IsString({ message: 'Channel ID must be a string' })
     @IsUUID('4', { message: 'Invalid channel ID' })
     channelId?: string;
 }
@@ -18,12 +18,13 @@ export class MarkMessageReadDto {
  * DTO for marking multiple messages as read
  */
 export class MarkMessagesReadDto {
-    @IsArray()
-    @IsString({ each: true })
+    @IsArray({ message: 'Message IDs must be an array' })
+    @ArrayMaxSize(100, { message: 'Cannot mark more than 100 messages as read at once' })
+    @IsString({ each: true, message: 'Each message ID must be a string' })
     @IsUUID('4', { each: true, message: 'Invalid message ID in array' })
     messageIds: string[];
 
-    @IsString()
+    @IsString({ message: 'Channel ID must be a string' })
     @IsUUID('4', { message: 'Invalid channel ID' })
     channelId: string;
 }
@@ -73,7 +74,7 @@ export class TypingIndicatorDto {
  * WebSocket DTO for typing start/stop events
  */
 export class TypingEventDto {
-    @IsString()
+    @IsString({ message: 'Channel ID must be a string' })
     @IsUUID('4', { message: 'Invalid channel ID' })
     channelId: string;
 }

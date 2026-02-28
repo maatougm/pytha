@@ -14,19 +14,24 @@ import { Logger, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } fr
 import { createClient, RedisClientType } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { ConfigService } from '@nestjs/config';
-import { MessagingService } from './messaging.service';
-import { TypingService, TypingUser } from './typing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { WsRateLimitGuard } from '../common/guards/ws-rate-limit.guard';
+import { MetricsService } from '../metrics/metrics.service';
+import {
+    MessageHandler,
+    ReactionHandler,
+    TypingHandler,
+    ChannelHandler,
+} from './handlers';
 import {
     WsSendMessageDto,
     WsEditMessageDto,
     WsDeleteMessageDto,
     WsJoinChannelDto,
-    WsTypingDto,
     WsReactionDto,
     WsReadReceiptDto,
     WsReadBulkDto,
+    WsGetTypingDto,
 } from './dto/ws-message.dto';
 
 interface AuthenticatedSocket extends Socket {
@@ -49,7 +54,8 @@ interface RateLimitEntry {
                 'http://localhost:5173',
                 'http://localhost:4173',
             ];
-            if (!origin || allowedOrigins.includes(origin)) {
+            const isLocalhost = origin && /^http:\/\/localhost:\d+$/.test(origin);
+            if (!origin || allowedOrigins.includes(origin) || isLocalhost) {
                 callback(null, true);
             } else {
                 callback(new Error('Not allowed by CORS'), false);
@@ -89,9 +95,12 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     constructor(
         private jwtService: JwtService,
         private configService: ConfigService,
-        private messagingService: MessagingService,
-        private typingService: TypingService,
         private prisma: PrismaService,
+        private messageHandler: MessageHandler,
+        private reactionHandler: ReactionHandler,
+        private typingHandler: TypingHandler,
+        private channelHandler: ChannelHandler,
+        private metricsService: MetricsService,
     ) { }
 
     async afterInit(server: Server) {
@@ -107,7 +116,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
                 this.subClient.connect(),
             ]);
 
-            server.adapter(createAdapter(this.pubClient, this.subClient));
+            (server.adapter as any) = createAdapter(this.pubClient, this.subClient);
             this.logger.log('✅ Redis adapter configured for WebSocket scaling');
         } catch (error) {
             this.logger.warn('⚠️ Redis adapter not configured - WebSocket scaling will be limited:', error.message);
@@ -162,6 +171,11 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
                 this.server.to('admin-global').emit('user:online', { userId: payload.sub });
             }
 
+            // Record metrics
+            this.metricsService.recordWsConnection(payload.sub);
+            const primaryRole = payload.roles[0] || 'unknown';
+            this.metricsService.recordWsEvent('connection');
+
             this.logger.log(`🟢 ${payload.email} connected (${client.id})`);
         } catch (err) {
             this.logger.warn(`❌ WS auth failed for ${client.id}:`, err.message);
@@ -188,6 +202,10 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
                 } else {
                     this.server.to('admin-global').emit('user:offline', { userId: client.user.sub });
                 }
+
+                // Record metrics
+                this.metricsService.recordWsDisconnection(client.user.sub);
+                this.metricsService.recordWsEvent('disconnection');
 
                 this.logger.log(`🔴 ${client.user.email} disconnected`);
             } catch (error) {
@@ -226,6 +244,10 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return true;
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // Message Handlers
+    // ═══════════════════════════════════════════════════════════════
+
     @UseGuards(WsRateLimitGuard)
     @SubscribeMessage('message:send')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -233,26 +255,20 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: WsSendMessageDto,
     ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
         // Additional per-socket rate limiting as backup
         if (!this.checkRateLimit(client.id, 'message:send')) {
+            this.metricsService.recordRateLimit('message:send', client.user?.roles?.[0] || 'unknown');
             return { success: false, error: 'Rate limit exceeded. Please slow down.' };
         }
 
-        try {
-            const message = await this.messagingService.sendMessage(
-                data.channelId,
-                client.user.sub,
-                { content: data.content, replyTo: data.replyTo },
-            );
-
-            this.server.to(`channel:${data.channelId}`).emit('message:new', message);
-            return { success: true, message };
-        } catch (err) {
-            this.logger.error('Error sending message:', err.message);
-            return { success: false, error: err.message };
+        // Record metrics
+        const result = await this.messageHandler.handleSendMessage(this.server, client, data);
+        if (result.success) {
+            const senderRole = client.user?.roles?.[0] || 'unknown';
+            this.metricsService.recordMessageSent(data.channelId ? 'channel' : 'direct', senderRole);
+            this.metricsService.recordWsEvent('message:send');
         }
+        return result;
     }
 
     @UseGuards(WsRateLimitGuard)
@@ -262,32 +278,11 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: WsEditMessageDto,
     ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
         if (!this.checkRateLimit(client.id, 'message:edit')) {
             return { success: false, error: 'Rate limit exceeded. Please slow down.' };
         }
 
-        try {
-            const message = await this.messagingService.editMessage(
-                data.messageId,
-                client.user.sub,
-                data.content,
-            );
-
-            // Emit with type field for frontend compatibility
-            this.server.to(`channel:${message.channelId}`).emit('message:updated', {
-                type: 'updated',
-                messageId: message.id,
-                content: message.content,
-                editedAt: message.editedAt,
-                channelId: message.channelId,
-            });
-            return { success: true, message };
-        } catch (err) {
-            this.logger.error('Error editing message:', err.message);
-            return { success: false, error: err.message };
-        }
+        return this.messageHandler.handleEditMessage(this.server, client, data);
     }
 
     @UseGuards(WsRateLimitGuard)
@@ -297,252 +292,91 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: WsDeleteMessageDto,
     ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
         if (!this.checkRateLimit(client.id, 'message:delete')) {
             return { success: false, error: 'Rate limit exceeded. Please slow down.' };
         }
 
-        try {
-            const original = await this.prisma.message.findUnique({
-                where: { id: data.messageId },
-            });
-
-            if (!original) {
-                return { success: false, error: 'Message not found' };
-            }
-
-            await this.messagingService.deleteMessage(
-                data.messageId,
-                client.user.sub,
-                client.user.roles,
-            );
-
-            // Emit with type field for frontend compatibility
-            this.server
-                .to(`channel:${original.channelId}`)
-                .emit('message:deleted', {
-                    type: 'deleted',
-                    messageId: data.messageId,
-                    channelId: original.channelId,
-                });
-
-            return { success: true };
-        } catch (err) {
-            this.logger.error('Error deleting message:', err.message);
-            return { success: false, error: err.message };
-        }
+        return this.messageHandler.handleDeleteMessage(this.server, client, data);
     }
 
+    @UseGuards(WsRateLimitGuard)
+    @SubscribeMessage('message:read')
+    async handleMessageRead(
+        @ConnectedSocket() client: AuthenticatedSocket,
+        @MessageBody() data: WsReadReceiptDto,
+    ) {
+        return this.messageHandler.handleMessageRead(this.server, client, data);
+    }
+
+    @UseGuards(WsRateLimitGuard)
+    @SubscribeMessage('message:read_bulk')
+    async handleMessagesReadBulk(
+        @ConnectedSocket() client: AuthenticatedSocket,
+        @MessageBody() data: WsReadBulkDto,
+    ) {
+        return this.messageHandler.handleMessagesReadBulk(this.server, client, data);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Typing Handlers
+    // ═══════════════════════════════════════════════════════════════
+
+    @UseGuards(WsRateLimitGuard)
     @SubscribeMessage('typing:start')
     async handleTypingStart(
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: { channelId: string },
     ) {
-        if (!client.user) return;
-
         if (!this.checkRateLimit(client.id, 'typing:start')) {
             return;
         }
 
-        const userName = client.user.email?.split('@')[0] || 'Someone';
-
-        // Debounce typing events to prevent spam
-        const shouldProcess = await this.typingService.shouldProcessTypingEvent(
-            data.channelId,
-            client.user.sub,
-            2000, // 2 second debounce
-        );
-
-        if (!shouldProcess) {
-            return; // Skip if within debounce window
-        }
-
-        // Record typing in Redis/memory
-        await this.typingService.startTyping(data.channelId, client.user.sub, userName);
-
-        // Persist to database for cross-instance sync (TODO: implement in messaging service)
-        // await this.messagingService.startTyping(data.channelId, client.user.sub);
-
-        // Emit to channel members
-        client.to(`channel:${data.channelId}`).emit('typing:update', {
-            type: 'start',
-            channelId: data.channelId,
-            userId: client.user.sub,
-            userName: userName,
-        });
-
-        // Also emit legacy event for backward compatibility
-        client.to(`channel:${data.channelId}`).emit('user:typing', {
-            type: 'start',
-            channelId: data.channelId,
-            userId: client.user.sub,
-            userName: userName,
-        });
+        return this.typingHandler.handleTypingStart(client, data);
     }
 
+    @UseGuards(WsRateLimitGuard)
     @SubscribeMessage('typing:stop')
     async handleTypingStop(
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: { channelId: string },
     ) {
-        if (!client.user) return;
-
         if (!this.checkRateLimit(client.id, 'typing:stop')) {
             return;
         }
 
-        const userName = client.user.email?.split('@')[0] || 'Someone';
-
-        // Remove typing indicator
-        await this.typingService.stopTyping(data.channelId, client.user.sub);
-        // await this.messagingService.stopTyping(data.channelId, client.user.sub);
-
-        // Emit to channel members
-        client.to(`channel:${data.channelId}`).emit('typing:update', {
-            type: 'stop',
-            channelId: data.channelId,
-            userId: client.user.sub,
-            userName: userName,
-        });
-
-        // Also emit legacy event for backward compatibility
-        client.to(`channel:${data.channelId}`).emit('user:typing', {
-            type: 'stop',
-            channelId: data.channelId,
-            userId: client.user.sub,
-            userName: userName,
-        });
+        return this.typingHandler.handleTypingStop(client, data);
     }
 
+    @UseGuards(WsRateLimitGuard)
     @SubscribeMessage('typing:get')
     async handleGetTypingUsers(
         @ConnectedSocket() client: AuthenticatedSocket,
-        @MessageBody() data: { channelId: string },
+        @MessageBody() data: WsGetTypingDto,
     ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
-        try {
-            // Get typing users from Redis/memory
-            const typingUsers = await this.typingService.getTypingUsers(
-                data.channelId,
-                client.user.sub,
-            );
-
-            return {
-                success: true,
-                channelId: data.channelId,
-                users: typingUsers,
-            };
-        } catch (err) {
-            this.logger.error('Error getting typing users:', err.message);
-            return { success: false, error: err.message };
-        }
+        return this.typingHandler.handleGetTypingUsers(client, data);
     }
 
-    @SubscribeMessage('message:read')
-    async handleMessageRead(
-        @ConnectedSocket() client: AuthenticatedSocket,
-        @MessageBody() data: { messageId: string; channelId: string },
-    ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
+    // ═══════════════════════════════════════════════════════════════
+    // Channel Handlers
+    // ═══════════════════════════════════════════════════════════════
 
-        try {
-            // Persist the read receipt to the database
-            await this.prisma.messageRead.upsert({
-                where: {
-                    messageId_userId: {
-                        messageId: data.messageId,
-                        userId: client.user!.sub,
-                    },
-                },
-                create: {
-                    messageId: data.messageId,
-                    userId: client.user!.sub,
-                    readAt: new Date(),
-                },
-                update: { readAt: new Date() },
-            });
-
-            // Broadcast to channel members
-            this.server.to(`channel:${data.channelId}`).emit('message:read_receipt', {
-                messageId: data.messageId,
-                channelId: data.channelId,
-                readBy: { userId: client.user!.sub, readAt: new Date() },
-            });
-
-            return { success: true };
-        } catch (err) {
-            this.logger.error('Error marking message as read:', err.message);
-            return { success: false, error: err.message };
-        }
-    }
-
-    @SubscribeMessage('message:read_bulk')
-    async handleMessagesReadBulk(
-        @ConnectedSocket() client: AuthenticatedSocket,
-        @MessageBody() data: { messageIds: string[]; channelId: string },
-    ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
-        try {
-            const now = new Date();
-            // Persist all read receipts in a single transaction
-            await this.prisma.$transaction(
-                data.messageIds.map((messageId) =>
-                    this.prisma.messageRead.upsert({
-                        where: { messageId_userId: { messageId, userId: client.user!.sub } },
-                        create: { messageId, userId: client.user!.sub, readAt: now },
-                        update: { readAt: now },
-                    }),
-                ),
-            );
-
-            // Broadcast read receipts to channel members
-            for (const messageId of data.messageIds) {
-                this.server.to(`channel:${data.channelId}`).emit('message:read_receipt', {
-                    messageId,
-                    channelId: data.channelId,
-                    readBy: { userId: client.user!.sub, readAt: now },
-                });
-            }
-
-            return { success: true, count: data.messageIds.length };
-        } catch (err) {
-            this.logger.error('Error marking messages as read:', err.message);
-            return { success: false, error: err.message };
-        }
-    }
-
+    @UseGuards(WsRateLimitGuard)
     @SubscribeMessage('channel:join')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async handleJoinChannel(
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: WsJoinChannelDto,
     ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
         if (!this.checkRateLimit(client.id, 'channel:join')) {
             return { success: false, error: 'Rate limit exceeded' };
         }
 
-        // Verify the user is actually a member of this channel
-        const membership = await this.prisma.channelMember.findUnique({
-            where: {
-                channelId_userId: {
-                    channelId: data.channelId,
-                    userId: client.user.sub,
-                },
-            },
-        });
-
-        if (!membership || membership.isBanned) {
-            return { success: false, error: 'Not a member of this channel' };
-        }
-
-        client.join(`channel:${data.channelId}`);
-        return { success: true };
+        return this.channelHandler.handleJoinChannel(client, data);
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Reaction Handlers
+    // ═══════════════════════════════════════════════════════════════
 
     @UseGuards(WsRateLimitGuard)
     @SubscribeMessage('reaction:add')
@@ -551,41 +385,11 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: WsReactionDto,
     ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
         if (!this.checkRateLimit(client.id, 'reaction:add')) {
             return { success: false, error: 'Rate limit exceeded. Please slow down.' };
         }
 
-        try {
-            const reaction = await this.messagingService.addReaction(
-                data.messageId,
-                client.user.sub,
-                { reaction: data.reaction },
-            );
-
-            // Get message info for channel broadcast
-            const message = await this.prisma.message.findUnique({
-                where: { id: data.messageId },
-                select: { channelId: true },
-            });
-
-            if (message) {
-                this.server.to(`channel:${message.channelId}`).emit('message:reaction_added', {
-                    type: 'reaction_added',
-                    messageId: data.messageId,
-                    reaction: data.reaction,
-                    userId: client.user.sub,
-                    user: reaction.user,
-                    createdAt: reaction.createdAt,
-                });
-            }
-
-            return { success: true, reaction };
-        } catch (err) {
-            this.logger.error('Error adding reaction:', err.message);
-            return { success: false, error: err.message };
-        }
+        return this.reactionHandler.handleAddReaction(this.server, client, data);
     }
 
     @UseGuards(WsRateLimitGuard)
@@ -595,42 +399,16 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: WsReactionDto,
     ) {
-        if (!client.user) return { success: false, error: 'Not authenticated' };
-
         if (!this.checkRateLimit(client.id, 'reaction:remove')) {
             return { success: false, error: 'Rate limit exceeded. Please slow down.' };
         }
 
-        try {
-            const result = await this.messagingService.removeReaction(
-                data.messageId,
-                client.user.sub,
-                data.reaction,
-            );
-
-            // Get message info for channel broadcast
-            const message = await this.prisma.message.findUnique({
-                where: { id: data.messageId },
-                select: { channelId: true },
-            });
-
-            if (message) {
-                this.server.to(`channel:${message.channelId}`).emit('message:reaction_removed', {
-                    type: 'reaction_removed',
-                    messageId: data.messageId,
-                    reaction: data.reaction,
-                    userId: client.user.sub,
-                });
-            }
-
-            return { success: true, result };
-        } catch (err) {
-            this.logger.error('Error removing reaction:', err.message);
-            return { success: false, error: err.message };
-        }
+        return this.reactionHandler.handleRemoveReaction(this.server, client, data);
     }
 
-    // ─── Methods called from controllers ────────────────────
+    // ═══════════════════════════════════════════════════════════════
+    // Public Methods (called from controllers)
+    // ═══════════════════════════════════════════════════════════════
 
     emitToChannel(channelId: string, event: string, data: any) {
         this.server.to(`channel:${channelId}`).emit(event, data);

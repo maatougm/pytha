@@ -233,4 +233,82 @@ export class UsersService {
             },
         };
     }
+
+    /**
+     * Check if two users have a valid relationship
+     * Relationships include: parent-student, teacher-student, same class
+     */
+    async hasRelationship(userId: string, targetUserId: string): Promise<boolean> {
+        // Don't check relationship with self
+        if (userId === targetUserId) return true;
+
+        const [user, targetUser] = await Promise.all([
+            this.prisma.user.findUnique({
+                where: { id: userId },
+                include: { userRoles: { include: { role: true } } },
+            }),
+            this.prisma.user.findUnique({
+                where: { id: targetUserId },
+                include: { userRoles: { include: { role: true } } },
+            }),
+        ]);
+
+        if (!user || !targetUser) return false;
+
+        const userRoles = user.userRoles.map((ur) => ur.role.name);
+        const targetRoles = targetUser.userRoles.map((ur) => ur.role.name);
+
+        // Check parent-student relationship
+        const isParentStudentRelation = await this.prisma.parentStudent.findFirst({
+            where: {
+                OR: [
+                    { parentId: userId, studentId: targetUserId },
+                    { parentId: targetUserId, studentId: userId },
+                ],
+            },
+        });
+        if (isParentStudentRelation) return true;
+
+        // Check if user is teacher of target student
+        const teacherStudentRelation = await this.prisma.classTeacher.findFirst({
+            where: {
+                teacherId: userId,
+                class: {
+                    enrollments: {
+                        some: { studentId: targetUserId },
+                    },
+                },
+            },
+        });
+        if (teacherStudentRelation) return true;
+
+        // Check if they share a class (both students)
+        const userEnrollments = await this.prisma.classEnrollment.findMany({
+            where: { studentId: userId },
+            select: { classId: true },
+        });
+        const targetEnrollments = await this.prisma.classEnrollment.findMany({
+            where: { studentId: targetUserId },
+            select: { classId: true },
+        });
+
+        const userClassIds = new Set(userEnrollments.map((e) => e.classId));
+        const sharedEnrollment = targetEnrollments.some((e) => userClassIds.has(e.classId));
+        if (sharedEnrollment) return true;
+
+        // Check shared channel membership
+        const sharedChannel = await this.prisma.channelMember.findFirst({
+            where: {
+                userId: targetUserId,
+                channel: {
+                    members: {
+                        some: { userId },
+                    },
+                },
+            },
+        });
+        if (sharedChannel) return true;
+
+        return false;
+    }
 }

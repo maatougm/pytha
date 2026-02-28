@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, Query, ParseIntPipe, DefaultValuePipe, Body, Put, Req, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Query, ParseIntPipe, DefaultValuePipe, Body, Put, Req, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -43,6 +43,11 @@ export class UsersController {
     @Get(':id')
     @ApiOperation({ summary: 'Get user by ID' })
     async findById(@Param('id') id: string, @Req() req: any) {
+        // Validate UUID format to prevent injection and enumeration attacks
+        if (!this.isValidUUID(id)) {
+            throw new BadRequestException('Invalid user ID format');
+        }
+
         const requesterId: string = req.user.sub;
         const requesterRoles: string[] = req.user.roles || [];
         const isAdminOrTeacher = requesterRoles.includes('admin') || requesterRoles.includes('teacher');
@@ -52,8 +57,22 @@ export class UsersController {
             return this.usersService.findById(id);
         }
 
-        // Everyone else gets a limited public profile (name + avatar only)
+        // For other users, verify relationship exists before allowing access
+        const hasRelationship = await this.usersService.hasRelationship(requesterId, id);
+        if (!hasRelationship) {
+            throw new ForbiddenException('You do not have permission to view this user');
+        }
+
+        // Return limited public profile for related users
         return this.usersService.findPublicProfile(id);
+    }
+
+    /**
+     * Validate UUID v4 format
+     */
+    private isValidUUID(str: string): boolean {
+        const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        return uuidV4Regex.test(str);
     }
 
     @Get(':id/children')

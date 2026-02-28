@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - Course Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#1E3A8A",
+              "primary-light": "#3B82F6",
+              "accent": "#F59E0B",
+              "background-light": "#f6f6f8",
+              "background-dark": "#0F172A",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1e293b",
+              "text-main": "#1E293B",
+              "text-secondary": "#64748B",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "12px", 
+              "lg": "12px", 
+              "xl": "16px", 
+              "2xl": "20px",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-nav-icon .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-slate-200">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl bg-surface-light dark:bg-surface-dark">
+<div class="sticky top-0 z-10 bg-surface-light dark:bg-surface-dark/95 backdrop-blur-sm border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between p-4 pb-2 pt-6">
+<button class="text-primary dark:text-white flex size-10 shrink-0 items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-primary dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Course Catalog</h2>
+<div class="size-10 flex items-center justify-center">
+<button class="text-primary dark:text-white flex size-10 shrink-0 items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</div>
+<div class="px-4 py-3">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-[12px] h-full shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 focus-within:ring-2 focus-within:ring-primary/20 bg-slate-50 dark:bg-slate-800 overflow-hidden">
+<div class="text-text-secondary dark:text-slate-400 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden border-none bg-transparent focus:border-none focus:ring-0 h-full placeholder:text-text-secondary dark:placeholder:text-slate-500 px-3 text-base font-normal leading-normal" placeholder="Search courses..." value=""/>
+<button class="text-primary dark:text-primary-light flex items-center justify-center pr-4 hover:text-primary-light">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+</label>
+</div>
+<div class="flex gap-2 px-4 pb-4 overflow-x-auto no-scrollbar snap-x">
+<button class="snap-start flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary text-white px-4 transition-transform active:scale-95 shadow-md shadow-primary/20">
+<p class="text-xs font-semibold leading-normal">All</p>
+</button>
+<button class="snap-start flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-text-main dark:text-slate-200 px-4 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
+<p class="text-xs font-medium leading-normal">Math</p>
+</button>
+<button class="snap-start flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-text-main dark:text-slate-200 px-4 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
+<p class="text-xs font-medium leading-normal">Science</p>
+</button>
+<button class="snap-start flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-text-main dark:text-slate-200 px-4 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
+<p class="text-xs font-medium leading-normal">Humanities</p>
+</button>
+<button class="snap-start flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-text-main dark:text-slate-200 px-4 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
+<p class="text-xs font-medium leading-normal">Arts</p>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 p-4 pb-28 overflow-y-auto bg-background-light dark:bg-background-dark">
+<div class="group flex flex-col gap-0 rounded-[12px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-[4/3] w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Abstract mathematical symbols on chalkboard" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCZ3XSE5XSGc2UsfEo9gWd3KlMWOMWMTC-Y4n7X9qk_uYJJWW4srUeutCYud_EM3R6GJOfYQOgYx8hq6fgCj_LJYOZVz5st9FbJYtN-ivrsUyuNS_QID96Rv9Xa4IXjubNooIbDnczIuVbJX86TGrYTcVopBWWUrcuXKqeGnxakqLnTk2JOTqmp60Y2h34bc3IN7PVmUdYhSgHL__KMYvo5x0ukqSP4sl5LEoLoFJcgP9VYvqLOE-nPimOIOyer_MuTK3w1KsRP6eep');">
+</div>
+<div class="absolute top-2 right-2">
+<span class="inline-flex items-center rounded-md bg-accent/90 backdrop-blur-md px-2 py-1 text-[10px] font-bold text-white shadow-sm uppercase tracking-wide">Open</span>
+</div>
+</div>
+<div class="flex flex-col p-3 h-full">
+<p class="text-[10px] uppercase font-bold tracking-wider text-accent mb-1">Mathematics</p>
+<h3 class="text-primary dark:text-white text-sm font-bold leading-tight line-clamp-2 mb-2">Advanced Calculus II</h3>
+<div class="mt-auto flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-1 text-text-secondary dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span class="text-xs font-medium">24/30</span>
+</div>
+<button class="text-primary dark:text-primary-light hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-0 rounded-[12px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-[4/3] w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Old world map and compass vintage style" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBO6EJ3zSIRGWuxODjTunZ8UvRj1bstrC0xXpA_NW8eFP2dRiUzZ_ygINs3wvVPg4jqj5-QZhJH8ybZWf4O61xhBfxyIAAutCa2pRtIIrRNG5tDRQQgrRfSUcg1uexWjBxStks2vwIouyyBbHn8vwev59Pynm1AT5DjGTCczVW9NZtbyko78-Dmu3Qk19K4gTfznREIrFmYEZJ8aVnZzvt8tq88Z3eTg6YnS_PuBYdJgNZcjcltl59aIVu1j2BwrmcuMJJ3abc2biSk');">
+</div>
+<div class="absolute top-2 right-2">
+<span class="inline-flex items-center rounded-md bg-amber-100/90 dark:bg-amber-900/80 backdrop-blur-md px-2 py-1 text-[10px] font-bold text-amber-800 dark:text-amber-200 shadow-sm uppercase tracking-wide border border-amber-200 dark:border-amber-700">Waitlist</span>
+</div>
+</div>
+<div class="flex flex-col p-3 h-full">
+<p class="text-[10px] uppercase font-bold tracking-wider text-accent mb-1">Humanities</p>
+<h3 class="text-primary dark:text-white text-sm font-bold leading-tight line-clamp-2 mb-2">World History: 1900s</h3>
+<div class="mt-auto flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-1 text-text-secondary dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span class="text-xs font-medium">32/30</span>
+</div>
+<button class="text-primary dark:text-primary-light hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-0 rounded-[12px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-[4/3] w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Physics laboratory equipment blue light" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBREZzAwii7qX3cdVZW_034OGXOxiJHzYHt3u40246uwwVSZbyKcOOWsbG4sWgWx7_GnPy7JqpnWXTxU8Z12gPO6TWWyNNv_SbzYP158xIvsXdzqwkHXhSFoTtcsIyqvj3tN2N-oftmewaPYfamiz3Pp3fQdd9BxyCQZ8TAtCfRVrt79xbZELYpkN4Xhb759fpa4lBjXbbYzUzlbGXb7gcwsF1zIpEgTzK3J-1ouUbpd1vYq1p5UKzISHkBBxOjVlg1DwLlHy-LRbJD');">
+</div>
+<div class="absolute top-2 right-2">
+<span class="inline-flex items-center rounded-md bg-accent/90 backdrop-blur-md px-2 py-1 text-[10px] font-bold text-white shadow-sm uppercase tracking-wide">Open</span>
+</div>
+</div>
+<div class="flex flex-col p-3 h-full">
+<p class="text-[10px] uppercase font-bold tracking-wider text-accent mb-1">Science</p>
+<h3 class="text-primary dark:text-white text-sm font-bold leading-tight line-clamp-2 mb-2">Physics 101</h3>
+<div class="mt-auto flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-1 text-text-secondary dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span class="text-xs font-medium">15/40</span>
+</div>
+<button class="text-primary dark:text-primary-light hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-0 rounded-[12px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-[4/3] w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Colorful paint brushes and palette" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDDbS4U1W9LJVK5U9-61u4LA1vfOdd3KIoSu9s-E5XcbsApAXmUzgpegPlxK8Th3mJe8wCgaW-7i-MOUtptT2oUQanxWLw5v6Ly27PpUtTFguLAho-2UwbGqkR5VA0Mt4RLMY-fc9iqWHqH-siLq2rIEMzwotdstz5EfxUZoW16naDmYLhblF5DfV6QxNQnroCg6y8n8Sdvol06E5gNRQSJ2HH3FPmLwm2poWPrXNn4FG4E7aipyfVX4GU3BnY2hbjGYVQAdVws3CAc');">
+</div>
+<div class="absolute top-2 right-2">
+<span class="inline-flex items-center rounded-md bg-slate-100/90 dark:bg-slate-700/90 backdrop-blur-md px-2 py-1 text-[10px] font-bold text-slate-500 dark:text-slate-300 shadow-sm uppercase tracking-wide border border-slate-200 dark:border-slate-600">Closed</span>
+</div>
+</div>
+<div class="flex flex-col p-3 h-full">
+<p class="text-[10px] uppercase font-bold tracking-wider text-accent mb-1">Arts</p>
+<h3 class="text-primary dark:text-white text-sm font-bold leading-tight line-clamp-2 mb-2">Introduction to Art</h3>
+<div class="mt-auto flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-1 text-text-secondary dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span class="text-xs font-medium">20/20</span>
+</div>
+<button class="text-slate-300 dark:text-slate-600 cursor-not-allowed">
+<span class="material-symbols-outlined">block</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-0 rounded-[12px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-[4/3] w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Chemistry laboratory glassware with blue liquid" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCzIPdtG0PLyJ0lyb7sbtNcDsEh2VJVUcyO49URNgG-PTy_5k7XOgLvb6BrttvP50fjqu_jd2WGOdeyxWw31_ltTqQnyrITwoh35bQFw4qgvoutLUKy0NFOq9tUps5Z4YNYlkRuUDNa4az0t1EQn1bpDUXqIiQ0025HIEBAwsDDTZm1cUE1WqCMlUjhdUIgDG4Yehi3wuj2YzIS21E5stWwr79wbAkG8qR-nhDeYyPUksWWCianqDVW3WOV0H30CAE0pguZNI-NFBv1');">
+</div>
+<div class="absolute top-2 right-2">
+<span class="inline-flex items-center rounded-md bg-accent/90 backdrop-blur-md px-2 py-1 text-[10px] font-bold text-white shadow-sm uppercase tracking-wide">Open</span>
+</div>
+</div>
+<div class="flex flex-col p-3 h-full">
+<p class="text-[10px] uppercase font-bold tracking-wider text-accent mb-1">Science</p>
+<h3 class="text-primary dark:text-white text-sm font-bold leading-tight line-clamp-2 mb-2">Organic Chemistry</h3>
+<div class="mt-auto flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-1 text-text-secondary dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span class="text-xs font-medium">12/15</span>
+</div>
+<button class="text-primary dark:text-primary-light hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-0 rounded-[12px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-[4/3] w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Stack of old books with glasses" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAwRKpJWCdXDWMaRuQ3oGpiSUBI3cb_lekXnGDrg6qKno3QZJkehoUu15TQyo9zSKPnx0LQPmYCVLtZxyuFDFQQ04bQeh6lOwXfxGQCvd-a6xtqQhULs-scYftNdvee5kCvyqROx3mfIcEyRvvilWiRLHF-JTJxodD6mn6wcTG9Hgwkd0zsv88yjI57jXLsJ07S-cxGCFXu1FzM3nBEViXcW8VcRXXN6mzX_8ZmSug6tBgcdsIYvHsfn5ChxsRZlnyiYP66RJqnJ7J6');">
+</div>
+<div class="absolute top-2 right-2">
+<span class="inline-flex items-center rounded-md bg-accent/90 backdrop-blur-md px-2 py-1 text-[10px] font-bold text-white shadow-sm uppercase tracking-wide">Open</span>
+</div>
+</div>
+<div class="flex flex-col p-3 h-full">
+<p class="text-[10px] uppercase font-bold tracking-wider text-accent mb-1">Literature</p>
+<h3 class="text-primary dark:text-white text-sm font-bold leading-tight line-clamp-2 mb-2">Modern American Lit</h3>
+<div class="mt-auto flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-1 text-text-secondary dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span class="text-xs font-medium">18/25</span>
+</div>
+<button class="text-primary dark:text-primary-light hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 z-50 flex max-w-md mx-auto bg-surface-light dark:bg-surface-dark px-6 pb-6 pt-3 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-secondary dark:text-slate-500 hover:text-primary dark:hover:text-primary-light transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:-translate-y-0.5 transition-transform duration-300">home</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Home</p>
+</a>
+<a class="active-nav-icon flex flex-1 flex-col items-center justify-end gap-1 text-primary dark:text-primary-light relative" href="#">
+<div class="absolute -top-3 w-8 h-1 bg-accent rounded-full mb-1"></div>
+<span class="material-symbols-outlined font-bold">local_library</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide">Courses</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-secondary dark:text-slate-500 hover:text-primary dark:hover:text-primary-light transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:-translate-y-0.5 transition-transform duration-300">calendar_month</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Schedule</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-secondary dark:text-slate-500 hover:text-primary dark:hover:text-primary-light transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:-translate-y-0.5 transition-transform duration-300">person</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Profile</p>
+</a>
+</div>
+</div>
+
+</body></html>

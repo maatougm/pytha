@@ -1,0 +1,90 @@
+# Docker Compose for Backend Services Only
+# Backend API and database services for School Hub
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: school-hub-postgres
+    environment:
+      POSTGRES_USER: sms_user
+      POSTGRES_PASSWORD: sms_password_2026
+      POSTGRES_DB: school_messaging
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sms_user -d school_messaging"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - school-hub
+
+  redis:
+    image: redis:7-alpine
+    container_name: school-hub-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - school-hub
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: school-hub-backend
+    environment:
+      # Database
+      DATABASE_URL: postgresql://sms_user:sms_password_2026@postgres:5432/school_messaging
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      
+      # JWT (Change these in production!)
+      JWT_SECRET: docker_jwt_secret_please_change_in_production
+      JWT_REFRESH_SECRET: docker_jwt_refresh_secret_please_change_in_production
+      JWT_EXPIRATION: 15m
+      JWT_REFRESH_EXPIRATION: 7d
+      
+      # Server
+      PORT: 3000
+      NODE_ENV: production
+      
+      # CORS
+      ALLOWED_ORIGINS: http://localhost:8080,http://localhost:8085,http://127.0.0.1:8080
+      
+      # API URLs
+      API_BASE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - school-hub
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_uploads:
+  backend_logs:
+
+networks:
+  school-hub:
+    driver: bridge

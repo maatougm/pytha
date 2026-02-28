@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsOptional, IsArray, IsEnum, IsBoolean, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsUUID, IsOptional, IsArray, IsEnum, IsBoolean, IsNumber, Min, Max, IsNotEmpty, MaxLength, ArrayMaxSize } from 'class-validator';
 import { ContentType } from './create-message.dto';
 
 /**
@@ -8,65 +8,121 @@ import { ContentType } from './create-message.dto';
  */
 
 export class WsSendMessageDto {
-    @IsUUID()
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsNotEmpty({ message: 'Channel ID is required' })
+    @IsUUID('4', { message: 'Invalid channel ID' })
     channelId: string;
 
-    @IsString()
+    @IsString({ message: 'Content must be a string' })
+    @IsNotEmpty({ message: 'Content is required' })
+    @MaxLength(4000, { message: 'Message cannot exceed 4000 characters' })
     content: string;
 
     @IsOptional()
-    @IsUUID()
+    @IsString({ message: 'Reply to must be a string' })
+    @IsUUID('4', { message: 'Invalid reply message ID' })
     replyTo?: string;
 
     @IsOptional()
-    @IsEnum(ContentType)
+    @IsEnum(ContentType, { message: 'Invalid content type' })
     contentType?: ContentType;
 }
 
 export class WsEditMessageDto {
-    @IsUUID()
+    @IsString({ message: 'Message ID must be a string' })
+    @IsNotEmpty({ message: 'Message ID is required' })
+    @IsUUID('4', { message: 'Invalid message ID' })
     messageId: string;
 
-    @IsString()
+    @IsString({ message: 'Content must be a string' })
+    @IsNotEmpty({ message: 'Content is required' })
+    @MaxLength(4000, { message: 'Message cannot exceed 4000 characters' })
     content: string;
 }
 
 export class WsDeleteMessageDto {
-    @IsUUID()
+    @IsString({ message: 'Message ID must be a string' })
+    @IsNotEmpty({ message: 'Message ID is required' })
+    @IsUUID('4', { message: 'Invalid message ID' })
     messageId: string;
+
+    @IsOptional()
+    @IsBoolean({ message: 'Soft delete must be a boolean' })
+    softDelete?: boolean = true;
 }
 
 export class WsJoinChannelDto {
-    @IsUUID()
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsNotEmpty({ message: 'Channel ID is required' })
+    @IsUUID('4', { message: 'Invalid channel ID' })
+    channelId: string;
+}
+
+export class WsLeaveChannelDto {
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsNotEmpty({ message: 'Channel ID is required' })
+    @IsUUID('4', { message: 'Invalid channel ID' })
     channelId: string;
 }
 
 export class WsTypingDto {
-    @IsUUID()
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsNotEmpty({ message: 'Channel ID is required' })
+    @IsUUID('4', { message: 'Invalid channel ID' })
     channelId: string;
 }
 
 export class WsReactionDto {
-    @IsUUID()
+    @IsString({ message: 'Message ID must be a string' })
+    @IsNotEmpty({ message: 'Message ID is required' })
+    @IsUUID('4', { message: 'Invalid message ID' })
     messageId: string;
 
-    @IsString()
+    @IsString({ message: 'Reaction must be a string' })
+    @IsNotEmpty({ message: 'Reaction is required' })
+    @MaxLength(50, { message: 'Reaction cannot exceed 50 characters' })
+    reaction: string;
+}
+
+export class WsRemoveReactionDto {
+    @IsString({ message: 'Message ID must be a string' })
+    @IsNotEmpty({ message: 'Message ID is required' })
+    @IsUUID('4', { message: 'Invalid message ID' })
+    messageId: string;
+
+    @IsString({ message: 'Reaction must be a string' })
+    @IsNotEmpty({ message: 'Reaction is required' })
+    @MaxLength(50, { message: 'Reaction cannot exceed 50 characters' })
     reaction: string;
 }
 
 export class WsReadReceiptDto {
-    @IsUUID()
+    @IsString({ message: 'Message ID must be a string' })
+    @IsNotEmpty({ message: 'Message ID is required' })
+    @IsUUID('4', { message: 'Invalid message ID' })
     messageId: string;
 
-    @IsUUID()
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsNotEmpty({ message: 'Channel ID is required' })
+    @IsUUID('4', { message: 'Invalid channel ID' })
     channelId: string;
 }
 
 export class WsReadBulkDto {
-    @IsUUID()
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsNotEmpty({ message: 'Channel ID is required' })
+    @IsUUID('4', { message: 'Invalid channel ID' })
     channelId: string;
 
-    @IsArray()
-    @IsUUID('4', { each: true })
+    @IsArray({ message: 'Message IDs must be an array' })
+    @ArrayMaxSize(100, { message: 'Cannot mark more than 100 messages as read at once' })
+    @IsUUID('4', { each: true, message: 'Invalid message ID in array' })
     messageIds: string[];
+}
+
+export class WsGetTypingDto {
+    @IsString({ message: 'Channel ID must be a string' })
+    @IsNotEmpty({ message: 'Channel ID is required' })
+    @IsUUID('4', { message: 'Invalid channel ID' })
+    channelId: string;
 }

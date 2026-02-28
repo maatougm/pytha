@@ -20,6 +20,7 @@ import { spawn } from 'child_process';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoggerService } from '@nestjs/common';
 import * as crypto from 'crypto';
+import Redis from 'ioredis';
 import {
     validateFile,
     getFileCategory,
@@ -64,14 +65,17 @@ export class FilesService {
     private readonly thumbnailsDir: string;
     private readonly previewsDir: string;
 
-    // In-memory rate limiting store (use Redis in production)
-    private uploadRateStore: Map<string, { count: number; resetTime: number }> = new Map();
+    // Redis-based rate limiting for distributed deployments
+    private redis: Redis;
 
     constructor(
         private prisma: PrismaService,
         @Inject(WINSTON_MODULE_NEST_PROVIDER)
         private readonly winstonLogger: LoggerService,
     ) {
+        // Initialize Redis client for rate limiting
+        const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+        this.redis = new Redis(redisUrl);
         // Use absolute paths for directories
         this.uploadsDir = path.resolve(process.cwd(), 'uploads');
         this.thumbnailsDir = path.join(this.uploadsDir, 'thumbnails');
@@ -94,43 +98,70 @@ export class FilesService {
     // ─── RATE LIMITING ───────────────────────────────────────────────────
 
     /**
-     * Check if user has exceeded upload rate limit
+     * Check if user has exceeded upload rate limit (Redis-based for distributed deployments)
      */
-    checkRateLimit(userId: string): { allowed: boolean; remaining: number; resetTime: number } {
+    async checkRateLimit(userId: string): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+        const key = `ratelimit:upload:${userId}`;
         const now = Date.now();
-        const windowStart = now - 60000; // 1 minute window
-        const key = `upload:${userId}`;
-
-        const record = this.uploadRateStore.get(key);
-
-        if (!record || record.resetTime < now) {
+        const windowMs = 60000; // 1 minute window
+        
+        const pipeline = this.redis.pipeline();
+        pipeline.get(key);
+        pipeline.pttl(key);
+        
+        const results = await pipeline.exec();
+        
+        if (!results || results[0][0]) {
+            // Error or no data - treat as new window
+            await this.redis.setex(key, Math.ceil(windowMs / 1000), '1');
+            return { allowed: true, remaining: UPLOAD_RATE_LIMIT - 1, resetTime: now + windowMs };
+        }
+        
+        const current = results[0][1] as string | null;
+        const ttl = results[1][1] as number;
+        
+        if (!current) {
             // New window
-            this.uploadRateStore.set(key, { count: 1, resetTime: now + 60000 });
-            return { allowed: true, remaining: UPLOAD_RATE_LIMIT - 1, resetTime: now + 60000 };
+            await this.redis.setex(key, Math.ceil(windowMs / 1000), '1');
+            return { allowed: true, remaining: UPLOAD_RATE_LIMIT - 1, resetTime: now + windowMs };
         }
-
-        if (record.count >= UPLOAD_RATE_LIMIT) {
-            return { allowed: false, remaining: 0, resetTime: record.resetTime };
+        
+        const count = parseInt(current, 10);
+        if (count >= UPLOAD_RATE_LIMIT) {
+            return { allowed: false, remaining: 0, resetTime: now + (ttl || windowMs) };
         }
-
-        record.count++;
-        return { allowed: true, remaining: UPLOAD_RATE_LIMIT - record.count, resetTime: record.resetTime };
+        
+        await this.redis.incr(key);
+        return { allowed: true, remaining: UPLOAD_RATE_LIMIT - count - 1, resetTime: now + (ttl || windowMs) };
     }
 
     /**
      * Get current rate limit status for user
      */
-    getRateLimitStatus(userId: string): { remaining: number; resetTime: number } {
-        const key = `upload:${userId}`;
-        const record = this.uploadRateStore.get(key);
-
-        if (!record) {
+    async getRateLimitStatus(userId: string): Promise<{ remaining: number; resetTime: number }> {
+        const key = `ratelimit:upload:${userId}`;
+        
+        const pipeline = this.redis.pipeline();
+        pipeline.get(key);
+        pipeline.pttl(key);
+        
+        const results = await pipeline.exec();
+        
+        if (!results || results[0][0]) {
             return { remaining: UPLOAD_RATE_LIMIT, resetTime: Date.now() + 60000 };
         }
-
+        
+        const current = results[0][1] as string | null;
+        const ttl = results[1][1] as number;
+        
+        if (!current) {
+            return { remaining: UPLOAD_RATE_LIMIT, resetTime: Date.now() + 60000 };
+        }
+        
+        const count = parseInt(current, 10);
         return {
-            remaining: Math.max(0, UPLOAD_RATE_LIMIT - record.count),
-            resetTime: record.resetTime
+            remaining: Math.max(0, UPLOAD_RATE_LIMIT - count),
+            resetTime: Date.now() + (ttl || 60000)
         };
     }
 
@@ -491,7 +522,7 @@ export class FilesService {
         }
 
         // Check rate limit
-        const rateLimit = this.checkRateLimit(uploaderId);
+        const rateLimit = await this.checkRateLimit(uploaderId);
         if (!rateLimit.allowed) {
             const resetSeconds = Math.ceil((rateLimit.resetTime - Date.now()) / 1000);
             throw new BadRequestException(
@@ -700,8 +731,15 @@ export class FilesService {
         relatedType?: string;
         search?: string;
         visibility?: string;
-    }): Promise<FileEntity[]> {
+        page?: number;
+        limit?: number;
+    }): Promise<{ data: FileEntity[]; meta: { total: number; page: number; pageSize: number; totalPages: number } }> {
         const { category, uploaderId, relatedId, relatedType, search, visibility } = params;
+
+        // Validate and normalize pagination
+        const page = Math.max(1, params.page || 1);
+        const limit = Math.min(100, Math.max(1, params.limit || 20));
+        const skip = (page - 1) * limit;
 
         const where: Prisma.FileWhereInput = {
             isDeleted: false,
@@ -718,19 +756,33 @@ export class FilesService {
             ];
         }
 
-        return this.prisma.file.findMany({
-            where,
-            include: {
-                uploader: {
-                    select: { id: true, email: true, firstName: true, lastName: true },
+        const [files, total] = await Promise.all([
+            this.prisma.file.findMany({
+                where,
+                include: {
+                    uploader: {
+                        select: { id: true, email: true, firstName: true, lastName: true },
+                    },
+                    _count: {
+                        select: { permissions: true },
+                    },
                 },
-                _count: {
-                    select: { permissions: true },
-                },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+            }),
+            this.prisma.file.count({ where }),
+        ]);
+
+        return {
+            data: files,
+            meta: {
+                total,
+                page,
+                pageSize: limit,
+                totalPages: Math.ceil(total / limit),
             },
-            orderBy: { createdAt: 'desc' },
-            take: 100,
-        });
+        };
     }
 
     async findById(id: string): Promise<FileEntity & { uploader: any }> {

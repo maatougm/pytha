@@ -1,0 +1,63 @@
+{
+  "app": {
+    "name": "School Hub",
+    "tagline": "连接学校、教师、家长和学生"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "register": "创建账户",
+    "email": "电子邮件",
+    "password": "密码",
+    "forgotPassword": "忘记密码？",
+    "resetPassword": "重置密码",
+    "continueWithBiometric": "使用生物识别继续",
+    "or": "或",
+    "loginSuccess": "欢迎回来！",
+    "loginError": "邮箱或密码无效",
+    "logoutSuccess": "您已退出登录",
+    "welcomeTitle": "欢迎使用 School Hub",
+    "welcomeSubtitle": "您的学校社区一站式平台"
+  },
+  "navigation": {
+    "home": "首页",
+    "courses": "课程",
+    "messages": "消息",
+    "files": "文件",
+    "assignments": "作业",
+    "grades": "成绩",
+    "attendance": "出勤",
+    "profile": "个人资料",
+    "settings": "设置",
+    "accessibility": "辅助功能",
+    "language": "语言",
+    "notifications": "通知"
+  },
+  "home": {
+    "title": "仪表板",
+    "todaysClasses": "今日课程",
+    "upcomingAssignments": "即将到期的作业",
+    "recentMessages": "最近消息",
+    "noClasses": "今天没有安排课程",
+    "noAssignments": "没有即将到期的作业",
+    "viewAll": "查看全部",
+    "announcements": "公告"
+  },
+  "accessibility": {
+    "title": "辅助功能",
+    "appearance": "外观",
+    "textDisplay": "文字和显示",
+    "screenReader": "屏幕阅读器",
+    "theme": "主题",
+    "highContrast": "高对比度",
+    "textSize": "文字大小",
+    "fontStyle": "字体样式",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统",
+    "small": "小",
+    "normal": "正常",
+    "large": "大",
+    "xlarge": "特大"
+  }
+}

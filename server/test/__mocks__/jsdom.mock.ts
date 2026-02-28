@@ -1,14 +1,14 @@
-// Mock JSDOM for tests
+// Mock for jsdom in E2E tests
 export class JSDOM {
-    constructor(html?: string) {
+    constructor(html: string = '') {
         // Mock implementation
     }
 
     get window() {
         return {
             document: {
-                createElement: jest.fn(),
-                createTextNode: jest.fn(),
+                createElement: () => ({}),
+                createTextNode: () => ({}),
             },
         };
     }

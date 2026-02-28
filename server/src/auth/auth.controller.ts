@@ -4,6 +4,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, RefreshDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { MetricsService } from '../metrics/metrics.service';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 
@@ -25,7 +26,10 @@ const cookieOptions = (maxAgeMs: number) => ({
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private metricsService: MetricsService,
+    ) { }
 
     @Post('register')
     @ApiOperation({ summary: 'Register a new user (non-admin roles only)' })
@@ -41,6 +45,8 @@ export class AuthController {
         const result = await this.authService.register(dto);
         // Set refresh token as httpOnly cookie (C4)
         res.cookie(REFRESH_COOKIE, result.refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
+        // Record metrics
+        this.metricsService.recordUserRegistration(result.user.roles?.[0]?.role?.name || 'user');
         return { user: result.user, accessToken: result.accessToken };
     }
 
@@ -67,6 +73,8 @@ export class AuthController {
         const result = await this.authService.login(dto);
         // Set refresh token as httpOnly cookie (C4)
         res.cookie(REFRESH_COOKIE, result.refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
+        // Record metrics
+        this.metricsService.recordUserLogin(result.user.roles?.[0]?.role?.name || 'user');
         // Return accessToken in body; refreshToken is now in the cookie only
         return { user: result.user, accessToken: result.accessToken };
     }

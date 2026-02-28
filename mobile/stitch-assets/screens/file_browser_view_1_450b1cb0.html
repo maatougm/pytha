@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pythagore - File Browser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1E3A8A",
+                        "secondary": "#F59E0B",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e2330",
+                        "text-main-light": "#121317",
+                        "text-main-dark": "#e2e8f0",
+                        "text-sub-light": "#666e85",
+                        "text-sub-dark": "#94a3b8",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "body": ["Lexend", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "card": "12px",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col antialiased selection:bg-primary/20">
+<div class="flex-1 flex flex-col relative overflow-hidden max-w-md mx-auto w-full bg-background-light dark:bg-background-dark shadow-2xl min-h-screen">
+<header class="sticky top-0 z-10 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 pb-4 pt-12 transition-colors">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<button class="text-text-main-light dark:text-text-main-dark p-1 rounded-full hover:bg-background-light dark:hover:bg-background-dark transition-colors">
+<span class="material-symbols-outlined !text-[28px]">menu</span>
+</button>
+<h1 class="text-2xl font-bold tracking-tight text-primary dark:text-white">My Files</h1>
+</div>
+<div class="flex items-center gap-2">
+<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary dark:text-blue-300 font-bold border border-primary/20">
+                        JD
+                    </div>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-sub-light dark:text-text-sub-dark group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 rounded-[12px] bg-background-light dark:bg-background-dark border-none ring-1 ring-border-light dark:ring-border-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary placeholder-text-sub-light dark:placeholder-text-sub-dark text-sm transition-all shadow-sm" placeholder="Search folders and files..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+<button class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-text-sub-light dark:text-text-sub-dark !text-[20px]">tune</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-24 px-4 pt-4">
+<section class="mb-6">
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-lg font-bold text-text-main-light dark:text-text-main-dark">Folders</h2>
+<button class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">View All</button>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="group relative flex flex-col justify-between p-4 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div class="p-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300">
+<span class="material-symbols-outlined">folder</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">more_vert</span>
+</button>
+</div>
+<div>
+<h3 class="font-semibold text-text-main-light dark:text-text-main-dark mb-0.5">Mathematics</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">12 files • 240 MB</p>
+</div>
+</div>
+<div class="group relative flex flex-col justify-between p-4 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div class="p-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300">
+<span class="material-symbols-outlined">folder</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">more_vert</span>
+</button>
+</div>
+<div>
+<h3 class="font-semibold text-text-main-light dark:text-text-main-dark mb-0.5">History</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">8 files • 128 MB</p>
+</div>
+</div>
+<div class="group relative flex flex-col justify-between p-4 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div class="p-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300">
+<span class="material-symbols-outlined">folder</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">more_vert</span>
+</button>
+</div>
+<div>
+<h3 class="font-semibold text-text-main-light dark:text-text-main-dark mb-0.5">Science</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">24 files • 1.2 GB</p>
+</div>
+</div>
+<div class="group relative flex flex-col justify-between p-4 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div class="p-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300">
+<span class="material-symbols-outlined">folder</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">more_vert</span>
+</button>
+</div>
+<div>
+<h3 class="font-semibold text-text-main-light dark:text-text-main-dark mb-0.5">Literature</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">15 files • 450 MB</p>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-lg font-bold text-text-main-light dark:text-text-main-dark">Recent Files</h2>
+<div class="flex gap-2">
+<button class="p-1 rounded text-text-sub-light dark:text-text-sub-dark hover:bg-background-light dark:hover:bg-background-dark">
+<span class="material-symbols-outlined !text-[20px]">grid_view</span>
+</button>
+<button class="p-1 rounded text-primary bg-background-light dark:bg-surface-dark dark:text-white shadow-sm">
+<span class="material-symbols-outlined !text-[20px]">list</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center p-3 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark active:scale-[0.99] transition-transform cursor-pointer">
+<div class="h-10 w-10 shrink-0 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 mr-3">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-medium text-sm text-text-main-light dark:text-text-main-dark truncate">Algebra_Homework_Oct.pdf</h4>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-0.5">Today • 2.4 MB</p>
+</div>
+<button class="p-2 text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">download</span>
+</button>
+</div>
+<div class="flex items-center p-3 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark active:scale-[0.99] transition-transform cursor-pointer">
+<div class="h-10 w-10 shrink-0 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 mr-3">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-medium text-sm text-text-main-light dark:text-text-main-dark truncate">Project_Proposal_Draft.docx</h4>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-0.5">Yesterday • 145 KB</p>
+</div>
+<button class="p-2 text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">download</span>
+</button>
+</div>
+<div class="flex items-center p-3 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark active:scale-[0.99] transition-transform cursor-pointer">
+<div class="h-10 w-10 shrink-0 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-500 mr-3">
+<span class="material-symbols-outlined">image</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-medium text-sm text-text-main-light dark:text-text-main-dark truncate">Biology_Diagram_Cell.png</h4>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-0.5">Oct 24 • 3.1 MB</p>
+</div>
+<button class="p-2 text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">download</span>
+</button>
+</div>
+<div class="flex items-center p-3 rounded-card bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark active:scale-[0.99] transition-transform cursor-pointer">
+<div class="h-10 w-10 shrink-0 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-500 mr-3">
+<span class="material-symbols-outlined">slideshow</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-medium text-sm text-text-main-light dark:text-text-main-dark truncate">History_Presentation_WW2.pptx</h4>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-0.5">Oct 22 • 15 MB</p>
+</div>
+<button class="p-2 text-text-sub-light dark:text-text-sub-dark hover:text-primary">
+<span class="material-symbols-outlined !text-[20px]">download</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-24 right-4 z-20">
+<button class="group flex items-center justify-center w-14 h-14 rounded-full bg-secondary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+<span class="material-symbols-outlined !text-[28px] group-hover:rotate-90 transition-transform">add</span>
+</button>
+</div>
+<nav class="sticky bottom-0 z-30 bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark safe-area-bottom">
+<div class="flex items-center justify-around px-2 py-3">
+<a class="flex flex-col items-center gap-1 p-2 rounded-xl text-text-sub-light dark:text-text-sub-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors" href="#">
+<span class="material-symbols-outlined !text-[24px]">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 rounded-xl text-primary dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined !text-[24px] font-variation-fill">folder</span>
+<span class="text-[10px] font-medium">Files</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 rounded-xl text-text-sub-light dark:text-text-sub-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors" href="#">
+<span class="material-symbols-outlined !text-[24px]">bar_chart</span>
+<span class="text-[10px] font-medium">Grades</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 rounded-xl text-text-sub-light dark:text-text-sub-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors" href="#">
+<span class="material-symbols-outlined !text-[24px]">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</div>
+</nav>
+</div>
+
+</body></html>

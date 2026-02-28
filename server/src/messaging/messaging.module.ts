@@ -11,6 +11,12 @@ import { ChannelManagementService } from './channel-management.service';
 import { MessagingEnhancedService } from './messaging-enhanced.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { MentionsModule } from '../mentions/mentions.module';
+import {
+    MessageHandler,
+    ReactionHandler,
+    TypingHandler,
+    ChannelHandler,
+} from './handlers';
 
 @Module({
     imports: [
@@ -27,11 +33,18 @@ import { MentionsModule } from '../mentions/mentions.module';
     ],
     controllers: [MessagingController, ChannelManagementController],
     providers: [
+        // Services
         MessagingService,
-        MessagingGateway,
         TypingService,
         ChannelManagementService,
         MessagingEnhancedService,
+        // Gateway
+        MessagingGateway,
+        // WebSocket Handlers
+        MessageHandler,
+        ReactionHandler,
+        TypingHandler,
+        ChannelHandler,
     ],
     exports: [
         MessagingService,
@@ -39,6 +52,11 @@ import { MentionsModule } from '../mentions/mentions.module';
         TypingService,
         ChannelManagementService,
         MessagingEnhancedService,
+        // Export handlers in case they're needed by other modules
+        MessageHandler,
+        ReactionHandler,
+        TypingHandler,
+        ChannelHandler,
     ],
 })
 export class MessagingModule { }

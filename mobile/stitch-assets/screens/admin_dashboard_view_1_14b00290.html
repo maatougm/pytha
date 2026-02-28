@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Unified Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1E3A8A",
+                        "primary-light": "#EFF6FF",
+                        "primary-dark": "#172554",
+                        "accent": "#F59E0B",
+                        "accent-light": "#FFFBEB",
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#111827",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1F2937",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "12px",
+                        "lg": "12px",
+                        "xl": "12px",
+                        "2xl": "16px",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-50 font-display antialiased selection:bg-accent selection:text-white">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden bg-background-light dark:bg-background-dark">
+<header class="flex items-center justify-between px-6 pt-12 pb-6 bg-primary dark:bg-surface-dark sticky top-0 z-10 shadow-md">
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white backdrop-blur-sm">
+<span class="material-symbols-outlined text-2xl">school</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight text-white">Pythagore</h1>
+<p class="text-xs text-blue-100 font-medium">Admin Portal</p>
+</div>
+</div>
+<button class="relative p-2 text-blue-100 hover:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent border border-primary dark:border-surface-dark"></span>
+</button>
+</header>
+<main class="flex-1 overflow-y-auto pb-24 px-4 pt-6 space-y-6 scrollbar-hide">
+<section class="grid grid-cols-2 gap-4">
+<div class="relative overflow-hidden rounded-xl bg-surface-light dark:bg-surface-dark p-5 shadow-sm border border-slate-100 dark:border-slate-800 group">
+<div class="absolute right-[-10px] top-[-10px] h-16 w-16 rounded-full bg-accent/10 transition-transform group-hover:scale-150"></div>
+<div class="relative z-10 flex flex-col gap-1">
+<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-accent dark:bg-accent/20">
+<span class="material-symbols-outlined text-xl">group</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Users</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">2,540</h3>
+<p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +5.2%
+                    </p>
+</div>
+</div>
+<div class="relative overflow-hidden rounded-xl bg-surface-light dark:bg-surface-dark p-5 shadow-sm border border-slate-100 dark:border-slate-800 group">
+<div class="absolute right-[-10px] top-[-10px] h-16 w-16 rounded-full bg-primary/10 transition-transform group-hover:scale-150"></div>
+<div class="relative z-10 flex flex-col gap-1">
+<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/30 dark:text-blue-300">
+<span class="material-symbols-outlined text-xl">menu_book</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Active Courses</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">128</h3>
+<p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +1.8%
+                    </p>
+</div>
+</div>
+</section>
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-bold text-primary dark:text-blue-300">User Management</h2>
+<button class="flex items-center gap-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-md shadow-primary/30 active:scale-95 transition-all hover:bg-primary-dark">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Add User
+                </button>
+</div>
+<div class="relative">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full rounded-xl border-none bg-surface-light dark:bg-surface-dark py-3 pl-10 pr-3 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary shadow-sm text-sm" placeholder="Search by name, ID or email..." type="text"/>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<button class="whitespace-nowrap rounded-lg bg-primary text-white px-4 py-1.5 text-sm font-medium shadow-sm transition-colors">
+                    All
+                </button>
+<button class="whitespace-nowrap rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700 px-4 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    Teachers
+                </button>
+<button class="whitespace-nowrap rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700 px-4 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    Students
+                </button>
+<button class="whitespace-nowrap rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700 px-4 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    Parents
+                </button>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/50 transition-colors cursor-pointer group">
+<img alt="Portrait of Sarah Miller" class="h-12 w-12 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/20 transition-all" data-alt="Young woman smiling portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPz8z6JxSyKabSURw4HlF7lKAxF_sSqDn4x1blxj073qiQBfc6P-whBcF_bcsp6OW2pIYQiLLb9foCmY-J-dqWCxyVRxTF8ht4NIoAedlPFOFPiVCn7ARb7K-yIegIa2myI0mcPsc5sC5jL8d_u6jQ54jp8hG4t8bnzuciMyfOyb3LfLnN7-IyHSnWg_3TpIn2briOVCpiJZoVmlXD_1J73MViAtvi8iXO9_-wBgl8sV2xiVXHhCaGshQvxF-l7_OlJEhGCpzfdole"/>
+<div class="flex-1 min-w-0">
+<h4 class="truncate text-base font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Sarah Miller</h4>
+<p class="truncate text-xs text-slate-500 dark:text-slate-400">ID: T-4829 • <span class="text-accent font-medium">Teacher</span></p>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<div class="flex items-center gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/50 transition-colors cursor-pointer group">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-300 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+<span class="text-sm font-bold">JD</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="truncate text-base font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">James Doe</h4>
+<p class="truncate text-xs text-slate-500 dark:text-slate-400">ID: S-9921 • <span class="text-slate-500 dark:text-slate-400">Student</span></p>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<div class="flex items-center gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/50 transition-colors cursor-pointer group">
+<img alt="Portrait of Michael Chen" class="h-12 w-12 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/20 transition-all" data-alt="Man in glasses portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLptfTglULO7tJbo-QefEVMFc56j3YC5AGcnE2_FrGOx61ZG7tZEWtwk16b3A7wAXrb9--frp_Tvq2bJuNjQa0gChVY4SYl5nVflHt_nsYZGW8v-kKRtNEakJftsPQf0Tgj27K0GAWiDtHJVisxx_HezfSJ4Bp1jGE34yhfIhYNoWngcakbWFXico7TSx1x5mRE6mPmkOdSwKSjkKwwihf73Hi1-XzcOzbPHu4tTAoAJiUl-HnTclGWYj1HlbH4gshFT4VtI6Y8RCK"/>
+<div class="flex-1 min-w-0">
+<h4 class="truncate text-base font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Michael Chen</h4>
+<p class="truncate text-xs text-slate-500 dark:text-slate-400">ID: P-1023 • <span class="text-slate-500 dark:text-slate-400">Parent</span></p>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<div class="flex items-center gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/50 transition-colors cursor-pointer group">
+<img alt="Portrait of Emily Watson" class="h-12 w-12 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/20 transition-all" data-alt="Young woman looking at camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsgEX58g6pZubGz4HpqYr9__hPL6HzU06dxB02qdsWtVJhr_VOWqLcUQKAlCNdtrflBxZpL5dnSXUA3j2VmgX0laMJrXPS-HR3e8y5d5d0hCnkKFMp8V-j3ZL1rv9D-VL5NO3emJM-7y1ynRiFklA_NjY70JTwLsX9lZ-_Et3SAL8SBKcnMvZZ2A393MBmk4Mu1MKMh4tVXYF0Puf1LhNH0riFzydYHdZ2X5roPN32r8QeVrlqgLCQe769qldlBjL4x8SEiuABIqo3"/>
+<div class="flex-1 min-w-0">
+<h4 class="truncate text-base font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Emily Watson</h4>
+<p class="truncate text-xs text-slate-500 dark:text-slate-400">ID: T-3312 • <span class="text-accent font-medium">Teacher</span></p>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="flex justify-center py-4">
+<button class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-blue-300 transition-colors">View All Users</button>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex justify-center w-full max-w-md mx-auto">
+<div class="flex w-full items-center justify-around border-t border-slate-200 bg-surface-light dark:bg-surface-dark dark:border-slate-800 px-4 pb-6 pt-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 rounded-full text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px] filled">grid_view</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Dashboard</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary dark:text-slate-500 dark:hover:text-slate-300 transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">group</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Users</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary dark:text-slate-500 dark:hover:text-slate-300 transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">menu_book</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Courses</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary dark:text-slate-500 dark:hover:text-slate-300 transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Settings</p>
+</a>
+</div>
+</nav>
+</div>
+
+</body></html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notifications Center - Pythagore</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#258cf4",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<!-- Google Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        /* Custom scrollbar hiding for clean mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden h-screen w-full flex flex-col">
+<!-- Header Section -->
+<div class="flex-none bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 pb-2 pt-12 px-4 shadow-sm z-10">
+<!-- Top Bar -->
+<div class="flex items-center justify-between mb-4">
+<button class="text-slate-900 dark:text-white flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">Notifications</h2>
+</div>
+<!-- Segmented Control -->
+<div class="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+<label class="flex-1 relative cursor-pointer group">
+<input checked="" class="peer sr-only" name="filter" type="radio" value="all"/>
+<div class="py-2 px-3 text-center text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-700 peer-checked:text-primary peer-checked:shadow-sm transition-all duration-200">
+                    All
+                </div>
+</label>
+<label class="flex-1 relative cursor-pointer group">
+<input class="peer sr-only" name="filter" type="radio" value="messages"/>
+<div class="py-2 px-3 text-center text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-700 peer-checked:text-primary peer-checked:shadow-sm transition-all duration-200">
+                    Messages
+                </div>
+</label>
+<label class="flex-1 relative cursor-pointer group">
+<input class="peer sr-only" name="filter" type="radio" value="grades"/>
+<div class="py-2 px-3 text-center text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-700 peer-checked:text-primary peer-checked:shadow-sm transition-all duration-200">
+                    Grades
+                </div>
+</label>
+</div>
+<!-- Action Bar -->
+<div class="flex justify-between items-center mt-4">
+<div class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Recent</div>
+<button class="text-primary text-sm font-semibold hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                Mark all as read
+            </button>
+</div>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto no-scrollbar bg-background-light dark:bg-background-dark pb-24">
+<!-- Today Section -->
+<div class="pt-4">
+<h3 class="text-slate-900 dark:text-white text-base font-bold px-4 mb-3">Today</h3>
+<!-- Unread Item (Active Style) -->
+<div class="relative flex items-start gap-4 bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20 px-4 py-4 border-l-4 border-primary transition-colors cursor-pointer group">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 border border-slate-200 dark:border-slate-700 shadow-sm" data-alt="Portrait of a female teacher smiling" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBfiyFvEitwMQ5UQ1OdpzkO0Ye372J-USNYAcsJPnqaR8AZOPR7KKDzWYFf-7wggFbKZftAEcFPpY7JSkHydWLPzl54oW0VejXkbp9NyNLj0NwOxHyiLUghnznH37QZ2vCqp340O_3lcUJQ8U4sr-wkwudDy85rdIhJZzWd-obA1aG-wmk1BBjqhSzFH0YVp0AiSLZ7C8ANfM9QpyKkqjt-lZnqL3RxdyHgy8yjZY5NVxskgRTk65onqMs3m4mgyAilbwqqpKg_TrcR");'></div>
+<span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-900"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate pr-2">Ms. Sarah Johnson</p>
+<span class="text-primary text-xs font-medium whitespace-nowrap">2m ago</span>
+</div>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-snug line-clamp-2">
+                        Assignment "Calculus II: Derivatives" has been graded. check your final score.
+                    </p>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center rounded-md bg-blue-100 dark:bg-blue-900/30 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10">Grade: A-</span>
+</div>
+</div>
+<div class="absolute top-1/2 -translate-y-1/2 right-4 h-2 w-2 rounded-full bg-primary opacity-100 group-hover:scale-110 transition-transform"></div>
+</div>
+<!-- Unread Item -->
+<div class="relative flex items-start gap-4 bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20 px-4 py-4 border-l-4 border-primary mt-[1px] transition-colors cursor-pointer">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 border border-slate-200 dark:border-slate-700 shadow-sm" data-alt="Portrait of a male teacher in a suit" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAmdk_f-G9yu2oKn9unmxVHQ-FZ3tzJw2RnZrUr1CCLNYOA_ZaXuSa8qiVi8uYJj-8ySa7ydXv9s_QVXSa9LpmtaBkUJ61JP8RwqwY4uomCPNO-KAcZuN8pIyinzvJ8GmgThWlXGixrj0JAFvoDsYNLKm2cjPhMYoaqXE_kpPq5hx213XlTIe9ofwTqeEUfZ4hDb4apBQiVY99dc0jP5-rTCLD8lJWodDcZvU62Df1Pee80LFuS6dYh_Ah7k0YacRDN2K9ShbjbAPOA");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate pr-2">Mr. David Chen</p>
+<span class="text-primary text-xs font-medium whitespace-nowrap">1h ago</span>
+</div>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-snug line-clamp-2">
+                        Reminder: Parent-Teacher conference is scheduled for tomorrow at 3 PM.
+                    </p>
+</div>
+<div class="absolute top-1/2 -translate-y-1/2 right-4 h-2 w-2 rounded-full bg-primary"></div>
+</div>
+<!-- Read Item -->
+<div class="flex items-start gap-4 bg-white dark:bg-slate-900 px-4 py-4 border-l-4 border-transparent border-b border-slate-50 dark:border-slate-800/50 mt-[1px]">
+<div class="relative shrink-0">
+<div class="flex items-center justify-center bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 rounded-full h-12 w-12 border border-purple-200 dark:border-purple-800">
+<span class="material-symbols-outlined text-[24px]">school</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate pr-2">System Notification</p>
+<span class="text-slate-400 text-xs font-normal whitespace-nowrap">3h ago</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-snug line-clamp-2">
+                        The school library will be closed this Friday for maintenance.
+                    </p>
+</div>
+</div>
+</div>
+<!-- Yesterday Section -->
+<div class="pt-6">
+<h3 class="text-slate-900 dark:text-white text-base font-bold px-4 mb-3">Yesterday</h3>
+<!-- Read Item -->
+<div class="flex items-start gap-4 bg-white dark:bg-slate-900 px-4 py-4 border-l-4 border-transparent border-b border-slate-50 dark:border-slate-800/50">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 border border-slate-200 dark:border-slate-700 shadow-sm" data-alt="Portrait of a friendly school administrator" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAOjm9nvtk3CdTWjPVYvQpvVQsGcD9jubvy5Cq6NWXVIg-KOXqb45cY-JWEmlFLRkmqWTX91OViCC0I6l74ogZUIYvBDcyrHhakOH1cDu33zP385yrWFjDjpF1yqbuvrhhvBSu0loakaNacnUJewAOT7-NiOS8QndK2uEFxK9vgHa37q8h_FZV2vex_uci59Z7T5SAQLQY9tJmXEzFOMfVa-dD3_3_46UFBV4gyPau6m12ugg-clp9ngRdgJBLzMfEBIL_6Up7jkKS6");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate pr-2">Mrs. Roberts</p>
+<span class="text-slate-400 text-xs font-normal whitespace-nowrap">Yesterday</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-snug line-clamp-2">
+                        Please review the permission slip for the upcoming Science Museum trip.
+                    </p>
+</div>
+</div>
+<!-- Read Item -->
+<div class="flex items-start gap-4 bg-white dark:bg-slate-900 px-4 py-4 border-l-4 border-transparent border-b border-slate-50 dark:border-slate-800/50">
+<div class="relative shrink-0">
+<div class="flex items-center justify-center bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-300 rounded-full h-12 w-12 border border-orange-200 dark:border-orange-800">
+<span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate pr-2">Sports Department</p>
+<span class="text-slate-400 text-xs font-normal whitespace-nowrap">Yesterday</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-snug line-clamp-2">
+                        Soccer practice has been moved to the indoor gym due to rain.
+                    </p>
+</div>
+</div>
+<!-- Read Item -->
+<div class="flex items-start gap-4 bg-white dark:bg-slate-900 px-4 py-4 border-l-4 border-transparent border-b border-slate-50 dark:border-slate-800/50">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 border border-slate-200 dark:border-slate-700 shadow-sm" data-alt="Portrait of a young female art teacher" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAfEZBGkg4Z2ieEIftjpfciS9wwHZ5GeuaA1eLbdq2OdP-Os_Mhp_DgJzDsDLm7_i6Ipg60zWIjwcwE9eVbemUIwjElLCb6Tkeo4PIZZV6TP5sKZh2KlKHLwA8-zRuB_6bGQcoYJVE1uv7m-IMz5T-mpdh2QmJdvpAfAHAIIiP7MS8bQwOXhzX5EB8ECEUvr32Y6tmgcaMxvReokqIczOgpj6M3gtJJcJRulA0YgnkiZmcD1QrW5vtUnyr3oM79Cnzycrr_p2l-uM66");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate pr-2">Ms. Emily Art</p>
+<span class="text-slate-400 text-xs font-normal whitespace-nowrap">Yesterday</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-snug line-clamp-2">
+                        Don't forget to bring your sketchbooks tomorrow!
+                    </p>
+</div>
+</div>
+</div>
+<!-- End of list spacer -->
+<div class="h-8"></div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="flex-none bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-4 pb-6 pt-2 z-20">
+<div class="flex justify-around items-center">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<p class="text-xs font-medium leading-normal">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">class</span>
+<p class="text-xs font-medium leading-normal">Classes</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary relative" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-[24px] fill-current" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="absolute -top-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-900"></span>
+</div>
+<p class="text-xs font-medium leading-normal">Notifications</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<p class="text-xs font-medium leading-normal">Profile</p>
+</a>
+</div>
+</div>
+</body></html>

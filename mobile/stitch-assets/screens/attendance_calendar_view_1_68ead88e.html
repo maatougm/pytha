@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Attendance Calendar View 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1313ec",
+                        "primary-content": "#ffffff",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a1a2e",
+                        "text-main": "#111118",
+                        "text-sub": "#616189",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main antialiased min-h-screen flex flex-col overflow-hidden">
+<div class="flex-1 flex flex-col h-full overflow-hidden relative max-w-md mx-auto bg-white dark:bg-surface-dark shadow-xl min-h-screen">
+<!-- Header -->
+<div class="flex items-center justify-between p-4 pt-6 bg-white dark:bg-surface-dark sticky top-0 z-10">
+<button class="text-text-main dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-background-light dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h2 class="text-text-main dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Attendance</h2>
+<div class="flex size-10 items-center justify-end">
+<button class="text-text-main dark:text-white flex items-center justify-center rounded-full hover:bg-background-light dark:hover:bg-gray-800 size-10 transition-colors">
+<span class="material-symbols-outlined text-2xl">calendar_month</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto pb-24">
+<!-- Calendar Navigation -->
+<div class="flex items-center justify-between px-6 py-4">
+<button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-gray-800 text-text-main dark:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<p class="text-text-main dark:text-white text-base font-bold leading-tight">September 2023</p>
+<button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-gray-800 text-text-main dark:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+<!-- Calendar Grid -->
+<div class="px-4 pb-6">
+<!-- Days of Week -->
+<div class="grid grid-cols-7 mb-2">
+<div class="text-text-sub text-[13px] font-medium text-center py-2">S</div>
+<div class="text-text-sub text-[13px] font-medium text-center py-2">M</div>
+<div class="text-text-sub text-[13px] font-medium text-center py-2">T</div>
+<div class="text-text-sub text-[13px] font-medium text-center py-2">W</div>
+<div class="text-text-sub text-[13px] font-medium text-center py-2">T</div>
+<div class="text-text-sub text-[13px] font-medium text-center py-2">F</div>
+<div class="text-text-sub text-[13px] font-medium text-center py-2">S</div>
+</div>
+<!-- Calendar Days -->
+<div class="grid grid-cols-7 gap-y-2">
+<!-- Empty slots for previous month -->
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<!-- Days -->
+<!-- Normal Day -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            1
+                        </div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            2
+                        </div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            3
+                        </div>
+</div>
+<!-- Present (Green dot) -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            4
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Selected Day (Blue background) -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full bg-primary text-white text-sm font-bold shadow-md shadow-primary/30 cursor-pointer">
+                            5
+                        </div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            6
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            7
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Absent (Red dot) -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            8
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-rose-500"></div>
+</div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            9
+                        </div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            10
+                        </div>
+</div>
+<!-- Late (Yellow dot) -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            11
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-amber-400"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            12
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            13
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            14
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            15
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            16
+                        </div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            17
+                        </div>
+</div>
+<!-- Absent -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            18
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-rose-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            19
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            20
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            21
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Present -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium relative hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">
+                            22
+                            <div class="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+</div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            23
+                        </div>
+</div>
+<!-- Weekend -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-sub text-sm font-medium">
+                            24
+                        </div>
+</div>
+<!-- Future days -->
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">25</div>
+</div>
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">26</div>
+</div>
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">27</div>
+</div>
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">28</div>
+</div>
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">29</div>
+</div>
+<div class="aspect-square p-1">
+<div class="w-full h-full flex flex-col items-center justify-center rounded-full text-text-main dark:text-white text-sm font-medium hover:bg-background-light dark:hover:bg-gray-800 cursor-pointer">30</div>
+</div>
+</div>
+</div>
+<!-- Stats Summary -->
+<div class="px-4">
+<h3 class="text-text-main dark:text-white text-lg font-bold mb-4 px-1">September Summary</h3>
+<div class="grid grid-cols-3 gap-3">
+<!-- Present Card -->
+<div class="flex flex-col items-center justify-center p-4 rounded-xl bg-background-light dark:bg-gray-800/50 border border-transparent dark:border-gray-800">
+<div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-lg">check_circle</span>
+</div>
+<p class="text-2xl font-bold text-text-main dark:text-white">18</p>
+<p class="text-xs font-medium text-text-sub">Present</p>
+</div>
+<!-- Absent Card -->
+<div class="flex flex-col items-center justify-center p-4 rounded-xl bg-background-light dark:bg-gray-800/50 border border-transparent dark:border-gray-800">
+<div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-rose-600 dark:text-rose-400 text-lg">cancel</span>
+</div>
+<p class="text-2xl font-bold text-text-main dark:text-white">2</p>
+<p class="text-xs font-medium text-text-sub">Absent</p>
+</div>
+<!-- Late Card -->
+<div class="flex flex-col items-center justify-center p-4 rounded-xl bg-background-light dark:bg-gray-800/50 border border-transparent dark:border-gray-800">
+<div class="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-lg">schedule</span>
+</div>
+<p class="text-2xl font-bold text-text-main dark:text-white">1</p>
+<p class="text-xs font-medium text-text-sub">Late</p>
+</div>
+</div>
+</div>
+<!-- Today's Detail -->
+<div class="px-4 mt-6">
+<div class="p-4 rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/10 flex items-start gap-4">
+<div class="flex flex-col items-center justify-center bg-white dark:bg-surface-dark rounded-lg p-2 min-w-[60px] shadow-sm">
+<span class="text-xs font-medium text-text-sub uppercase">Tue</span>
+<span class="text-xl font-bold text-primary">05</span>
+</div>
+<div class="flex-1 pt-1">
+<h4 class="text-text-main dark:text-white font-bold text-sm mb-1">Marked as Present</h4>
+<p class="text-text-sub text-xs">08:30 AM • On Time</p>
+</div>
+<div class="self-center">
+<span class="material-symbols-outlined text-emerald-500">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="flex gap-2 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-surface-dark px-4 pb-6 pt-2 absolute bottom-0 w-full z-20">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-2xl fill-current">calendar_month</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Attendance</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Messages</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-text-sub hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">person</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Profile</p>
+</a>
+</div>
+</div>
+</body></html>
