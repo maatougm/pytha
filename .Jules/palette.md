@@ -1,3 +1,7 @@
 ## 2024-05-15 - Added Accessibility to Foundational UI Components
 **Learning:** Foundational components like inputs with icons and headers often act as the primary way users navigate or interact. Without setting `accessibilityRole="button"`, `accessibilityLabel`, and `accessibilityState`, users relying on screen readers wouldn't know when a button is "busy" loading or they are navigating via a back button.
 **Action:** When creating foundational atomic UI components, default to accepting accessibility props and hardcode accessibility roles for standard toggle states like secure password reveal.
+
+## 2025-02-28 - Comprehensive Accessibility on React Native Custom Inputs
+**Learning:** Custom `Input` components in React Native often miss critical accessibility attributes for the underlying `TextInput`. Passing down an `accessibilityLabel` mapping to the visible `label` (if one exists), an `accessibilityHint` pointing to the `helper` or `error` text, and `aria-invalid` based on `hasError` significantly improves screen reader comprehension. `accessibilityState={{ invalid: true }}` or `accessibilityInvalid` isn't fully supported in all TS typings for TextInput Props compared to the ARIA properties like `aria-invalid`.
+**Action:** When building or modifying custom text inputs or form fields, map `label` props explicitly to `accessibilityLabel`, and explicitly map helper/error messages to `accessibilityHint` while enforcing state using `aria-invalid`.

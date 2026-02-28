@@ -97,6 +97,13 @@ export function Input({
         )}
 
         <TextInput
+          accessibilityLabel={props.accessibilityLabel || label}
+          accessibilityHint={props.accessibilityHint || error || helper}
+          accessibilityState={{
+            disabled: isDisabled,
+            ...(props.accessibilityState || {})
+          }}
+          aria-invalid={hasError}
           style={[
             styles.input,
             {
