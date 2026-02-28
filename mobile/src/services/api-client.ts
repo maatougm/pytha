@@ -137,7 +137,10 @@ export async function clearTokens(): Promise<void> {
 // REQUEST INTERCEPTORS
 // ============================================================
 
+const DEFAULT_TIMEOUT = 15000; // 15 seconds
+
 interface RequestConfig extends RequestInit {
+  timeout?: number;
   skipAuth?: boolean;
   retryCount?: number;
   onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void;
@@ -287,35 +290,47 @@ async function request<T>(
 ): Promise<T> {
   const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
   
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), config.timeout || DEFAULT_TIMEOUT);
+
   // Apply request interceptors
-  const { url: finalUrl, config: finalConfig } = await applyRequestInterceptors(url, config);
+  const { url: finalUrl, config: finalConfig } = await applyRequestInterceptors(url, { ...config, signal: controller.signal });
   
   try {
     const response = await fetch(finalUrl, finalConfig);
+    clearTimeout(timeoutId);
     
     // Handle 401 - Token expired
-    if (response.status === 401 && !config.skipAuth && config.retryCount === 0) {
-      const newToken = await performTokenRefresh();
-      
-      if (newToken) {
-        // Retry the request with new token
-        return request<T>(endpoint, {
-          ...config,
-          retryCount: (config.retryCount || 0) + 1,
-        });
+    if (response.status === 401 && !config.skipAuth) {
+      if (!config.retryCount || config.retryCount === 0) {
+        const newToken = await performTokenRefresh();
+
+        if (newToken) {
+          // Retry the request with new token
+          return request<T>(endpoint, {
+            ...config,
+            retryCount: (config.retryCount || 0) + 1,
+          });
+        }
       }
       
-      // Refresh failed, clear tokens and throw
+      // Refresh failed or already retried, clear tokens and throw
       await clearTokens();
       throw new ApiError('Session expired. Please login again.', 401, 'SESSION_EXPIRED');
     }
     
     return await handleResponse<T>(response);
   } catch (error) {
+    clearTimeout(timeoutId);
+
     if (error instanceof ApiError) {
       throw error;
     }
     
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new ApiError('Request timed out. Please try again.', 408, 'REQUEST_TIMEOUT');
+    }
+
     // Network errors or other fetch failures
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new ApiError(
