@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface PushNotificationPayload {
@@ -28,6 +29,7 @@ export interface NotificationPreferences {
 @Injectable()
 export class PushNotificationService {
   private readonly logger = new Logger(PushNotificationService.name);
+  private readonly expo = new Expo();
 
   constructor(private prisma: PrismaService) {}
 
@@ -226,9 +228,24 @@ export class PushNotificationService {
       return null;
     }
 
-    // Prepare payload
+    const validTokens = tokens
+      .map((t) => t.token)
+      .filter((token) => {
+        if (!Expo.isExpoPushToken(token)) {
+          this.logger.warn(`Push token ${token} is not a valid Expo push token`);
+          return false;
+        }
+        return true;
+      });
+
+    if (validTokens.length === 0) {
+      this.logger.debug(`No valid Expo push tokens for user ${userId}`);
+      return null;
+    }
+
+    // Maintain the old payload format to return it at the end
     const payload: PushNotificationPayload = {
-      to: tokens.map((t) => t.token),
+      to: validTokens,
       title,
       body,
       data: {
@@ -240,21 +257,60 @@ export class PushNotificationService {
       priority: 'high',
     };
 
-    // TODO: Send to Expo Push Service
-    // For now, just log the notification
-    this.logger.log(`Sending notification to user ${userId}: ${title}`);
-    this.logger.debug(JSON.stringify(payload));
+    // Prepare payloads per token
+    const messages: ExpoPushMessage[] = validTokens.map((token) => ({
+      to: token,
+      title,
+      body,
+      data: payload.data,
+      sound: payload.sound,
+      priority: payload.priority,
+    }));
 
-    // TODO: Implement actual Expo Push API call
-    // const response = await fetch('https://exp.host/--/api/v2/push/send', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(payload),
-    // });
+    this.logger.log(`Sending notifications to user ${userId}: ${title}`);
+    this.logger.debug(JSON.stringify(messages));
 
-    return payload;
+    try {
+      // Chunk messages
+      const chunks = this.expo.chunkPushNotifications(messages);
+      const tickets: any[] = [];
+
+      // Send the chunks to the Expo push notification service
+      for (const chunk of chunks) {
+        try {
+          const ticketChunk = await this.expo.sendPushNotificationsAsync(chunk);
+          tickets.push(...ticketChunk);
+
+          // Process tickets for immediate errors
+          for (const [index, ticket] of ticketChunk.entries()) {
+            if (ticket.status === 'error') {
+              this.logger.error(`Error sending notification: ${ticket.message}`);
+              if (ticket.details && ticket.details.error === 'DeviceNotRegistered') {
+                // The token is no longer valid, unregister it
+                const invalidToken = chunk[index].to;
+                // 'to' can be a string or array of strings in ExpoPushMessage
+                const tokensToUnregister = Array.isArray(invalidToken) ? invalidToken : [invalidToken];
+
+                for (const token of tokensToUnregister) {
+                  this.logger.log(`Unregistering invalid token: ${token}`);
+                  await this.unregisterToken(token, userId);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          this.logger.error(`Error sending push notification chunk:`, error);
+        }
+      }
+
+      // TODO: Implement background receipt checks if full compliance is intended.
+      // E.g. save successful ticket IDs and process them asynchronously later with getPushNotificationReceiptsAsync()
+
+      return payload;
+    } catch (error) {
+      this.logger.error(`Failed to prepare/send push notifications for user ${userId}:`, error);
+      return null;
+    }
   }
 
   async sendToMultipleUsers(
