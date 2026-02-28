@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
@@ -29,7 +30,10 @@ export class PaymentsController {
   @Get('balance/:studentId')
   @ApiOperation({ summary: 'Get fee balance and invoice list for a student' })
   async getFeeBalance(@Param('studentId') studentId: string, @Request() req) {
-    // TODO: Check if user is parent of student or admin
+    const hasAccess = await this.paymentsService.verifyAccess(req.user.sub, studentId);
+    if (!hasAccess) {
+      throw new ForbiddenException('You do not have permission to view this fee balance');
+    }
     return this.paymentsService.getFeeBalance(studentId);
   }
 
@@ -41,7 +45,10 @@ export class PaymentsController {
     @Query('limit') limit?: string,
     @Request() req?: any,
   ) {
-    // TODO: Check if user is parent of student or admin
+    const hasAccess = await this.paymentsService.verifyAccess(req.user.sub, studentId);
+    if (!hasAccess) {
+      throw new ForbiddenException('You do not have permission to view this payment history');
+    }
     return this.paymentsService.getPaymentHistory(
       studentId,
       page ? parseInt(page) : 1,
