@@ -1,0 +1,3 @@
+## 2024-05-15 - Added Accessibility to Foundational UI Components
+**Learning:** Foundational components like inputs with icons and headers often act as the primary way users navigate or interact. Without setting `accessibilityRole="button"`, `accessibilityLabel`, and `accessibilityState`, users relying on screen readers wouldn't know when a button is "busy" loading or they are navigating via a back button.
+**Action:** When creating foundational atomic UI components, default to accepting accessibility props and hardcode accessibility roles for standard toggle states like secure password reveal.

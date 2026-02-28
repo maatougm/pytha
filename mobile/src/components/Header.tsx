@@ -55,6 +55,8 @@ export function Header({
               onPress={onBack}
               style={styles.backButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
             >
               <ArrowLeft size={24} color={theme.colors.text} />
             </TouchableOpacity>
@@ -71,6 +73,7 @@ export function Header({
             ]}
             numberOfLines={1}
             ellipsizeMode="tail"
+            accessibilityRole="header"
           >
             {title}
           </Text>
@@ -83,6 +86,7 @@ export function Header({
               onPress={rightAction.onPress}
               style={styles.actionButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
               accessibilityLabel={rightAction.label}
             >
               <rightAction.icon size={24} color={theme.colors.text} />
