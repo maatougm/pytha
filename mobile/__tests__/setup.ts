@@ -1,7 +1,7 @@
 // Test setup file for School Hub Mobile App
 
 // Mock React Native modules
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+// jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
 
 // Mock expo modules
 jest.mock('expo-secure-store', () => ({

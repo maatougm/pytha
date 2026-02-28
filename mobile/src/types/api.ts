@@ -859,6 +859,7 @@ export interface ModerationQueueItem {
 export interface UserFilters {
   search?: string;
   role?: string;
+  passwordVersion?: number;
   status?: string;
 }
 

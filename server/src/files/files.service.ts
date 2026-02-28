@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { File as FileEntity, Prisma } from '@prisma/client';
-import { UploadFileDto, SetFilePermissionDto } from './dto/files.dto';
+import { SetFilePermissionDto } from './dto/files.dto';
 import { FileUploadDto, FileUploadCategory, FileVisibility } from './dto/file-upload.dto';
 import { extname, join, resolve } from 'path';
 import * as path from 'path';
@@ -196,7 +196,7 @@ export class FilesService {
 
             try {
                 // Try clamdscan first (daemon mode - faster), fallback to clamscan
-                const scanner = spawn('clamdscan', ['--fdpass', '--no-summary', filePath]);
+                const scanner = spawn('clamdscan', ['--fdpass', '--no-summary', '--', filePath]);
 
                 let stdout = '';
                 let stderr = '';
@@ -269,7 +269,7 @@ export class FilesService {
             }, VIRUS_SCAN_TIMEOUT);
 
             try {
-                const scanner = spawn('clamscan', ['--no-summary', filePath]);
+                const scanner = spawn('clamscan', ['--no-summary', '--', filePath]);
 
                 let stdout = '';
                 let stderr = '';
@@ -587,9 +587,10 @@ export class FilesService {
         }
         const category = rawCategory as FileUploadCategory;
 
-        const categoryDir = path.join(this.uploadsDir, category);
+        const sanitizedCategory = path.basename(category);
+        const categoryDir = path.join(this.uploadsDir, sanitizedCategory);
         const finalPath = path.join(categoryDir, secureFilename);
-        const relativePath = path.join('uploads', category, secureFilename);
+        const relativePath = path.join('uploads', sanitizedCategory, secureFilename);
 
         let thumbnailPath: string | null = null;
 

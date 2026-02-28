@@ -25,10 +25,19 @@ export interface CreateInvoiceInput {
 @Injectable()
 export class PaymentsService {
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * Verify user has access to student's payment records
+   * Throws ForbiddenException if not authorized
+   */
   async verifyAccess(userId: string, userRoles: string[], studentId: string) {
+    // Admin can access all records
     if (userRoles?.includes('admin')) return;
+    
+    // Student can access their own records
     if (userId === studentId) return;
 
+    // Parent can access their children's records
     const link = await this.prisma.parentStudent.findUnique({
       where: {
         parentId_studentId: {
@@ -42,7 +51,6 @@ export class PaymentsService {
       throw new ForbiddenException("You are not authorized to access this student's records");
     }
   }
-
 
   async createPaymentIntent(input: CreatePaymentIntentInput, payerId: string) {
     // Validate student exists
@@ -170,6 +178,7 @@ export class PaymentsService {
 
   async getFeeBalance(studentId: string, userId: string, userRoles: string[]) {
     await this.verifyAccess(userId, userRoles, studentId);
+    
     const invoices = await this.prisma.feeInvoice.findMany({
       where: { studentId },
       include: {
@@ -208,6 +217,7 @@ export class PaymentsService {
 
   async getPaymentHistory(studentId: string, userId: string, userRoles: string[], page = 1, limit = 20) {
     await this.verifyAccess(userId, userRoles, studentId);
+    
     const skip = (page - 1) * limit;
 
     const [payments, total] = await Promise.all([
@@ -277,7 +287,7 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found');
     }
 
-    // Check if user is authorized (parent who paid or admin)
+    // Check if user is authorized (parent who paid, student, or admin)
     if (payment.payerId !== userId && payment.studentId !== userId) {
       if (!userRoles?.includes('admin')) {
         throw new ForbiddenException('You are not authorized to view this receipt');

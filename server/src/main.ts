@@ -25,9 +25,23 @@ async function bootstrap() {
         mkdirSync(downloadsDir, { recursive: true });
     }
 
+    // HTTPS Enforcement in Production
+    if (process.env.NODE_ENV === 'production') {
+        app.use((req, res, next) => {
+            if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
+                return res.redirect(301, `https://${req.headers.host}${req.url}`);
+            }
+            next();
+        });
+    }
+
     // Serve static files from downloads directory
     app.useStaticAssets(join(__dirname, '..', 'downloads'), {
         prefix: '/downloads/',
+        setHeaders: (res) => {
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.setHeader('Content-Security-Policy', "default-src 'none'");
+        },
     });
 
     // Security headers
