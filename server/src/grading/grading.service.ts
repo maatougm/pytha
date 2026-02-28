@@ -17,6 +17,29 @@ export class GradingService {
 
     // ─── ASSIGNMENTS ─────────────────────────────────────────
 
+    async getPendingAssignmentsCount(studentId: string): Promise<{ count: number }> {
+        const count = await this.prisma.assignment.count({
+            where: {
+                isPublished: true,
+                class: {
+                    enrollments: {
+                        some: {
+                            studentId,
+                            status: 'active',
+                        },
+                    },
+                },
+                submissions: {
+                    none: {
+                        studentId,
+                    },
+                },
+            },
+        });
+
+        return { count };
+    }
+
     async createAssignment(classId: string, teacherId: string, dto: CreateAssignmentDto) {
         const cls = await this.prisma.class.findUnique({ where: { id: classId } });
         if (!cls) throw new NotFoundException('Class not found');

@@ -25,6 +25,14 @@ import type {
 // ============================================================
 
 /**
+ * Get count of pending assignments for current user
+ * @returns Promise with count of pending assignments
+ */
+export async function getPendingAssignmentsCount(): Promise<{ count: number }> {
+  return apiClient.get<{ count: number }>('/assignments/pending/count');
+}
+
+/**
  * Get assignments with optional filters
  * @param filters - Filter options (classId, type)
  * @returns Promise with array of assignments
@@ -230,6 +238,7 @@ export async function getGrades(courseId?: string): Promise<Grade[]> {
 
 export const gradingService = {
   // Assignment operations
+  getPendingAssignmentsCount,
   getAssignments,
   getAssignmentById,
   createAssignment,

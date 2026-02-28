@@ -9,14 +9,15 @@ export function useDashboardStats() {
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       // Combine multiple API calls for dashboard stats
-      const [classes, channels] = await Promise.all([
+      const [classes, channels, pendingAssignmentsResult] = await Promise.all([
         courseService.getMyClasses(),
         messagingService.getChannels(),
+        gradingService.getPendingAssignmentsCount().catch(() => ({ count: 0 })),
       ]);
 
       return {
         upcomingClasses: classes?.length || 0,
-        pendingAssignments: 0, // TODO: needs a proper backend endpoint for pending count
+        pendingAssignments: pendingAssignmentsResult.count || 0,
         unreadMessages: channels?.reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0) || 0,
       };
     },
