@@ -435,25 +435,25 @@ export default function LoginScreen() {
             {/* Quick Login Buttons (For Testing/Seed Data) */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
               <TouchableOpacity
-                onPress={() => { setEmail('admin@school.com'); setPassword('JTsK5DZu1cguQznw6l_8Aa1!'); setSelectedRole('admin'); }}
+                onPress={() => { setEmail('admin@academy.edu'); setPassword('VJyhbuFmnPSiuEzpCz2CAa1!'); setSelectedRole('admin'); }}
                 style={[styles.quickLoginBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}
               >
                 <Text style={{ color: colors.primary, fontSize: 12, fontWeight: '600' }}>Admin</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => { setEmail('teacher1@school.com'); setPassword('JTsK5DZu1cguQznw6l_8Aa1!'); setSelectedRole('teacher'); }}
+                onPress={() => { setEmail('j.rodriguez@academy.edu'); setPassword('VJyhbuFmnPSiuEzpCz2CAa1!'); setSelectedRole('teacher'); }}
                 style={[styles.quickLoginBtn, { backgroundColor: colors.success + '15', borderColor: colors.success + '30' }]}
               >
                 <Text style={{ color: colors.success, fontSize: 12, fontWeight: '600' }}>Teacher</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => { setEmail('parent1@school.com'); setPassword('JTsK5DZu1cguQznw6l_8Aa1!'); setSelectedRole('parent'); }}
+                onPress={() => { setEmail('m.chen@academy.edu'); setPassword('VJyhbuFmnPSiuEzpCz2CAa1!'); setSelectedRole('parent'); }}
                 style={[styles.quickLoginBtn, { backgroundColor: colors.warning + '15', borderColor: colors.warning + '30' }]}
               >
                 <Text style={{ color: colors.warning, fontSize: 12, fontWeight: '600' }}>Parent</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => { setEmail('student1@school.com'); setPassword('JTsK5DZu1cguQznw6l_8Aa1!'); setSelectedRole('student'); }}
+                onPress={() => { setEmail('carlos.garcia@student.academy.edu'); setPassword('VJyhbuFmnPSiuEzpCz2CAa1!'); setSelectedRole('student'); }}
                 style={[styles.quickLoginBtn, { backgroundColor: colors.info || '#0ea5e9' + '15', borderColor: (colors.info || '#0ea5e9') + '30' }]}
               >
                 <Text style={{ color: colors.info || '#0ea5e9', fontSize: 12, fontWeight: '600' }}>Student</Text>
