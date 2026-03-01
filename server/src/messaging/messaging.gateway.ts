@@ -16,6 +16,8 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { WsRateLimitGuard } from '../common/guards/ws-rate-limit.guard';
+import { ChannelMembershipGuard } from './guards/channel-membership.guard';
+import { RedisService } from '../common/redis/redis.service';
 import { MetricsService } from '../metrics/metrics.service';
 import {
     MessageHandler,
@@ -101,6 +103,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         private typingHandler: TypingHandler,
         private channelHandler: ChannelHandler,
         private metricsService: MetricsService,
+        private redisService: RedisService,
     ) { }
 
     async afterInit(server: Server) {
@@ -140,6 +143,17 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
 
             const payload = this.jwtService.verify(token, { secret });
             client.user = payload;
+
+            // Check if token is in denylist
+            const jti = payload.jti;
+            if (jti) {
+                const isDenied = await this.redisService.get(`denylist:${jti}`);
+                if (isDenied) {
+                    this.logger.warn(`Denied token attempted WebSocket connection: ${jti}`);
+                    client.disconnect();
+                    return;
+                }
+            }
 
             // Initialize rate limit tracking for this socket
             this.rateLimits.set(client.id, new Map());
@@ -246,7 +260,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     // Message Handlers
     // ═══════════════════════════════════════════════════════════════
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('message:send')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async handleSendMessage(
@@ -269,7 +283,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return result;
     }
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('message:edit')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async handleEditMessage(
@@ -283,7 +297,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return this.messageHandler.handleEditMessage(this.server, client, data);
     }
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('message:delete')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async handleDeleteMessage(
@@ -297,7 +311,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return this.messageHandler.handleDeleteMessage(this.server, client, data);
     }
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('message:read')
     async handleMessageRead(
         @ConnectedSocket() client: AuthenticatedSocket,
@@ -306,7 +320,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return this.messageHandler.handleMessageRead(this.server, client, data);
     }
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('message:read_bulk')
     async handleMessagesReadBulk(
         @ConnectedSocket() client: AuthenticatedSocket,
@@ -319,7 +333,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     // Typing Handlers
     // ═══════════════════════════════════════════════════════════════
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('typing:start')
     async handleTypingStart(
         @ConnectedSocket() client: AuthenticatedSocket,
@@ -332,7 +346,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return this.typingHandler.handleTypingStart(client, data);
     }
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('typing:stop')
     async handleTypingStop(
         @ConnectedSocket() client: AuthenticatedSocket,
@@ -345,7 +359,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return this.typingHandler.handleTypingStop(client, data);
     }
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('typing:get')
     async handleGetTypingUsers(
         @ConnectedSocket() client: AuthenticatedSocket,
@@ -358,7 +372,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     // Channel Handlers
     // ═══════════════════════════════════════════════════════════════
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('channel:join')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async handleJoinChannel(
@@ -376,7 +390,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     // Reaction Handlers
     // ═══════════════════════════════════════════════════════════════
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('reaction:add')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async handleAddReaction(
@@ -390,7 +404,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         return this.reactionHandler.handleAddReaction(this.server, client, data);
     }
 
-    @UseGuards(WsRateLimitGuard)
+    @UseGuards(WsRateLimitGuard, ChannelMembershipGuard)
     @SubscribeMessage('reaction:remove')
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async handleRemoveReaction(

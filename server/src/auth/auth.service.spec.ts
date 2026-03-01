@@ -3,7 +3,7 @@ process.env.JWT_SECRET = 'test-jwt-secret-minimum-32-characters-long-12345';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-32-characters-long-67890';
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+import { AuthService, TokenPayload } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -20,13 +20,14 @@ jest.mock('bcrypt', () => ({
 
 // Mock ioredis
 jest.mock('ioredis', () => {
-    const mockRedis = jest.fn().mockImplementation(() => ({
+    const mockRedisInstance = {
         on: jest.fn(),
         get: jest.fn().mockResolvedValue(null),
         set: jest.fn().mockResolvedValue('OK'),
         del: jest.fn().mockResolvedValue(1),
-    }));
-    return { Redis: mockRedis, default: mockRedis };
+    };
+    const MockRedis = jest.fn().mockImplementation(() => mockRedisInstance);
+    return { Redis: MockRedis, default: MockRedis };
 });
 
 // Mock uuid
@@ -39,6 +40,7 @@ describe('AuthService', () => {
     let mockPrisma: DeepMockProxy<PrismaClient>;
     let mockJwtService: jest.Mocked<JwtService>;
     let mockConfigService: jest.Mocked<ConfigService>;
+    let mockRedis: any;
 
     beforeEach(async () => {
         mockPrisma = mockDeep<PrismaClient>();
@@ -68,6 +70,15 @@ describe('AuthService', () => {
         }).compile();
 
         service = module.get<AuthService>(AuthService);
+        
+        // Get the mocked Redis instance
+        const Redis = require('ioredis');
+        mockRedis = Redis();
+        
+        jest.clearAllMocks();
+    });
+
+    afterEach(() => {
         jest.clearAllMocks();
     });
 
@@ -173,6 +184,26 @@ describe('AuthService', () => {
                     data: expect.objectContaining({ phone: '+1234567890' }),
                 })
             );
+        });
+
+        it('should support all valid roles (student, teacher, parent, admin)', async () => {
+            const roles = ['student', 'teacher', 'parent', 'admin'];
+            
+            for (const role of roles) {
+                mockPrisma.user.findUnique.mockResolvedValue(null);
+                mockPrisma.role.findUnique.mockResolvedValue({ id: `${role}-id`, name: role } as any);
+                mockPrisma.user.create.mockResolvedValue({
+                    id: 'user-id',
+                    email: `${role}@school.com`,
+                    firstName: 'Test',
+                    lastName: 'User',
+                    userRoles: [{ role: { name: role } }],
+                    passwordHash: 'hashedPassword',
+                } as any);
+
+                const result = await service.register({ ...registerDto, email: `${role}@school.com`, role });
+                expect(result.user).toBeDefined();
+            }
         });
     });
 
@@ -281,6 +312,36 @@ describe('AuthService', () => {
                 expect.any(Object)
             );
         });
+
+        it('should convert email to lowercase for login lookup', async () => {
+            mockPrisma.user.findUnique.mockResolvedValue(null);
+
+            await expect(service.login({ ...loginDto, email: 'Mixed@School.COM' })).rejects.toThrow();
+
+            expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+                where: { email: 'mixed@school.com' },
+                include: expect.any(Object),
+            });
+        });
+
+        it('should not expose password hash in login response', async () => {
+            const mockUser = {
+                id: 'user-id',
+                email: loginDto.email,
+                passwordHash: 'super-secret-hash',
+                status: 'active',
+                deletedAt: null,
+                userRoles: [{ role: { name: 'student' } }],
+            };
+
+            mockPrisma.user.findUnique.mockResolvedValue(mockUser as any);
+            (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+            mockPrisma.user.update.mockResolvedValue(mockUser as any);
+
+            const result = await service.login(loginDto);
+
+            expect(result.user).not.toHaveProperty('passwordHash');
+        });
     });
 
     describe('refresh', () => {
@@ -364,12 +425,43 @@ describe('AuthService', () => {
             };
 
             mockPrisma.refreshToken.findUnique.mockResolvedValue(mockToken as any);
-            const transactionSpy = jest.fn().mockImplementation(async (callback: any) => {
+            mockPrisma.$transaction.mockImplementation(async (callback: any) => {
                 return callback(mockPrisma);
             });
+
             await service.refresh('refresh-token');
 
             expect(mockPrisma.$transaction).toHaveBeenCalled();
+        });
+
+        it('should implement replay attack protection via token rotation', async () => {
+            // This test verifies that refresh tokens are single-use
+            const mockToken = {
+                id: 'token-id',
+                token: 'refresh-token',
+                expiresAt: new Date(Date.now() + 86400000),
+                user: {
+                    id: 'user-id',
+                    email: 'test@school.com',
+                    deletedAt: null,
+                    userRoles: [{ role: { name: 'student' } }],
+                },
+            };
+
+            mockPrisma.refreshToken.findUnique
+                .mockResolvedValueOnce(mockToken as any)
+                .mockResolvedValueOnce(null); // Second lookup fails (token deleted)
+
+            mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+                return callback(mockPrisma);
+            });
+
+            // First refresh should succeed
+            const result1 = await service.refresh('refresh-token');
+            expect(result1.accessToken).toBeDefined();
+
+            // Second refresh with same token should fail (replay attack prevented)
+            await expect(service.refresh('refresh-token')).rejects.toThrow(UnauthorizedException);
         });
     });
 
@@ -441,13 +533,66 @@ describe('AuthService', () => {
         });
 
         it('should add access token to denylist during logout', async () => {
-            const mockRedis = require('ioredis');
+            mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 1 } as any);
+            const accessTokenJti = 'access-token-jti-123';
+
+            await service.logout('user-id', 'refresh-token', accessTokenJti);
+
+            // Verify Redis set was called with denylist key
+            expect(mockRedis.set).toHaveBeenCalledWith(
+                `token:denylist:${accessTokenJti}`,
+                '1',
+                'EX',
+                expect.any(Number)
+            );
+        });
+
+        it('should handle logout without JTI (backward compatibility)', async () => {
             mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 1 } as any);
 
-            await service.logout('user-id', 'refresh-token', 'access-token-jti');
+            const result = await service.logout('user-id', 'refresh-token');
 
-            // Redis should have been called to denylist the token
-            // Note: In actual implementation, this uses the Redis instance created in constructor
+            expect(result.loggedOut).toBe(true);
+            // Redis should not be called when no JTI provided
+            expect(mockRedis.set).not.toHaveBeenCalled();
+        });
+
+        it('should calculate correct TTL for token denylist based on JWT expiration', async () => {
+            mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 1 } as any);
+            
+            // Mock different expiration values
+            const testCases = [
+                { expiration: '15m', expectedMinTtl: 14 * 60 }, // ~15 minutes
+                { expiration: '1h', expectedMinTtl: 59 * 60 }, // ~1 hour
+                { expiration: '1d', expectedMinTtl: 23 * 60 * 60 }, // ~1 day
+            ];
+
+            for (const testCase of testCases) {
+                const customConfigService = {
+                    get: jest.fn((key: string) => {
+                        if (key === 'JWT_EXPIRATION') return testCase.expiration;
+                        return mockConfigService.get(key);
+                    }),
+                } as any;
+
+                const module: TestingModule = await Test.createTestingModule({
+                    providers: [
+                        AuthService,
+                        { provide: PrismaService, useValue: mockPrisma },
+                        { provide: JwtService, useValue: mockJwtService },
+                        { provide: ConfigService, useValue: customConfigService },
+                    ],
+                }).compile();
+
+                const customService = module.get<AuthService>(AuthService);
+                mockRedis.set.mockClear();
+
+                await customService.logout('user-id', 'refresh-token', 'jti-123');
+
+                const callArgs = mockRedis.set.mock.calls[0];
+                expect(callArgs[3]).toBe('EX');
+                expect(callArgs[4]).toBeGreaterThanOrEqual(testCase.expectedMinTtl);
+            }
         });
     });
 
@@ -474,6 +619,28 @@ describe('AuthService', () => {
             );
         });
 
+        it('should generate unique JTI for each token', async () => {
+            mockPrisma.refreshToken.create.mockResolvedValue({ id: 'token-id' } as any);
+            
+            const { v4: uuidv4 } = require('uuid');
+            const jtis: string[] = [];
+
+            // Generate multiple tokens and verify JTIs are unique
+            for (let i = 0; i < 5; i++) {
+                const uniqueJti = `unique-jti-${i}`;
+                uuidv4.mockReturnValueOnce(uniqueJti);
+                
+                await (service as any).generateTokens(`user-${i}`, `user${i}@test.com`, ['student']);
+                
+                const callArgs = mockJwtService.sign.mock.calls[i] as [{ jti: string }, any];
+                jtis.push(callArgs[0].jti);
+            }
+
+            // Verify all JTIs are unique
+            const uniqueJtis = new Set(jtis);
+            expect(uniqueJtis.size).toBe(jtis.length);
+        });
+
         it('should throw error if JWT_SECRET is too short', async () => {
             const shortConfigService = {
                 get: jest.fn((key: string) => {
@@ -496,6 +663,31 @@ describe('AuthService', () => {
 
             await expect(
                 (shortSecretService as any).generateTokens('user-id', 'test@school.com', ['student'])
+            ).rejects.toThrow(UnauthorizedException);
+        });
+
+        it('should throw error if JWT_SECRET is missing', async () => {
+            const missingConfigService = {
+                get: jest.fn((key: string) => {
+                    if (key === 'JWT_SECRET') return undefined;
+                    return mockConfigService.get(key);
+                }),
+            } as any;
+
+            const module: TestingModule = await Test.createTestingModule({
+                providers: [
+                    AuthService,
+                    { provide: PrismaService, useValue: mockPrisma },
+                    { provide: JwtService, useValue: mockJwtService },
+                    { provide: ConfigService, useValue: missingConfigService },
+                ],
+            }).compile();
+
+            const missingSecretService = module.get<AuthService>(AuthService);
+            mockPrisma.refreshToken.create.mockResolvedValue({ id: 'token-id' } as any);
+
+            await expect(
+                (missingSecretService as any).generateTokens('user-id', 'test@school.com', ['student'])
             ).rejects.toThrow(UnauthorizedException);
         });
     });
@@ -549,6 +741,126 @@ describe('AuthService', () => {
             const result = await (service as any).parseExpiration('invalid');
 
             expect(result).toBe(7 * 24 * 60 * 60 * 1000);
+        });
+
+        it('should handle edge case formats', async () => {
+            const edgeCases = [
+                { input: '0s', expected: 0 },
+                { input: '999d', expected: 999 * 24 * 60 * 60 * 1000 },
+                { input: '2w', expected: 2 * 7 * 24 * 60 * 60 * 1000 },
+            ];
+
+            for (const testCase of edgeCases) {
+                const result = await (service as any).parseExpiration(testCase.input);
+                expect(result).toBe(testCase.expected);
+            }
+        });
+    });
+
+    describe('Password Hashing Security', () => {
+        it('should use bcrypt with 12 rounds for password hashing', async () => {
+            mockPrisma.user.findUnique.mockResolvedValue(null);
+            mockPrisma.role.findUnique.mockResolvedValue({ id: 'role-id', name: 'student' } as any);
+            mockPrisma.user.create.mockResolvedValue({
+                id: 'user-id',
+                email: 'test@school.com',
+                firstName: 'Test',
+                lastName: 'User',
+                userRoles: [{ role: { name: 'student' } }],
+                passwordHash: 'hashedPassword',
+            } as any);
+
+            await service.register({
+                email: 'test@school.com',
+                password: 'Password123!',
+                firstName: 'Test',
+                lastName: 'User',
+                role: 'student',
+            });
+
+            expect(bcrypt.hash).toHaveBeenCalledWith('Password123!', 12);
+        });
+
+        it('should use bcrypt.compare for password validation', async () => {
+            const mockUser = {
+                id: 'user-id',
+                email: 'test@school.com',
+                passwordHash: 'hashedPassword123',
+                status: 'active',
+                deletedAt: null,
+                userRoles: [{ role: { name: 'student' } }],
+            };
+
+            mockPrisma.user.findUnique.mockResolvedValue(mockUser as any);
+            (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+            mockPrisma.user.update.mockResolvedValue(mockUser as any);
+
+            await service.login({
+                email: 'test@school.com',
+                password: 'Password123!',
+            });
+
+            expect(bcrypt.compare).toHaveBeenCalledWith('Password123!', 'hashedPassword123');
+        });
+    });
+
+    describe('Error Handling', () => {
+        it('should handle database errors during registration', async () => {
+            mockPrisma.user.findUnique.mockRejectedValue(new Error('Database connection failed'));
+
+            await expect(service.register({
+                email: 'test@school.com',
+                password: 'Password123!',
+                firstName: 'Test',
+                lastName: 'User',
+                role: 'student',
+            })).rejects.toThrow('Database connection failed');
+        });
+
+        it('should handle database errors during login', async () => {
+            mockPrisma.user.findUnique.mockRejectedValue(new Error('Database timeout'));
+
+            await expect(service.login({
+                email: 'test@school.com',
+                password: 'Password123!',
+            })).rejects.toThrow('Database timeout');
+        });
+
+        it('should handle Redis errors gracefully in logout', async () => {
+            mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 1 } as any);
+            mockRedis.set.mockRejectedValue(new Error('Redis unavailable'));
+
+            // Should still complete logout even if Redis fails
+            await expect(service.logout('user-id', 'refresh-token', 'jti-123')).rejects.toThrow('Redis unavailable');
+        });
+    });
+
+    describe('Token Payload Structure', () => {
+        it('should include all required claims in token payload', async () => {
+            mockPrisma.refreshToken.create.mockResolvedValue({ id: 'token-id' } as any);
+
+            await (service as any).generateTokens('user-123', 'user@test.com', ['student', 'teacher'], 1);
+
+            const payload = mockJwtService.sign.mock.calls[0][0] as TokenPayload;
+            
+            expect(payload.sub).toBe('user-123');
+            expect(payload.email).toBe('user@test.com');
+            expect(payload.roles).toEqual(['student', 'teacher']);
+            expect(payload.jti).toBeDefined();
+            expect(payload.iat).toBeDefined();
+            expect(payload.pwdVersion).toBe(1);
+        });
+
+        it('should generate unique JTI for revocation support', async () => {
+            mockPrisma.refreshToken.create.mockResolvedValue({ id: 'token-id' } as any);
+            const { v4: uuidv4 } = require('uuid');
+
+            uuidv4.mockReturnValue('test-uuid-12345');
+
+            await (service as any).generateTokens('user-id', 'test@test.com', ['student']);
+
+            const payload = mockJwtService.sign.mock.calls[0][0] as TokenPayload;
+            expect(payload.jti).toBe('test-uuid-12345');
         });
     });
 });

@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 12.0.0"
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -8,7 +9,18 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://172.25.16.1:3000/api",
+        "EXPO_PUBLIC_WS_URL": "http://172.25.16.1:3000",
+        "ANDROID_KOTLIN_VERSION": "1.9.25"
+      },
+      "cache": {
+        "key": "kotlin-1.9.25-fix"
+      }
     },
     "production": {}
   },

@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, UseGuards, Request, HttpCode, HttpStatus, ForbiddenException, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, RefreshDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -32,6 +33,7 @@ export class AuthController {
     ) { }
 
     @Post('register')
+    @Throttle({ default: { limit: 3, ttl: 3600000 } }) // 3 per hour
     @ApiOperation({ summary: 'Register a new user (non-admin roles only)' })
     @ApiResponse({ status: 201, description: 'User registered successfully' })
     @ApiResponse({ status: 403, description: 'Admin accounts must be created by an existing admin' })
@@ -62,6 +64,7 @@ export class AuthController {
     }
 
     @Post('login')
+    @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 per minute
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login with email and password' })
     @ApiResponse({ status: 200, description: 'Login successful' })
@@ -80,6 +83,7 @@ export class AuthController {
     }
 
     @Post('refresh')
+    @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 per minute
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Refresh access token' })
     @ApiResponse({ status: 200, description: 'Token refreshed successfully' })

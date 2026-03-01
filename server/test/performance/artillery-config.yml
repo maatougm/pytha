@@ -1,0 +1,205 @@
+# Artillery.io Load Test Configuration for School Hub
+# 
+# Usage:
+#   artillery run artillery-config.yml
+#   artillery run --output report.json artillery-config.yml
+#   artillery report report.json
+
+config:
+  target: '{{ $processEnvironment.API_BASE_URL || "http://localhost:3000" }}'
+  
+  # Load phases
+  phases:
+    # Phase 1: Warm up - gradual increase to 50 users
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 10
+      name: Warm up
+    
+    # Phase 2: Ramp up - increase to 100 concurrent users
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 25
+      name: Ramp up
+    
+    # Phase 3: Sustained load - maintain 100 users for 5 minutes
+    - duration: 300
+      arrivalRate: 25
+      name: Sustained load
+    
+    # Phase 4: Spike - sudden surge to 150 users
+    - duration: 30
+      arrivalRate: 25
+      rampTo: 40
+      name: Spike
+    
+    # Phase 5: Recovery - return to normal load
+    - duration: 60
+      arrivalRate: 40
+      rampTo: 10
+      name: Recovery
+    
+    # Phase 6: Cool down
+    - duration: 30
+      arrivalRate: 10
+      rampTo: 0
+      name: Cool down
+
+  # Default headers
+  defaults:
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+
+  # Plugins
+  plugins:
+    metrics-by-endpoint: {}
+    expect:
+      expectStatusCode: [200, 201]
+      expectResponseTime: 1000
+
+  # Processor functions
+  processor: './artillery-processor.js'
+
+scenarios:
+  # Scenario 1: API Exploration (most common)
+  - name: API User Journey
+    weight: 60
+    flow:
+      # Health check
+      - get:
+          url: '/api/health'
+          capture:
+            - json: '$.status'
+              as: 'healthStatus'
+          expect:
+            - statusCode: 200
+            - contentType: json
+      
+      # Login
+      - post:
+          url: '/api/auth/login'
+          json:
+            email: 'admin@school.com'
+            password: 'Password123!'
+          capture:
+            - json: '$.accessToken'
+              as: 'token'
+            - json: '$.user.id'
+              as: 'userId'
+          expect:
+            - statusCode: 200
+            - hasProperty: 'accessToken'
+      
+      # Get user list (pagination)
+      - get:
+          url: '/api/users?page=1&limit=20'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          capture:
+            - json: '$.data'
+              as: 'users'
+          expect:
+            - statusCode: 200
+      
+      # Get courses
+      - get:
+          url: '/api/courses?page=1&limit=50'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          capture:
+            - json: '$.data[0].id'
+              as: 'courseId'
+      
+      # Get assignments
+      - get:
+          url: '/api/grading/assignments'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      
+      # Think time between requests
+      - think: 2
+
+  # Scenario 2: Teacher Workflow
+  - name: Teacher Workflow
+    weight: 25
+    flow:
+      # Login as teacher
+      - post:
+          url: '/api/auth/login'
+          json:
+            email: 'teacher1@school.com'
+            password: 'Password123!'
+          capture:
+            - json: '$.accessToken'
+              as: 'token'
+      
+      # Get assigned classes
+      - get:
+          url: '/api/classes/my'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      
+      # Get attendance for a class
+      - get:
+          url: '/api/classes/class-test-id/attendance'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      
+      # Mark bulk attendance
+      - post:
+          url: '/api/classes/class-test-id/attendance/bulk'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          json:
+            date: '2026-03-01'
+            period: 1
+            records: []
+      
+      - think: 3
+
+  # Scenario 3: Student Workflow
+  - name: Student Workflow
+    weight: 15
+    flow:
+      # Login as student
+      - post:
+          url: '/api/auth/login'
+          json:
+            email: 'student1@school.com'
+            password: 'Password123!'
+          capture:
+            - json: '$.accessToken'
+              as: 'token'
+      
+      # Get my courses
+      - get:
+          url: '/api/courses/my'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      
+      # Get my assignments
+      - get:
+          url: '/api/grading/assignments/my'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      
+      # Get my attendance
+      - get:
+          url: '/api/attendance/my'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      
+      - think: 2
+
+# WebSocket scenario (requires artillery-engine-socketio)
+  # - name: WebSocket Messaging
+  #   engine: socketio
+  #   weight: 20
+  #   flow:
+  #     - emit:
+  #         channel: 'message:send'
+  #         data:
+  #           channelId: 'test-channel'
+  #           content: 'Test message from Artillery'
+  #     - think: 1

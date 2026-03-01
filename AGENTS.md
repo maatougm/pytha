@@ -80,24 +80,30 @@ School Hub is a **School Management System** designed to facilitate communicatio
 ## Project Structure
 
 ```
-minivirson/
+pytha/
 ├── .env                        # Local development environment
 ├── .env.example                # Environment template for development
 ├── .env.production             # Production environment template
 ├── .gitattributes              # Git configuration
+├── .githooks/                  # Git hooks
+├── .github/                    # GitHub workflows and templates
 ├── .gitignore                  # Git ignore patterns
+├── .idea/                      # IntelliJ IDEA configuration
 ├── docker-compose.yml          # Main Docker Compose configuration
 ├── docker-compose.backend.yml  # Backend-only configuration
 ├── docker-compose.backend-only.yml  # Minimal backend setup
 ├── docker-compose.monitoring.yml    # Monitoring stack
 ├── docker-compose.nginx.yml    # Nginx-specific configuration
 ├── AGENTS.md                   # This file - AI agent documentation
+├── API_DOCUMENTATION.md        # Detailed API endpoint documentation
 ├── mobile/                     # React Native mobile application
 │   ├── package.json           # npm dependencies
 │   ├── app.json               # Expo configuration
+│   ├── eas.json               # EAS (Expo Application Services) config
 │   ├── tsconfig.json          # TypeScript configuration
 │   ├── index.ts               # Application entry point
 │   ├── jest.config.js         # Jest test configuration
+│   ├── metro.config.js        # Metro bundler configuration
 │   ├── app/                   # Expo Router file-based routes
 │   │   ├── _layout.tsx        # Root layout with providers
 │   │   ├── +not-found.tsx     # 404 error page
@@ -116,9 +122,10 @@ minivirson/
 │   ├── src/
 │   │   ├── assets/            # Images and icons
 │   │   ├── components/        # Reusable UI components
-│   │   ├── providers/         # Context providers (SocketProvider)
+│   │   ├── providers/         # Context providers (SocketProvider, NotificationProvider)
 │   │   ├── services/          # API services
 │   │   ├── constants/         # App constants
+│   │   ├── i18n/              # Internationalization config
 │   │   └── types/             # TypeScript type definitions
 │   ├── providers/             # Context providers (Auth, Theme, Query)
 │   ├── hooks/                 # Custom React hooks
@@ -127,6 +134,7 @@ minivirson/
 │   ├── types/                 # Type definitions
 │   ├── utils/                 # Utility functions
 │   └── __tests__/             # Test files
+│       └── setup.ts           # Jest test setup with mocks
 ├── nginx/                     # Nginx configuration for production
 │   ├── nginx.conf             # Main nginx configuration
 │   ├── nginx-simple.conf      # Simplified nginx config
@@ -155,7 +163,7 @@ minivirson/
     ├── jest.config.js         # Unit test configuration
     ├── jest-e2e.config.js     # E2E test configuration
     ├── prisma/
-    │   ├── schema.prisma      # Database schema definition
+    │   ├── schema.prisma      # Database schema definition (1000+ lines)
     │   ├── seed.ts            # Database seeding script
     │   └── migrations/        # Database migrations
     ├── uploads/               # File upload storage directory
@@ -311,7 +319,7 @@ See `.env.production` file for production configuration template. Key requiremen
 ### Prerequisites
 
 - Node.js 18+ (see `engines` in `package.json`)
-- npm 8+
+- npm 8+ (or pnpm for mobile)
 - Docker & Docker Compose
 - Expo CLI (for mobile development): `npm install -g @expo/cli`
 
@@ -370,7 +378,7 @@ npm run lint               # Run ESLint with auto-fix
 ```bash
 cd mobile
 
-# Install dependencies
+# Install dependencies (uses pnpm-lock.yaml)
 npm install
 
 # Development
@@ -415,7 +423,7 @@ npx expo start
 
 ## Testing Strategy
 
-### Unit Tests
+### Backend Unit Tests
 
 - **Framework**: Jest with ts-jest
 - **Location**: `src/**/*.spec.ts`
@@ -430,7 +438,7 @@ npm run test:watch         # Watch mode
 npm run test:coverage      # Generate coverage report
 ```
 
-### E2E Tests
+### Backend E2E Tests
 
 - **Framework**: Jest with supertest
 - **Location**: `test/*.e2e-spec.ts`
@@ -447,6 +455,7 @@ npm run test:e2e           # Run E2E tests
 - **Framework**: Jest with jest-expo preset
 - **Location**: `__tests__/**/*.test.ts(x)`
 - **Configuration**: `jest.config.js`
+- **Setup**: `mobile/__tests__/setup.ts` with Expo/React Native mocks
 - **Coverage Thresholds**: 30% minimum for branches, functions, lines, statements
 
 ```bash
@@ -457,10 +466,10 @@ npm run test:coverage      # Generate coverage report
 
 ### Test Setup Files
 
-- `test/setup.ts`: Unit test environment variables, Redis mock, JSDOM mock for DOMPurify
-- `test/setup.e2e.ts`: E2E test database setup and migrations
-- `test/__mocks__/jsdom.mock.ts`: JSDOM mock for DOMPurify
-- `mobile/__tests__/setup.ts`: Mobile test setup
+- `server/test/setup.ts`: Unit test environment variables, Redis mock, JSDOM mock for DOMPurify
+- `server/test/setup.e2e.ts`: E2E test database setup and migrations
+- `server/test/__mocks__/jsdom.mock.ts`: JSDOM mock for DOMPurify
+- `mobile/__tests__/setup.ts`: Mobile test setup with Expo modules mocked (expo-secure-store, expo-local-authentication, expo-notifications, expo-device)
 
 ## Code Style Guidelines
 

@@ -13,6 +13,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
+const MAX_PAGE_SIZE = 100;
+
 @ApiTags('Courses')
 @ApiBearerAuth()
 @Controller('courses')
@@ -44,11 +46,12 @@ export class CoursesController {
         @Query('page') page?: string,
         @Query('limit') limit?: string,
     ) {
+        const limitNum = Math.min(limit ? parseInt(limit) : 20, MAX_PAGE_SIZE);
         return this.coursesService.findAllCourses({
             department,
             isActive: active !== undefined ? active === 'true' : undefined,
             search,
-        }, page ? parseInt(page) : 1, limit ? parseInt(limit) : 50);
+        }, page ? parseInt(page) : 1, limitNum);
     }
 
     @Get(':id')
@@ -115,10 +118,11 @@ export class ClassesController {
         @Query('page') page?: string,
         @Query('limit') limit?: string,
     ) {
+        const limitNum = Math.min(limit ? parseInt(limit) : 20, MAX_PAGE_SIZE);
         return this.coursesService.findAllClasses(
             { term, teacherId, courseId, studentId },
             page ? parseInt(page) : 1,
-            limit ? parseInt(limit) : 50,
+            limitNum,
         );
     }
 
@@ -190,10 +194,11 @@ export class ClassesController {
         @Query('page') page?: string,
         @Query('limit') limit?: string,
     ) {
+        const limitNum = Math.min(limit ? parseInt(limit) : 20, MAX_PAGE_SIZE);
         return this.coursesService.getClassRoster(
             classId,
             page ? parseInt(page) : 1,
-            limit ? parseInt(limit) : 50,
+            limitNum,
         );
     }
 

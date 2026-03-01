@@ -130,6 +130,8 @@ export class GradingController {
     }
 
     @Get('students/:studentId/grades')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin', 'teacher')
     getStudentGrades(
         @Param('studentId') studentId: string,
         @Query('classId') classId?: string,

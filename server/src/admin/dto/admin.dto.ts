@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsDateString, IsBoolean, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsDateString, IsBoolean, IsInt, Min, Max, IsArray, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SanitizePlainText, SanitizeHtml } from '../../common/decorators/sanitize.decorator';
 
@@ -77,7 +77,8 @@ export class BulkActionDto {
     @IsEnum(UserStatusAction)
     action: UserStatusAction;
 
-    @IsString({ each: true })
+    @IsArray()
+    @IsUUID('4', { each: true, message: 'Each user ID must be a valid UUID' })
     userIds: string[];
 
     @IsOptional()

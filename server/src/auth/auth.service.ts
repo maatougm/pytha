@@ -47,7 +47,7 @@ export class AuthService {
         }
 
         // Hash password
-        const passwordHash = await bcrypt.hash(dto.password, 12);
+        const passwordHash = await bcrypt.hash(dto.password, 14);
 
         // Find or validate role
         const role = await this.prisma.role.findUnique({
@@ -199,7 +199,25 @@ export class AuthService {
         return { loggedOut: true };
     }
 
+    private validateJwtSecrets() {
+        const secret = this.configService.get<string>('JWT_SECRET');
+        const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+        
+        if (!secret || secret.length < 32) {
+            throw new UnauthorizedException('JWT_SECRET must be at least 32 characters');
+        }
+        if (!refreshSecret || refreshSecret.length < 32) {
+            throw new UnauthorizedException('JWT_REFRESH_SECRET must be at least 32 characters');
+        }
+        if (secret === refreshSecret) {
+            throw new UnauthorizedException('JWT_SECRET and JWT_REFRESH_SECRET must be different');
+        }
+    }
+
     private async generateTokens(userId: string, email: string, roles: string[], pwdVersion?: number) {
+        // Validate JWT secrets at the start of token generation
+        this.validateJwtSecrets();
+
         const jti = uuidv4(); // Unique token ID for revocation
         const payload: TokenPayload = { sub: userId, email, roles, jti, pwdVersion, iat: Math.floor(Date.now() / 1000) };
 

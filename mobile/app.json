@@ -31,12 +31,22 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.schoolhub.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro"
     },
     "plugins": [
+      "./plugins/withKotlinVersion.js",
       "expo-router",
       [
         "expo-local-authentication",
@@ -68,6 +78,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "01bbe371-3b22-4b08-91e2-19663b4425e7"
+      }
+    },
+    "owner": "maatoug"
   }
 }

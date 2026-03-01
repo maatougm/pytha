@@ -74,6 +74,8 @@ export class AttendanceController {
     // ─── HISTORY & REPORTS ───────────────────────────────────
 
     @Get('students/:studentId/attendance')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin', 'teacher', 'parent')
     getStudentAttendance(
         @Param('studentId') studentId: string,
         @Query('classId') classId?: string,

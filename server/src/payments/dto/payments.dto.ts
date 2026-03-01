@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsEnum, IsUUID, Min, IsObject } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum, IsUUID, Min, IsObject, IsArray, IsNotEmpty, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum PaymentStatus {
@@ -57,6 +57,19 @@ export class ConfirmPaymentDto {
   paymentMethod: PaymentMethod;
 }
 
+export class InvoiceItemDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  @Min(0)
+  amount: number;
+
+  @IsString()
+  category: string;
+}
+
 export class CreateInvoiceDto {
   @ApiProperty()
   @IsUUID()
@@ -64,6 +77,7 @@ export class CreateInvoiceDto {
 
   @ApiProperty()
   @IsString()
+  @IsNotEmpty({ message: 'Invoice title is required' })
   title: string;
 
   @ApiProperty({ required: false })
@@ -72,12 +86,9 @@ export class CreateInvoiceDto {
   description?: string;
 
   @ApiProperty({ type: 'array', items: { type: 'object' } })
-  @IsObject()
-  items: Array<{
-    name: string;
-    amount: number;
-    category: string;
-  }>;
+  @IsArray()
+  @IsNotEmpty({ message: 'Invoice items are required' })
+  items: InvoiceItemDto[];
 
   @ApiProperty()
   @IsNumber()
@@ -90,6 +101,7 @@ export class CreateInvoiceDto {
   currency?: string;
 
   @ApiProperty()
+  @IsDateString({}, { message: 'Due date must be a valid ISO date string' })
   dueDate: Date;
 }
 
