@@ -46,7 +46,14 @@
       "bundler": "metro"
     },
     "plugins": [
-      "./plugins/withKotlinVersion.js",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.9.25"
+          }
+        }
+      ],
       "expo-router",
       [
         "expo-local-authentication",
